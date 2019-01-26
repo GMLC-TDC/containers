@@ -14,15 +14,15 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #ifdef USE_STD_OPTIONAL
 #include <optional>
 template <class T>
-using opt = std::optional;
+using opt = std::optional<T>;
 #elif defined(USE_BOOST_OPTIONAL)
 #include <boost/optional.hpp>
 template <class T>
-using opt = boost::optional;
+using opt = boost::optional<T>;
 #else
 #include "extra/optional.hpp"
 template <class T>
-using opt = stx::optional;
+using opt = stx::optional<T>;
 #endif
 
 /** class for very simple thread safe queue
@@ -249,8 +249,7 @@ class SimpleQueue
                 std::swap (pushElements, pullElements);
                 pushLock.unlock ();  // we can free the push function to accept more elements after the swap call;
                 std::reverse (pullElements.begin (), pullElements.end ());
-                opt<X> val (
-                  std::move (pullElements.back ()));  // do it this way to allow moveable only types
+                opt<X> val (std::move (pullElements.back ()));  // do it this way to allow moveable only types
                 pullElements.pop_back ();
                 if (pullElements.empty ())
                 {

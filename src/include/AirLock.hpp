@@ -5,12 +5,25 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <type_traits>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional<T>;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional<T>;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional<T>;
+#endif
 
 /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
@@ -70,7 +83,7 @@ class AirLock
     /** unload the airlock,
     @return the value is returned in an optional which needs to be checked if it contains a value
     */
-    stx::optional<T> try_unload ()
+    opt<T> try_unload ()
     {
         if (loaded.load (std::memory_order_acquire))
         {
@@ -78,13 +91,13 @@ class AirLock
             // can use relaxed since we are behind a mutex
             if (loaded.load (std::memory_order_relaxed))
             {
-                stx::optional<T> val{std::move (data)};
+                opt<T> val{std::move (data)};
                 loaded.store (false, std::memory_order_release);
                 condition.notify_one ();
                 return val;
             }
         }
-        return stx::nullopt;
+        return {};
     }
     /** check if the airlock is loaded
     @details this may or may  not mean anything depending on usage

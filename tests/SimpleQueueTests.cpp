@@ -3,8 +3,8 @@ Copyright © 2017-2018,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include "gtest/gtest.h"
+#include <iostream>
 
 #include <future>
 #include <memory>
@@ -13,33 +13,31 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 /** these test cases test data_block and data_view objects
  */
 
-#include "helics/common/simpleQueue.hpp"
-
-BOOST_AUTO_TEST_SUITE (simple_queue_tests)
+#include "simpleQueue.hpp"
 
 /** test basic operations */
-BOOST_AUTO_TEST_CASE (basic_tests)
+TEST (simple_queue_tests, basic_tests)
 {
     SimpleQueue<int> sq;
 
     sq.push (45);
     sq.push (54);
 
-    BOOST_CHECK (sq.empty () == false);
+    EXPECT_TRUE (sq.empty () == false);
 
-    BOOST_CHECK_EQUAL (sq.size (), 2);
+    EXPECT_EQ (sq.size (), 2);
     auto b = sq.pop ();
-    BOOST_CHECK_EQUAL (*b, 45);
+    EXPECT_EQ (*b, 45);
     b = sq.pop ();
-    BOOST_CHECK_EQUAL (*b, 54);
+    EXPECT_EQ (*b, 54);
 
     b = sq.pop ();
-    BOOST_CHECK (!(b));
-    BOOST_CHECK (sq.empty ());
+    EXPECT_TRUE (!(b));
+    EXPECT_TRUE (sq.empty ());
 }
 
 /** test with a move only element*/
-BOOST_AUTO_TEST_CASE (move_only_tests)
+TEST (simple_queue_tests, move_only_tests)
 {
     SimpleQueue<std::unique_ptr<double>> sq;
 
@@ -48,22 +46,22 @@ BOOST_AUTO_TEST_CASE (move_only_tests)
     auto e2 = std::make_unique<double> (34.234);
     sq.push (std::move (e2));
 
-    BOOST_CHECK (sq.empty () == false);
+    EXPECT_TRUE (sq.empty () == false);
 
-    BOOST_CHECK_EQUAL (sq.size (), 2);
+    EXPECT_EQ (sq.size (), 2);
     auto b = sq.pop ();
-    BOOST_CHECK_EQUAL (**b, 4534.23);
+    EXPECT_EQ (**b, 4534.23);
     b = sq.pop ();
-    BOOST_CHECK_EQUAL (**b, 34.234);
+    EXPECT_EQ (**b, 34.234);
 
     b = sq.pop ();
-    BOOST_CHECK (!(b));
-    BOOST_CHECK (sq.empty ());
+    EXPECT_TRUE (!(b));
+    EXPECT_TRUE (sq.empty ());
 }
 
 /** test the ordering with a larger number of inputs*/
 
-BOOST_AUTO_TEST_CASE (ordering_tests)
+TEST (simple_queue_tests, ordering_tests)
 {
     SimpleQueue<int> sq;
 
@@ -73,11 +71,11 @@ BOOST_AUTO_TEST_CASE (ordering_tests)
     }
 
     auto b = sq.pop ();
-    BOOST_CHECK_EQUAL (*b, 1);
+    EXPECT_EQ (*b, 1);
     for (int ii = 2; ii < 7; ++ii)
     {
         b = sq.pop ();
-        BOOST_CHECK_EQUAL (*b, ii);
+        EXPECT_EQ (*b, ii);
     }
     for (int ii = 10; ii < 20; ++ii)
     {
@@ -86,13 +84,13 @@ BOOST_AUTO_TEST_CASE (ordering_tests)
     for (int ii = 7; ii < 20; ++ii)
     {
         b = sq.pop ();
-        BOOST_CHECK_EQUAL (*b, ii);
+        EXPECT_EQ (*b, ii);
     }
 
-    BOOST_CHECK (sq.empty ());
+    EXPECT_TRUE (sq.empty ());
 }
 
-BOOST_AUTO_TEST_CASE (emplace_tests)
+TEST (simple_queue_tests, emplace_tests)
 {
     SimpleQueue<std::pair<int, double>> sq;
 
@@ -100,17 +98,17 @@ BOOST_AUTO_TEST_CASE (emplace_tests)
     sq.emplace (11, 34.1);
     sq.emplace (12, 34.2);
 
-    BOOST_CHECK_EQUAL (sq.size (), 3);
+    EXPECT_EQ (sq.size (), 3);
     auto b = sq.pop ();
-    BOOST_CHECK_EQUAL (b->first, 10);
-    BOOST_CHECK_EQUAL (b->second, 45.4);
+    EXPECT_EQ (b->first, 10);
+    EXPECT_EQ (b->second, 45.4);
     b = sq.pop ();
-    BOOST_CHECK_EQUAL (b->first, 11);
-    BOOST_CHECK_EQUAL (b->second, 34.1);
+    EXPECT_EQ (b->first, 11);
+    EXPECT_EQ (b->second, 34.1);
 }
 
 /** test with single consumer/single producer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests)
+TEST (simple_queue_tests, multithreaded_tests)
 {
     SimpleQueue<int64_t> sq (1010000);
 
@@ -161,11 +159,11 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests)
 
     ret.wait ();
     auto V = res.get ();
-    BOOST_CHECK_EQUAL (V, 1'010'000);
+    EXPECT_EQ (V, 1'010'000);
 }
 
 /** test with multiple consumer/single producer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests2)
+TEST (simple_queue_tests, multithreaded_tests2)
 {
     SimpleQueue<int64_t> sq (1010000);
 
@@ -206,11 +204,11 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests2)
     auto V2 = res2.get ();
     auto V3 = res3.get ();
 
-    BOOST_CHECK_EQUAL (V1 + V2 + V3, 2'010'000);
+    EXPECT_EQ (V1 + V2 + V3, 2'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests3)
+TEST (simple_queue_tests, multithreaded_tests3)
 {
     SimpleQueue<int64_t> sq;
     sq.reserve (3'010'000);
@@ -255,7 +253,5 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests3)
     auto V2 = res2.get ();
     auto V3 = res3.get ();
 
-    BOOST_CHECK_EQUAL (V1 + V2 + V3, 3'010'000);
+    EXPECT_EQ (V1 + V2 + V3, 3'010'000);
 }
-
-BOOST_AUTO_TEST_SUITE_END ()

@@ -16,15 +16,15 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #ifdef USE_STD_OPTIONAL
 #include <optional>
 template <class T>
-using opt = std::optional;
+using opt = std::optional<T>;
 #elif defined(USE_BOOST_OPTIONAL)
 #include <boost/optional.hpp>
 template <class T>
-using opt = boost::optional;
+using opt = boost::optional<T>;
 #else
 #include "extra/optional.hpp"
 template <class T>
-using opt = stx::optional;
+using opt = stx::optional<T>;
 #endif
 
 /** class merging a vector of pointer with a map that can be used to lookup specific values

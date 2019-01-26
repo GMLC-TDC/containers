@@ -17,6 +17,9 @@ set(
   include/DualMappedPointerVector.hpp
   include/CircularBuffer.hpp
   include/StackQueue.hpp
+  include/StableBlockVector.hpp
+  include/StableBlockDeque.hpp
+  include/BlockIterator.hpp
 )
 
 set(

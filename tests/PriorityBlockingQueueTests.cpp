@@ -3,8 +3,8 @@ Copyright © 2017-2018,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
-#include <boost/test/unit_test.hpp>
-#include <boost/test/floating_point_comparison.hpp>
+#include "gtest/gtest.h"
+#include <iostream>
 
 #include <future>
 #include <memory>
@@ -13,28 +13,26 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 /** these test cases test data_block and data_view objects
  */
 
-#include "helics/common/BlockingPriorityQueue.hpp"
-
-BOOST_AUTO_TEST_SUITE (blocking_priority_queue_tests)
+#include "BlockingPriorityQueue.hpp"
 
 /** test basic operations */
-BOOST_AUTO_TEST_CASE (basic_tests)
+TEST (blocking_priority_queue_tests, basic_tests)
 {
     BlockingPriorityQueue<int> sq;
 
     sq.push (45);
     sq.push (54);
 
-    BOOST_CHECK (!sq.empty ());
+    EXPECT_TRUE (!sq.empty ());
 
     auto b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (*b, 45);
+    EXPECT_EQ (*b, 45);
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (*b, 54);
+    EXPECT_EQ (*b, 54);
 
     b = sq.try_pop ();
-    BOOST_CHECK (!(b));
-    BOOST_CHECK (sq.empty ());
+    EXPECT_FALSE (b);
+    EXPECT_TRUE (sq.empty ());
 
     sq.push (45);
     sq.push (54);
@@ -43,13 +41,13 @@ BOOST_AUTO_TEST_CASE (basic_tests)
     sq.pushPriority (65);
 
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (*b, 65);
+    EXPECT_EQ (*b, 65);
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (*b, 45);
+    EXPECT_EQ (*b, 45);
 }
 
 /** test with a move only element*/
-BOOST_AUTO_TEST_CASE (move_only_tests)
+TEST (blocking_priority_queue_tests, move_only_tests)
 {
     BlockingPriorityQueue<std::unique_ptr<double>> sq;
 
@@ -58,25 +56,25 @@ BOOST_AUTO_TEST_CASE (move_only_tests)
     auto e2 = std::make_unique<double> (34.234);
     sq.push (std::move (e2));
 
-    BOOST_CHECK (!sq.empty ());
+    EXPECT_TRUE (!sq.empty ());
 
     auto b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (**b, 4534.23);
+    EXPECT_EQ (**b, 4534.23);
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (**b, 34.234);
+    EXPECT_EQ (**b, 34.234);
     e2 = std::make_unique<double> (29.785);
     sq.pushPriority (std::move (e2));
 
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (**b, 29.785);
+    EXPECT_EQ (**b, 29.785);
     b = sq.try_pop ();
-    BOOST_CHECK (!(b));
-    BOOST_CHECK (sq.empty ());
+    EXPECT_TRUE (!(b));
+    EXPECT_TRUE (sq.empty ());
 }
 
 /** test the ordering with a larger number of inputs*/
 
-BOOST_AUTO_TEST_CASE (ordering_tests)
+TEST (blocking_priority_queue_tests, ordering_tests)
 {
     BlockingPriorityQueue<int> sq;
 
@@ -86,11 +84,11 @@ BOOST_AUTO_TEST_CASE (ordering_tests)
     }
 
     auto b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (*b, 1);
+    EXPECT_EQ (*b, 1);
     for (int ii = 2; ii < 7; ++ii)
     {
         b = sq.try_pop ();
-        BOOST_CHECK_EQUAL (*b, ii);
+        EXPECT_EQ (*b, ii);
     }
     for (int ii = 10; ii < 20; ++ii)
     {
@@ -98,17 +96,17 @@ BOOST_AUTO_TEST_CASE (ordering_tests)
     }
     sq.pushPriority (99);
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (*b, 99);
+    EXPECT_EQ (*b, 99);
     for (int ii = 7; ii < 20; ++ii)
     {
         b = sq.try_pop ();
-        BOOST_CHECK_EQUAL (*b, ii);
+        EXPECT_EQ (*b, ii);
     }
 
-    BOOST_CHECK (sq.empty ());
+    EXPECT_TRUE (sq.empty ());
 }
 
-BOOST_AUTO_TEST_CASE (emplace_tests)
+TEST (blocking_priority_queue_tests, emplace_tests)
 {
     BlockingPriorityQueue<std::pair<int, double>> sq;
 
@@ -118,19 +116,19 @@ BOOST_AUTO_TEST_CASE (emplace_tests)
     sq.emplacePriority (14, 19.99);
 
     auto b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (b->first, 14);
-    BOOST_CHECK_EQUAL (b->second, 19.99);
+    EXPECT_EQ (b->first, 14);
+    EXPECT_EQ (b->second, 19.99);
 
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (b->first, 10);
-    BOOST_CHECK_EQUAL (b->second, 45.4);
+    EXPECT_EQ (b->first, 10);
+    EXPECT_EQ (b->second, 45.4);
     b = sq.try_pop ();
-    BOOST_CHECK_EQUAL (b->first, 11);
-    BOOST_CHECK_EQUAL (b->second, 34.1);
+    EXPECT_EQ (b->first, 11);
+    EXPECT_EQ (b->second, 34.1);
 }
 
 /** test with single consumer/single producer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests)
+TEST (blocking_priority_queue_tests, multithreaded_tests)
 {
     BlockingPriorityQueue<int64_t> sq (1010000);
 
@@ -167,11 +165,11 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests)
 
     ret.wait ();
     auto V = res.get ();
-    BOOST_CHECK_EQUAL (V, 1'010'000);
+    EXPECT_EQ (V, 1'010'000);
 }
 
 /** test with single consumer / single producer */
-BOOST_AUTO_TEST_CASE (pop_tests)
+TEST (blocking_priority_queue_tests, pop_tests)
 {
     BlockingPriorityQueue<int64_t> sq (1010000);
 
@@ -211,11 +209,11 @@ BOOST_AUTO_TEST_CASE (pop_tests)
 
     ret.wait ();
     auto V = res.get ();
-    BOOST_CHECK_EQUAL (V, 1'000'000);
+    EXPECT_EQ (V, 1'000'000);
 }
 
 /** test with multiple consumer/single producer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests2)
+TEST (blocking_priority_queue_tests, multithreaded_tests2)
 {
     BlockingPriorityQueue<int64_t> sq (1010000);
 
@@ -256,11 +254,11 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests2)
     auto V2 = res2.get ();
     auto V3 = res3.get ();
 
-    BOOST_CHECK_EQUAL (V1 + V2 + V3, 1'010'000);
+    EXPECT_EQ (V1 + V2 + V3, 1'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests3)
+TEST (blocking_priority_queue_tests, multithreaded_tests3)
 {
     BlockingPriorityQueue<int64_t> sq;
     sq.reserve (3'010'000);
@@ -305,11 +303,11 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests3)
     auto V2 = res2.get ();
     auto V3 = res3.get ();
 
-    BOOST_CHECK_EQUAL (V1 + V2 + V3, 3'010'000);
+    EXPECT_EQ (V1 + V2 + V3, 3'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
-BOOST_AUTO_TEST_CASE (multithreaded_tests3_pop)
+TEST (blocking_priority_queue_tests, multithreaded_tests3_pop)
 {
     BlockingPriorityQueue<int64_t> sq;
     sq.reserve (3'010'000);
@@ -347,11 +345,11 @@ BOOST_AUTO_TEST_CASE (multithreaded_tests3_pop)
     auto V2 = res2.get ();
     auto V3 = res3.get ();
 
-    BOOST_CHECK_EQUAL (V1 + V2 + V3, 3'000'000);
+    EXPECT_EQ (V1 + V2 + V3, 3'000'000);
 }
 
 /** test with multiple producer/multiple consumer*/
-BOOST_AUTO_TEST_CASE (pop_callback_tests)
+TEST (blocking_priority_queue_tests, pop_callback_tests)
 {
     BlockingPriorityQueue<int64_t> sq;
     int pushcnt = 0;
@@ -363,17 +361,15 @@ BOOST_AUTO_TEST_CASE (pop_callback_tests)
     auto cons = [&](int cnt) {
         for (int ii = 0; ii < cnt; ii++)
         {
-            sq.pop (prod1);
+            sq.popOrCall (prod1);
         }
         return cnt;
     };
 
     auto res = cons (25);
-    BOOST_CHECK_EQUAL (res, 25);
-    BOOST_CHECK_EQUAL (pushcnt, 25);
+    EXPECT_EQ (res, 25);
+    EXPECT_EQ (pushcnt, 25);
     auto res2 = cons (127);
-    BOOST_CHECK_EQUAL (res2, 127);
-    BOOST_CHECK_EQUAL (pushcnt, 127 + 25);
+    EXPECT_EQ (res2, 127);
+    EXPECT_EQ (pushcnt, 127 + 25);
 }
-
-BOOST_AUTO_TEST_SUITE_END ()

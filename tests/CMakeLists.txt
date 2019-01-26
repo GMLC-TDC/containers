@@ -12,6 +12,14 @@ include(AddGoogletest)
 set(CONTAINERS_TESTS
     StackQueueTests
 	CircularBufferTests
+	AirLockTests
+	MappedVectorTests
+	DualMappedVectorTests
+	BlockingQueueTests
+	SimpleQueueTests
+	PriorityBlockingQueueTests
+	StableBlockDequeTests
+	StableBlockVectorTests
     )
 
 # Only affects current directory, so safe
