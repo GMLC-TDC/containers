@@ -11,7 +11,19 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <type_traits>
 #include <vector>
 
-#include <helics_includes/optional.hpp>
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** class for very simple thread safe queue
 @details  uses two vectors for the operations,  once the pull vector is empty it swaps the vectors
@@ -226,7 +238,7 @@ class SimpleQueue
     /** extract the first element from the queue
     @return an empty optional if there is no element otherwise the optional will contain a value
     */
-    stx::optional<X> pop ()
+    opt<X> pop ()
     {
         std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
         if (pullElements.empty ())
@@ -237,7 +249,7 @@ class SimpleQueue
                 std::swap (pushElements, pullElements);
                 pushLock.unlock ();  // we can free the push function to accept more elements after the swap call;
                 std::reverse (pullElements.begin (), pullElements.end ());
-                stx::optional<X> val (
+                opt<X> val (
                   std::move (pullElements.back ()));  // do it this way to allow moveable only types
                 pullElements.pop_back ();
                 if (pullElements.empty ())
@@ -260,7 +272,7 @@ class SimpleQueue
             queueEmptyFlag = true;
             return {};  // return the empty optional
         }
-        stx::optional<X> val (std::move (pullElements.back ()));  // do it this way to allow moveable only types
+        opt<X> val (std::move (pullElements.back ()));  // do it this way to allow moveable only types
         pullElements.pop_back ();
         if (pullElements.empty ())
         {
@@ -285,7 +297,7 @@ class SimpleQueue
     @return an optional object with an object of type T if available
     */
     template <typename = std::enable_if<std::is_copy_assignable<X>::value>>
-    stx::optional<X> peek () const
+    opt<X> peek () const
     {
         std::lock_guard<MUTEX> lock (m_pullLock);
 

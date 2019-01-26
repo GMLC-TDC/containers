@@ -13,7 +13,7 @@ project (GMLC_CONTAINERS VERSION 0.1)
 # GMLC CONTAINERS library Version number
 #-----------------------------------------------------------------------------
 set (GMLC_CONTAINERS_VERSION_BUILD )
-set (GMLC_CONTAINERS_DATE "01-18-19")
+set (GMLC_CONTAINERS_DATE "01-30-19")
 
 set(GMLC_CONTAINERS_VERSION_STRING "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})")
 
@@ -24,7 +24,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
 include(extraMacros)
 include(CMakeDependentOption)
 
-target_link_libraries(helics_base INTERFACE helics_base_includes)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # Prohibit in-source build
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   message(
@@ -33,19 +34,50 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
   )
 endif()
 
+add_library(containers_base INTERFACE)
+
 include(compiler_flags)
 message(STATUS "setting version build options to \"${VERSION_OPTION}\"")
 if(VERSION_OPTION)
   if(MSVC)
-		target_compile_options(helics_base_includes INTERFACE ${VERSION_OPTION})
+		target_compile_options(containers_base INTERFACE ${VERSION_OPTION})
 	else()
     target_compile_options(
-      helics_base_includes
+      containers_base
       INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>
     )
   endif(MSVC)
 endif(VERSION_OPTION)
 
+
+# -------------------------------------------------------------
+# add threading support
+# -------------------------------------------------------------
+if(NOT WIN32)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+elseif(MSYS)
+	set(THREADS_PREFER_PTHREAD_FLAG ON)
+else()
+	set(CMAKE_USE_WIN32_THREADS_INIT ON)
+endif()
+find_package(Threads REQUIRED)
+
+target_link_libraries(containers_base INTERFACE Threads::Threads)
+
+
+add_subdirectory(src)
+
+option(GMLC_CONTAINERS_TEST "Enable tests for the containers library" ON)
+option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" OFF)
+
+if (GMLC_CONTAINERS_TEST)
+	enable_testing()
+	add_subdirectory(tests)
+endif()
+
+if (GMLC_CONTAINERS_BENCHMARK)
+    add_subdirectory(benchmarks)
+endif()
 # -------------------------------------------------------------
 # add coverage target
 # -------------------------------------------------------------
@@ -53,7 +85,7 @@ endif(VERSION_OPTION)
     TEST_CODE_COVERAGE
     "Build a target for testing code coverage"
     OFF
-    "BUILD_HELICS_TESTS"
+    "GMLC_CONTAINERS_TESTS"
     OFF
   )
   if(TEST_CODE_COVERAGE)
@@ -71,7 +103,7 @@ endif(VERSION_OPTION)
       )
       setup_target_for_coverage(
         NAME
-        helics_coverage # New target name
+        containers_coverage # New target name
         EXECUTABLE
         CTest # Executable in PROJECT_BINARY_DIR
       )

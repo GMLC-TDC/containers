@@ -5,13 +5,26 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 #include "MapTraits.hpp"
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <deque>
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** class combining a vector of objects with a map to search them by a separate index term
 the main use case is a bunch of inserts then searching with limited to no removal since removal is a rather
@@ -29,12 +42,12 @@ class MappedVector
     @return an optional with the index of the value placed if it was placed
     */
     template <typename... Us>
-    stx::optional<size_t> insert (const searchType &searchValue, Us &&... data)
+    opt<size_t> insert (const searchType &searchValue, Us &&... data)
     {
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::forward<Us> (data)...);
@@ -45,7 +58,7 @@ class MappedVector
     @return an optional with the index of the value placed if it was placed
     */
     template <typename... Us>
-    stx::optional<size_t> insert (std::nullptr_t /*searchValue*/, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*searchValue*/, Us &&... data)
     {
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::forward<Us> (data)...);

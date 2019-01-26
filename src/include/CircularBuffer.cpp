@@ -12,7 +12,6 @@ namespace helics
 {
 namespace common
 {
-
 CircularBufferRaw::CircularBufferRaw (unsigned char *dataBlock, int blockSize)
     : origin (dataBlock), next_write (origin), next_read (origin), capacity_ (blockSize)
 {
@@ -26,13 +25,13 @@ bool CircularBufferRaw::isSpaceAvailable (int sz) const
         {
             return true;
         }
-        else if ((next_read - origin) >= sz + 4)
+        if ((next_read - origin) >= sz + 4)
         {
             return true;
         }
         return false;
     }
-    else if ((next_read - next_write) >= sz + 4)
+    if ((next_read - next_write) >= sz + 4)
     {
         return true;
     }
@@ -80,8 +79,7 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
     return false;
 }
 
-
-int CircularBufferRaw::nextDataSize() const
+int CircularBufferRaw::nextDataSize () const
 {
     if (next_write == next_read)
     {
@@ -124,8 +122,7 @@ int CircularBufferRaw::pop (unsigned char *data, int maxLen)
 bool CircularBufferRaw::empty () const { return (next_write == next_read); }
 void CircularBufferRaw::clear () { next_write = next_read = origin; }
 
-
-CircularBuffer::CircularBuffer () noexcept : buffer (nullptr, 0){}
+CircularBuffer::CircularBuffer () noexcept : buffer (nullptr, 0) {}
 CircularBuffer::CircularBuffer (int size) : data (size), buffer (data.data (), size) {}
 
 CircularBuffer::CircularBuffer (CircularBuffer &&cb) noexcept
@@ -137,13 +134,13 @@ CircularBuffer::CircularBuffer (CircularBuffer &&cb) noexcept
     cb.buffer.next_write = nullptr;
 }
 
-CircularBuffer::CircularBuffer (const CircularBuffer &cb) : data (cb.data), buffer(cb.buffer)
+CircularBuffer::CircularBuffer (const CircularBuffer &cb) : data (cb.data), buffer (cb.buffer)
 {
     auto read_offset = buffer.next_read - buffer.origin;
     auto write_offset = buffer.next_write - buffer.origin;
     buffer.origin = data.data ();
-    buffer.next_read=buffer.origin+read_offset;
-    buffer.next_write = buffer.origin+write_offset;
+    buffer.next_read = buffer.origin + read_offset;
+    buffer.next_write = buffer.origin + write_offset;
 }
 
 CircularBuffer &CircularBuffer::operator= (CircularBuffer &&cb) noexcept
@@ -176,26 +173,25 @@ void CircularBuffer::resize (int newsize)
     {
         return;
     }
-    if (buffer.empty())
+    if (buffer.empty ())
     {
         data.resize (newsize);
         buffer = CircularBufferRaw (data.data (), newsize);
     }
-    else if (newsize > static_cast<int>(data.size ()))
+    else if (newsize > static_cast<int> (data.size ()))
     {
         data.resize (newsize);
         int read_offset = static_cast<int> (buffer.next_read - buffer.origin);
         int write_offset = static_cast<int> (buffer.next_write - buffer.origin);
-		if (buffer.next_read < buffer.next_write)
-		{
-           
+        if (buffer.next_read < buffer.next_write)
+        {
             buffer.capacity_ = newsize;
             buffer.origin = data.data ();
             buffer.next_read = buffer.origin + read_offset;
             buffer.next_write = buffer.origin + write_offset;
-		}
-		else
-		{
+        }
+        else
+        {
             int readDiff = buffer.capacity_ - read_offset;
             memmove (data.data () + newsize - readDiff, data.data () + read_offset,
                      buffer.capacity_ - read_offset);
@@ -203,40 +199,38 @@ void CircularBuffer::resize (int newsize)
             buffer.next_write = buffer.origin + write_offset;
             buffer.next_read = buffer.origin + newsize - readDiff;
             buffer.capacity_ = newsize;
-		}
-        
+        }
     }
     else  // smaller size
     {
-        int read_offset = static_cast<int>(buffer.next_read - buffer.origin);
-		if (buffer.next_read < buffer.next_write)
-		{
-			if (read_offset <= newsize)
-			{
+        int read_offset = static_cast<int> (buffer.next_read - buffer.origin);
+        if (buffer.next_read < buffer.next_write)
+        {
+            if (read_offset <= newsize)
+            {
                 data.resize (newsize);
                 buffer.capacity_ = newsize;
-			}
-		}
-		else
-		{
+            }
+        }
+        else
+        {
             int write_offset = static_cast<int> (buffer.next_write - buffer.origin);
             int readDiff = buffer.capacity_ - read_offset;
-			if (readDiff + write_offset < newsize)
-			{
+            if (readDiff + write_offset < newsize)
+            {
                 memmove (data.data () + newsize - readDiff, data.data () + read_offset,
                          buffer.capacity_ - read_offset);
                 buffer.origin = data.data ();
                 buffer.next_write = buffer.origin + write_offset;
                 buffer.next_read = buffer.origin + newsize - readDiff;
                 buffer.capacity_ = newsize;
-			}
-			else
-			{
+            }
+            else
+            {
                 throw (std::runtime_error (
                   "unable to resize, current data exceeds new size, please empty buffer before resizing"));
-			}
-		}
-        
+            }
+        }
     }
 }
 

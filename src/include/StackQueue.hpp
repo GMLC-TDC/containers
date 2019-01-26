@@ -5,9 +5,8 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 
-#include <chrono>
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace helics
 {
@@ -20,7 +19,7 @@ struct dataIndex
 };
 /** class containing the raw stackQueue implementation
 @details the stackQueueRaw class operates on raw memory
-it is given a memory location and uses that for the life of the queue, it does not own the memory so care must be 
+it is given a memory location and uses that for the life of the queue, it does not own the memory so care must be
 taken for memory management  It operates on blocks of raw data
 */
 class StackQueueRaw

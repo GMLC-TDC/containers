@@ -6,13 +6,26 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 #pragma once
 #include "MapTraits.hpp"
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** class merging a vector of pointer with a map that can be used to lookup specific values
  */
@@ -24,7 +37,7 @@ class MappedPointerVector
     MappedPointerVector (MappedPointerVector &&mp) = default;
     MappedPointerVector &operator= (MappedPointerVector &&mp) = default;
 
-    stx::optional<size_t> insert (const searchType &searchValue, std::unique_ptr<VType> &&ptr)
+    opt<size_t> insert (const searchType &searchValue, std::unique_ptr<VType> &&ptr)
     {
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
@@ -38,7 +51,7 @@ class MappedPointerVector
     }
     /** insert a new element into the vector*/
     template <typename... Us>
-    stx::optional<size_t> insert (const searchType &searchValue, Us &&... data)
+    opt<size_t> insert (const searchType &searchValue, Us &&... data)
     {
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())

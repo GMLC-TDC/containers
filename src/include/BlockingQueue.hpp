@@ -4,13 +4,26 @@ Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <type_traits>
 #include <vector>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
@@ -176,7 +189,7 @@ class BlockingQueue
     @return an optional object with an object of type T if available
     */
     template <typename = std::enable_if<std::is_copy_assignable<T>::value>>
-    stx::optional<T> try_peek () const
+    opt<T> try_peek () const
     {
         std::lock_guard<MUTEX> lock (m_pullLock);
 
@@ -193,7 +206,7 @@ class BlockingQueue
     @return an optional containing the value if successful the optional will be empty if there is no
     element in the queue
     */
-    stx::optional<T> try_pop ();
+    opt<T> try_pop ();
 
     /** blocking call to wait on an object from the stack*/
     T pop ()
@@ -224,7 +237,7 @@ class BlockingQueue
 
     /** blocking call to wait on an object from the stack with timeout*/
     template <typename TIME>
-    stx::optional<T> pop (TIME timeout)
+    opt<T> pop (TIME timeout)
     {
         auto val = try_pop ();
         while (!val)
@@ -301,7 +314,7 @@ depending on the number of consumers
 };
 
 template <typename T, class MUTEX, class COND>
-stx::optional<T> BlockingQueue<T, MUTEX, COND>::try_pop ()
+opt<T> BlockingQueue<T, MUTEX, COND>::try_pop ()
 {
     std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
     if (pullElements.empty ())
@@ -312,7 +325,7 @@ stx::optional<T> BlockingQueue<T, MUTEX, COND>::try_pop ()
             std::swap (pushElements, pullElements);
             pushLock.unlock ();  // we can free the push function to accept more elements after the swap call;
             std::reverse (pullElements.begin (), pullElements.end ());
-            stx::optional<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
+            opt<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
             pullElements.pop_back ();
             if (pullElements.empty ())
             {
@@ -332,9 +345,9 @@ stx::optional<T> BlockingQueue<T, MUTEX, COND>::try_pop ()
             return val;
         }
         queueEmptyFlag = true;
-        return stx::nullopt;  // return the empty optional
+        return {};  // return the empty optional
     }
-    stx::optional<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
+    opt<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
     pullElements.pop_back ();
     if (pullElements.empty ())
     {

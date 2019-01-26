@@ -5,7 +5,6 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 #include "MapTraits.hpp"
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <deque>
 #include <map>
@@ -13,6 +12,20 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** class to create a searchable vector by defined unique indices.
 The result object can be indexed multiple ways both by searching using indices or by numerical index
@@ -35,7 +48,7 @@ class DualMappedVector
     insertion
     */
     template <typename... Us>
-    stx::optional<size_t> insert (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -43,7 +56,7 @@ class DualMappedVector
             auto fnd2 = lookup2.find (searchValue2);
             if (fnd2 != lookup2.end ())
             {
-                return stx::nullopt;
+                return {};
             }
         }
         auto index = dataStorage.size ();
@@ -60,12 +73,12 @@ class DualMappedVector
    insertion
     */
     template <typename... Us>
-    stx::optional<size_t> insert (const searchType1 &searchValue1, std::nullptr_t /*searchValue2*/, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1, std::nullptr_t /*searchValue2*/, Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::forward<Us> (data)...);
@@ -80,12 +93,12 @@ class DualMappedVector
     insertion
     */
     template <typename... Us>
-    stx::optional<size_t> insert (std::nullptr_t /*searchValue1*/, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*searchValue1*/, const searchType2 &searchValue2, Us &&... data)
     {
         auto fnd = lookup2.find (searchValue2);
         if (fnd != lookup2.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::forward<Us> (data)...);
@@ -98,7 +111,7 @@ class DualMappedVector
     @return an optional value that indicates if the insertion was successful and if so contain the index of the
     insertion*/
     template <typename... Us>
-    stx::optional<size_t> insert (std::nullptr_t /*searchValue1*/, std::nullptr_t /*searchValue2*/, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*searchValue1*/, std::nullptr_t /*searchValue2*/, Us &&... data)
     {
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::forward<Us> (data)...);

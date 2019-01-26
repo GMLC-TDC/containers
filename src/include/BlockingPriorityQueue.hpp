@@ -5,7 +5,6 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <atomic>
 #include <condition_variable>
@@ -14,6 +13,20 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <string>
 #include <type_traits>
 #include <vector>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** class implementing a blocking queue with a priority channel
 @details this class uses locks one for push and pull it can exhibit longer blocking times if the internal
@@ -239,7 +252,7 @@ class BlockingPriorityQueue
     @return an optional object with an object of type T if available
     */
     template <typename = std::enable_if<std::is_copy_assignable<T>::value>>
-    stx::optional<T> try_peek () const
+    opt<T> try_peek () const
     {
         std::lock_guard<MUTEX> lock (m_pullLock);
         if (!priorityQueue.empty ())
@@ -248,7 +261,7 @@ class BlockingPriorityQueue
         }
         if (pullElements.empty ())
         {
-            return stx::nullopt;
+            return {};
         }
 
         auto t = pullElements.back ();
@@ -259,7 +272,7 @@ class BlockingPriorityQueue
     @return an optional containing the value if successful the optional will be empty if there is no
     element in the queue
     */
-    stx::optional<T> try_pop ();
+    opt<T> try_pop ();
 
     /** blocking call to wait on an object from the stack*/
     T pop ()
@@ -304,7 +317,7 @@ class BlockingPriorityQueue
 
     /** blocking call to wait on an object from the stack with timeout*/
     template <typename TIME>
-    stx::optional<T> pop (TIME timeout)
+    opt<T> pop (TIME timeout)
     {
         auto val = try_pop ();
         while (!val)
@@ -402,12 +415,12 @@ depending on the number of consumers
 };
 
 template <typename T, class MUTEX, class COND>
-stx::optional<T> BlockingPriorityQueue<T, MUTEX, COND>::try_pop ()
+opt<T> BlockingPriorityQueue<T, MUTEX, COND>::try_pop ()
 {
     std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
     if (!priorityQueue.empty ())
     {
-        stx::optional<T> val (std::move (priorityQueue.front ()));
+        opt<T> val (std::move (priorityQueue.front ()));
         priorityQueue.pop ();
         return val;
     }
@@ -419,7 +432,7 @@ stx::optional<T> BlockingPriorityQueue<T, MUTEX, COND>::try_pop ()
             std::swap (pushElements, pullElements);
             pushLock.unlock ();  // we can free the push function to accept more elements after the swap call;
             std::reverse (pullElements.begin (), pullElements.end ());
-            stx::optional<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
+            opt<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
             pullElements.pop_back ();
             if (pullElements.empty ())
             {
@@ -441,7 +454,7 @@ stx::optional<T> BlockingPriorityQueue<T, MUTEX, COND>::try_pop ()
         queueEmptyFlag = true;
         return {};  // return the empty optional
     }
-    stx::optional<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
+    opt<T> val (std::move (pullElements.back ()));  // do it this way to allow movable only types
     pullElements.pop_back ();
     if (pullElements.empty ())
     {

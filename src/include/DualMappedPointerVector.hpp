@@ -5,7 +5,6 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 #include "MapTraits.hpp"
-#include "helics_includes/optional.hpp"
 #include <algorithm>
 #include <functional>
 #include <map>
@@ -14,6 +13,20 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
+
+#ifdef USE_STD_OPTIONAL
+#include <optional>
+template <class T>
+using opt = std::optional;
+#elif defined(USE_BOOST_OPTIONAL)
+#include <boost/optional.hpp>
+template <class T>
+using opt = boost::optional;
+#else
+#include "extra/optional.hpp"
+template <class T>
+using opt = stx::optional;
+#endif
 
 /** class merging a vector of pointer with a map that can be used to lookup specific values
  */
@@ -31,7 +44,7 @@ class DualMappedPointerVector
     DualMappedPointerVector &operator= (const DualMappedPointerVector &mp) = delete;
     ~DualMappedPointerVector () = default;
     /** insert a new element into the vector directly from an existing unique ptr*/
-    stx::optional<size_t>
+    opt<size_t>
     insert (const searchType1 &searchValue1, const searchType2 &searchValue2, std::unique_ptr<VType> &&ptr)
     {
         auto fnd = lookup1.find (searchValue1);
@@ -40,7 +53,7 @@ class DualMappedPointerVector
             auto fnd2 = lookup2.find (searchValue2);
             if (fnd2 != lookup2.end ())
             {
-                return stx::nullopt;
+                return {};
             }
         }
         auto index = dataStorage.size ();
@@ -51,7 +64,7 @@ class DualMappedPointerVector
     }
     /** insert a new element into the vector*/
     template <typename... Us>
-    stx::optional<size_t> insert (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -59,7 +72,7 @@ class DualMappedPointerVector
             auto fnd2 = lookup2.find (searchValue2);
             if (fnd2 != lookup2.end ())
             {
-                return stx::nullopt;
+                return {};
             }
         }
         auto index = dataStorage.size ();
@@ -71,12 +84,12 @@ class DualMappedPointerVector
 
     /** insert a new element into the vector*/
     template <typename... Us>
-    stx::optional<size_t> insert (const searchType1 &searchValue1, std::nullptr_t /*unused*/, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1, std::nullptr_t /*unused*/, Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
@@ -86,12 +99,12 @@ class DualMappedPointerVector
 
     /** insert a new element into the vector*/
     template <typename... Us>
-    stx::optional<size_t> insert (std::nullptr_t /*unused*/, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*unused*/, const searchType2 &searchValue2, Us &&... data)
     {
         auto fnd = lookup2.find (searchValue2);
         if (fnd != lookup2.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
