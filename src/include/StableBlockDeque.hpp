@@ -7,9 +7,9 @@
 But the memory is not contiguous and the elements are stable
 no erase or insert
 @tparam X the type to store in the vector
-@tparam N the blocksize exponent store 2^N objects in an allocation block*/
-
-template <typename X, unsigned int N>
+@tparam N the blocksize exponent store 2^N objects in an allocation block
+@tparam Allocator and allocator object to get the blocks*/
+template <typename X, unsigned int N, class Allocator = std::allocator<X>>
 class StableBlockDeque
 {
     static_assert (N < 32, "N should be between 0 and 31 data will allocated in block 2^N");

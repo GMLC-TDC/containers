@@ -10,7 +10,7 @@ set(GOOGLE_TEST_INDIVIDUAL OFF)
 include(AddGoogletest)
 
 set(CONTAINERS_TESTS
-    StackQueueTests
+    StackBufferTests
 	CircularBufferTests
 	AirLockTests
 	MappedVectorTests

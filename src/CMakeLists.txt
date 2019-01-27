@@ -7,7 +7,7 @@
 set(
   container_headers
   include/AirLock.hpp
-  include/simpleQueue.hpp
+  include/SimpleQueue.hpp
   include/BlockingQueue.hpp
   include/BlockingPriorityQueue.hpp
   include/MapTraits.hpp
@@ -16,7 +16,7 @@ set(
   include/MappedPointerVector.hpp
   include/DualMappedPointerVector.hpp
   include/CircularBuffer.hpp
-  include/StackQueue.hpp
+  include/StackBuffer.hpp
   include/StableBlockVector.hpp
   include/StableBlockDeque.hpp
   include/BlockIterator.hpp
@@ -25,7 +25,7 @@ set(
 set(
   container_sources
   include/CircularBuffer.cpp
-  include/StackQueue.cpp
+  include/StackBuffer.cpp
 )
 
 

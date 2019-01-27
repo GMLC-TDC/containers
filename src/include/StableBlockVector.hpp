@@ -229,9 +229,9 @@ class StableBlockVector
 
     const X &front () const { return dataptr[0][0]; }
 
-    X &operator[] (size_t n) { return *dataptr[n >> N][n & cntmask]; }
+    X &operator[] (size_t n) { return dataptr[n >> N][n & cntmask]; }
 
-    const X &operator[] (size_t n) const { return *dataptr[n >> N][n & cntmask]; }
+    const X &operator[] (size_t n) const { return dataptr[n >> N][n & cntmask]; }
 
     size_t size () const { return csize; }
 
@@ -259,6 +259,7 @@ class StableBlockVector
             {
                 dataptr = new X *[64];
                 dataSlotsAvailable = 64;
+                dataSlotIndex = -1;
             }
             else if (dataSlotIndex >= dataSlotsAvailable - 1)
             {

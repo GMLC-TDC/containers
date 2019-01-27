@@ -5,14 +5,12 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 #pragma once
 
-#include <chrono>
-#include <vector>
+#include <stdexcept>
 
 namespace helics
 {
 namespace common
 {
-
 class CircularBufferRaw
 {
   public:
@@ -66,7 +64,12 @@ class CircularBuffer
     void clear () { buffer.clear (); }
 
   private:
-    std::vector<unsigned char> data;
+    void resizeMemory (int newsize);
+
+  private:
+    unsigned char *data = nullptr;
+    int actualSize = 0;
+    int actualCapacity = 0;
     CircularBufferRaw buffer;
 };
 

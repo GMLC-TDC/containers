@@ -4,7 +4,7 @@ Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 
-#include "StackQueue.hpp"
+#include "StackBuffer.hpp"
 
 #include "gtest/gtest.h"
 #include <iostream>
@@ -14,7 +14,7 @@ using namespace helics::common;
 TEST (stackQueueTest, test_stackqueueraw_simple)
 {
     unsigned char *block = new unsigned char[4096];
-    StackQueueRaw stack (block, 4096);
+    StackBufferRaw stack (block, 4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -36,7 +36,7 @@ TEST (stackQueueTest, test_stackqueueraw_simple)
 TEST (stackQueueTest, test_stackqueueraw_3_push)
 {
     unsigned char *block = new unsigned char[4096];
-    StackQueueRaw stack (block, 4096);
+    StackBufferRaw stack (block, 4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -74,7 +74,7 @@ TEST (stackQueueTest, test_stackqueueraw_3_push)
 TEST (stackQueueTest, test_stackqueueraw_push_full)
 {
     unsigned char *block = new unsigned char[1024];
-    StackQueueRaw stack (block, 1024);
+    StackBufferRaw stack (block, 1024);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -130,7 +130,7 @@ TEST (stackQueueTest, test_stackqueueraw_push_full)
 TEST (stackQueueTest, test_stackqueueraw_reverse)
 {
     unsigned char *block = new unsigned char[4096];
-    StackQueueRaw stack (block, 4096);
+    StackBufferRaw stack (block, 4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -170,7 +170,7 @@ TEST (stackQueueTest, test_stackqueueraw_reverse)
 
 TEST (stackQueueTest, test_stackqueue_simple)
 {
-    StackQueue stack (4096);
+    StackBuffer stack (4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -190,7 +190,7 @@ TEST (stackQueueTest, test_stackqueue_simple)
 
 TEST (stackQueueTest, test_stackqueue_3_push)
 {
-    StackQueue stack (4096);
+    StackBuffer stack (4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -226,7 +226,7 @@ TEST (stackQueueTest, test_stackqueue_3_push)
 
 TEST (stackQueueTest, test_stackqueue_push_full)
 {
-    StackQueue stack (1024);
+    StackBuffer stack (1024);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -280,7 +280,7 @@ TEST (stackQueueTest, test_stackqueue_push_full)
 
 TEST (stackQueueTest, test_stackqueue_reverse)
 {
-    StackQueue stack (4096);
+    StackBuffer stack (4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -319,7 +319,7 @@ TEST (stackQueueTest, test_stackqueue_reverse)
 
 TEST (stackQueueTest, test_stackqueue_move)
 {
-    StackQueue stack (2048);
+    StackBuffer stack (2048);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -328,7 +328,7 @@ TEST (stackQueueTest, test_stackqueue_move)
     stack.push (testData.data (), 571);
     testData.assign (1024, '\0');
 
-    StackQueue mstack (std::move (stack));
+    StackBuffer mstack (std::move (stack));
     EXPECT_EQ (mstack.getCurrentCount (), 1);
     res = mstack.pop (testData.data (), 1024);
     EXPECT_EQ (res, 571);
@@ -340,7 +340,7 @@ TEST (stackQueueTest, test_stackqueue_move)
 
 TEST (stackQueueTest, test_stackqueue_3_push_and_copy)
 {
-    StackQueue stack (4096);
+    StackBuffer stack (4096);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -355,7 +355,7 @@ TEST (stackQueueTest, test_stackqueue_3_push_and_copy)
     pushed = stack.push (testData.data (), 393);
     EXPECT_TRUE (pushed);
 
-    StackQueue cstack (stack);
+    StackBuffer cstack (stack);
     stack.reverse ();
 
     res = cstack.pop (testData.data (), 1024);
@@ -397,8 +397,8 @@ TEST (stackQueueTest, test_stackqueue_3_push_and_copy)
 
 TEST (stackQueueTest, test_stackqueue_move_assignement)
 {
-    StackQueue stack (2048);
-    StackQueue stack2 (1024);
+    StackBuffer stack (2048);
+    StackBuffer stack2 (1024);
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
     EXPECT_EQ (res, 0);
@@ -421,7 +421,7 @@ TEST (stackQueueTest, test_stackqueue_move_assignement)
 
 TEST (stackQueueTest, test_stackqueue_3_push_resize)
 {
-    StackQueue stack (2048);
+    StackBuffer stack (2048);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);
@@ -459,7 +459,7 @@ TEST (stackQueueTest, test_stackqueue_3_push_resize)
 
 TEST (stackQueueTest, test_stackqueue_3_push_resize_shrink)
 {
-    StackQueue stack (2048);
+    StackBuffer stack (2048);
 
     std::vector<unsigned char> testData (1024, 'a');
     int res = stack.pop (testData.data (), 1024);

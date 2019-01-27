@@ -6,7 +6,6 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #pragma once
 
 #include <cstdint>
-#include <vector>
 
 namespace helics
 {
@@ -17,12 +16,12 @@ struct dataIndex
     int32_t offset;
     int32_t dataSize;
 };
-/** class containing the raw stackQueue implementation
-@details the stackQueueRaw class operates on raw memory
+/** class containing the raw StackBuffer implementation
+@details the StackBufferRaw class operates on raw memory
 it is given a memory location and uses that for the life of the queue, it does not own the memory so care must be
 taken for memory management  It operates on blocks of raw data
 */
-class StackQueueRaw
+class StackBufferRaw
 {
   private:
     unsigned char *origin = nullptr;
@@ -32,9 +31,9 @@ class StackQueueRaw
     int dataCount = 0;
 
   public:
-    StackQueueRaw (unsigned char *newBlock, int blockSize);
+    StackBufferRaw (unsigned char *newBlock, int blockSize);
 
-    void swap (StackQueueRaw &other) noexcept;
+    void swap (StackBufferRaw &other) noexcept;
 
     int capacity () const { return dataSize; };
     int getCurrentCount () const { return dataCount; }
@@ -49,25 +48,25 @@ class StackQueueRaw
 
     /** reverse the order in which the data will be extracted*/
     void reverse ();
-    /** clear all data from the StackQueueRaw*/
+    /** clear all data from the StackBufferRaw*/
     void clear ();
 
   private:
-    friend class StackQueue;
+    friend class StackBuffer;
 };
 
-/** StackQueue manages memory for a StackQueueRaw and adds some convenience functions */
-class StackQueue
+/** StackBuffer manages memory for a StackBufferRaw and adds some convenience functions */
+class StackBuffer
 {
   public:
-    StackQueue () noexcept;
-    explicit StackQueue (int size);
-    ~StackQueue () = default;
-    StackQueue (StackQueue &&sq) noexcept;
-    StackQueue (const StackQueue &sq);
+    StackBuffer () noexcept;
+    explicit StackBuffer (int size);
+    ~StackBuffer () = default;
+    StackBuffer (StackBuffer &&sq) noexcept;
+    StackBuffer (const StackBuffer &sq);
 
-    StackQueue &operator= (StackQueue &&sq) noexcept;
-    StackQueue &operator= (const StackQueue &sq);
+    StackBuffer &operator= (StackBuffer &&sq) noexcept;
+    StackBuffer &operator= (const StackBuffer &sq);
 
     void resize (int newsize);
     int getCurrentCount () const { return stack.getCurrentCount (); }
@@ -85,8 +84,13 @@ class StackQueue
     void clear () { stack.clear (); }
 
   private:
-    std::vector<unsigned char> data;
-    StackQueueRaw stack;
+    void resizeMemory (int newsize);
+
+  private:
+    unsigned char *data = nullptr;
+    int actualSize = 0;
+    int actualCapacity = 0;
+    StackBufferRaw stack;
 };
 
 }  // namespace common

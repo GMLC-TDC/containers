@@ -11,6 +11,33 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 #include <string>
 
+TEST (stackBlockVectorTest, test_lookup)
+{
+    StableBlockVector<std::string, 2> sbv;
+    sbv.push_back ("bob");
+    sbv.emplace_back ("bob2");
+    sbv.emplace_back ("bob3");
+    sbv.emplace_back ("bob4");
+    sbv.emplace_back ("bob5");
+    EXPECT_EQ (sbv.size (), 5);
+    EXPECT_EQ (sbv[0], "bob");
+    EXPECT_EQ (sbv[1], "bob2");
+    EXPECT_EQ (sbv[2], "bob3");
+    EXPECT_EQ (sbv[3], "bob4");
+    EXPECT_EQ (sbv[4], "bob5");
+}
+
+TEST (stackBlockVectorTest, test_iterator)
+{
+    StableBlockVector<std::string, 2> sbv;
+    sbv.push_back ("bob");
+    sbv.emplace_back ("bob2");
+    sbv.emplace_back ("bob3");
+    sbv.emplace_back ("bob4");
+    sbv.emplace_back ("bob5");
+    EXPECT_EQ (sbv.size (), 5);
+}
+
 TEST (stackBlockVectorTest, test_simple)
 {
     StableBlockVector<std::string, 2> sbv;
@@ -30,9 +57,10 @@ TEST (stackBlockVectorTest, test_simple)
     sbv.emplace_back ("bob13");
     sbv.emplace_back ("bob14");
     int ii = 0;
+    std::vector<std::string> act;
     for (const auto &el : sbv)
     {
-        (void)(el);
+        act.push_back (el);
         ++ii;
     }
     EXPECT_EQ (sbv.size (), 14);
