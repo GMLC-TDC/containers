@@ -51,6 +51,7 @@ gtest_force_shared_crt
 gtest_hide_internal_symbols
 BUILD_GMOCK
 BUILD_GTEST
+INSTALL_GTEST
 )
 
 set_target_properties(gtest gtest_main gmock gmock_main

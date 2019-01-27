@@ -7,58 +7,38 @@
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
 
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE BOOL "")
+set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "")
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "Suppressing benchmark's tests" FORCE)
 add_subdirectory("${CMAKE_SOURCE_DIR}/extern/benchmark" "${CMAKE_BINARY_DIR}/extern/benchmark" EXCLUDE_FROM_ALL)
 
 
-if(GOOGLE_TEST_INDIVIDUAL)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.9)
-        include(GoogleTest)
-    else()
-        set(GOOGLE_TEST_INDIVIDUAL OFF)
-    endif()
-endif()
-
 # Target must already exist
-macro(add_gtest TESTNAME)
-    target_link_libraries(${TESTNAME} PUBLIC gtest gmock gtest_main)
-    
-    if(GOOGLE_TEST_INDIVIDUAL)
-        if(CMAKE_VERSION VERSION_LESS 3.10)
-            gtest_add_tests(TARGET ${TESTNAME}
-                            TEST_PREFIX "${TESTNAME}."
-                            TEST_LIST TmpTestList)
-            set_tests_properties(${TmpTestList} PROPERTIES FOLDER "Tests")
-        else()
-            gtest_discover_tests(${TESTNAME}
-                TEST_PREFIX "${TESTNAME}."
-                PROPERTIES FOLDER "Tests")
-            
-        endif()
-    else()
-        add_test(${TESTNAME} ${TESTNAME})
-        set_target_properties(${TESTNAME} PROPERTIES FOLDER "Tests")
-    endif()
+macro(add_benchmark TESTNAME)
+    target_link_libraries(${TESTNAME} PUBLIC benchmark benchmark_main Threads::Threads)
+    if (WIN32)
+		target_link_libraries(${TESTNAME} PUBLIC shlwapi)
+	endif()
+	set_target_properties(${TESTNAME} PROPERTIES FOLDER "benchmarks")
 
 endmacro()
 
 mark_as_advanced(
-gmock_build_tests
-gtest_build_samples
-gtest_build_tests
-gtest_disable_pthreads
-gtest_force_shared_crt
-gtest_hide_internal_symbols
-BUILD_GMOCK
-BUILD_GTEST
+ BENCHMARK_BUILD_32_BITS
+ BENCHMARK_DOWNLOAD_DEPENDENCIES
+ BENCHMARK_ENABLE_ASSEMBLY_TESTS
+ BENCHMARK_ENABLE_EXCEPTIONS
+ BENCHMARK_ENABLE_GTEST_TESTS
+ BENCHMARK_ENABLE_INSTALL
+ BENCHMARK_ENABLE_LTO
+ BENCHMARK_ENABLE_TESTING
+ BENCHMARK_USE_LIBCXX
+ LIBRT
 )
 
-set_target_properties(gtest gtest_main gmock gmock_main
+set_target_properties(benchmark benchmark_main
     PROPERTIES FOLDER "Extern")
 
 if(MSVC AND MSVC_VERSION GREATER_EQUAL 1900)
-    target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gmock PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gmock_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+    target_compile_definitions(benchmark PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+    target_compile_definitions(benchmark_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 endif()
