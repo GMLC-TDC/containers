@@ -25,6 +25,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
 will check performance at a later time
@@ -111,3 +115,6 @@ class AirLock
     T data;  //!< the data to be stored in the airlock
     COND condition;  //!< condition variable for notification of new data
 };
+
+}  // namespace containers
+}  // namespace gmlc

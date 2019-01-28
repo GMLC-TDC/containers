@@ -14,6 +14,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
  */
 
 #include "simpleQueue.hpp"
+using namespace gmlc::containers;
 
 /** test basic operations */
 TEST (simple_queue_tests, basic_tests)

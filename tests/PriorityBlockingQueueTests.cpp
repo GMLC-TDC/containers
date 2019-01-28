@@ -14,6 +14,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
  */
 
 #include "BlockingPriorityQueue.hpp"
+using namespace gmlc::containers;
 
 /** test basic operations */
 TEST (blocking_priority_queue_tests, basic_tests)

@@ -7,6 +7,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <iostream>
 
 #include "MappedVector.hpp"
+using namespace gmlc::containers;
 
 /** test basic operations */
 TEST (mapped_vector_tests, definition_tests)

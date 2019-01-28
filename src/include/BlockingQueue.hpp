@@ -25,6 +25,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
 will check performance at a later time
@@ -380,3 +384,6 @@ bool BlockingQueue<T, MUTEX, COND>::empty () const
 {
     return queueEmptyFlag;
 }
+
+}  // namespace containers
+}  // namespace gmlc

@@ -11,9 +11,9 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <cstring>
 #include <stdexcept>
 
-namespace helics
+namespace gmlc
 {
-namespace common
+namespace containers
 {
 StackBufferRaw::StackBufferRaw (unsigned char *newBlock, int blockSize)
     : origin (newBlock), next (newBlock), dataSize (blockSize)
@@ -232,5 +232,5 @@ void StackBuffer::resizeMemory (int newsize)
     }
     actualSize = newsize;
 }
-}  // namespace common
-}  // namespace helics
+}  // namespace containers
+}  // namespace gmlc

@@ -11,6 +11,8 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 #include <string>
 
+using namespace gmlc::containers;
+
 TEST (stackBlockVectorTest, test_lookup)
 {
     StableBlockVector<std::string, 2> sbv;

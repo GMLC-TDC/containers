@@ -27,6 +27,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** class merging a vector of pointer with a map that can be used to lookup specific values
  */
 template <class VType, class searchType = std::string>
@@ -202,3 +206,6 @@ class MappedPointerVector
                        std::map<searchType, size_t>>
       lookup;  //!< map to lookup the index lookup;
 };
+
+}  // namespace containers
+}  // namespace gmlc

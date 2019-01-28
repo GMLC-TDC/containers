@@ -25,6 +25,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** class for very simple thread safe queue
 @details  uses two vectors for the operations,  once the pull vector is empty it swaps the vectors
 and reverses it so it can pop from the back as well as an atomic flag indicating the queue is empty
@@ -309,3 +313,6 @@ class SimpleQueue
         return t;
     }
 };
+
+}  // namespace containers
+}  // namespace gmlc

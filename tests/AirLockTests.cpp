@@ -17,6 +17,8 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 #include "AirLock.hpp"
 
+using namespace gmlc::containers;
+
 /** test basic operations */
 TEST (airlock_tests, basic_tests)
 {

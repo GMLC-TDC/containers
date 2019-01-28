@@ -7,10 +7,10 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 #include <cstdint>
 
-namespace helics
+namespace gmlc
 {
-namespace common
-{
+	namespace containers
+	{
 struct dataIndex
 {
     int32_t offset;
@@ -93,5 +93,5 @@ class StackBuffer
     StackBufferRaw stack;
 };
 
-}  // namespace common
-}  // namespace helics
+}  // namespace containers
+}  // namespace gmlc

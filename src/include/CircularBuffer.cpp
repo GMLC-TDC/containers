@@ -8,9 +8,9 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <algorithm>
 #include <cstring>
 
-namespace helics
+namespace gmlc
 {
-namespace common
+namespace containers
 {
 CircularBufferRaw::CircularBufferRaw (unsigned char *dataBlock, int blockSize)
     : origin (dataBlock), next_write (origin), next_read (origin), capacity_ (blockSize)
@@ -154,13 +154,13 @@ CircularBuffer::CircularBuffer (const CircularBuffer &cb)
 
 CircularBuffer &CircularBuffer::operator= (CircularBuffer &&cb) noexcept
 {
-	if (data != nullptr)
-	{
-		std::free(data);
-	}
-	data = cb.data;
-	actualSize = cb.actualSize;
-	actualCapacity = cb.actualCapacity;
+    if (data != nullptr)
+    {
+        std::free (data);
+    }
+    data = cb.data;
+    actualSize = cb.actualSize;
+    actualCapacity = cb.actualCapacity;
     buffer = std::move (cb.buffer);
     data = std::move (cb.data);
 
@@ -174,8 +174,8 @@ CircularBuffer &CircularBuffer::operator= (CircularBuffer &&cb) noexcept
 CircularBuffer &CircularBuffer::operator= (const CircularBuffer &cb)
 {
     buffer = cb.buffer;
-	resizeMemory(cb.actualSize);
-	std::memcpy(data, cb.data, cb.actualSize);
+    resizeMemory (cb.actualSize);
+    std::memcpy (data, cb.data, cb.actualSize);
 
     auto read_offset = buffer.next_read - buffer.origin;
     auto write_offset = buffer.next_write - buffer.origin;
@@ -198,7 +198,7 @@ void CircularBuffer::resize (int newsize)
     }
     else if (newsize > actualSize)
     {
-		resizeMemory(newsize);
+        resizeMemory (newsize);
         int read_offset = static_cast<int> (buffer.next_read - buffer.origin);
         int write_offset = static_cast<int> (buffer.next_write - buffer.origin);
         if (buffer.next_read < buffer.next_write)
@@ -211,8 +211,7 @@ void CircularBuffer::resize (int newsize)
         else
         {
             int readDiff = buffer.capacity_ - read_offset;
-            memmove (data + newsize - readDiff, data + read_offset,
-                     buffer.capacity_ - read_offset);
+            memmove (data + newsize - readDiff, data + read_offset, buffer.capacity_ - read_offset);
             buffer.origin = data;
             buffer.next_write = buffer.origin + write_offset;
             buffer.next_read = buffer.origin + newsize - readDiff;
@@ -226,7 +225,7 @@ void CircularBuffer::resize (int newsize)
         {
             if (read_offset <= newsize)
             {
-                actualSize=newsize;
+                actualSize = newsize;
                 buffer.capacity_ = newsize;
             }
         }
@@ -236,8 +235,7 @@ void CircularBuffer::resize (int newsize)
             int readDiff = buffer.capacity_ - read_offset;
             if (readDiff + write_offset < newsize)
             {
-                memmove (data + newsize - readDiff, data + read_offset,
-                         buffer.capacity_ - read_offset);
+                memmove (data + newsize - readDiff, data + read_offset, buffer.capacity_ - read_offset);
                 buffer.origin = data;
                 buffer.next_write = buffer.origin + write_offset;
                 buffer.next_read = buffer.origin + newsize - readDiff;
@@ -249,28 +247,28 @@ void CircularBuffer::resize (int newsize)
                   "unable to resize, current data exceeds new size, please empty buffer before resizing"));
             }
         }
-		actualSize = newsize;
+        actualSize = newsize;
     }
 }
 
 void CircularBuffer::resizeMemory (int newsize)
 {
-	if (newsize == actualSize)
-	{
-		return;
-	}
-	if (newsize > actualCapacity)
-	{
-		auto buf = reinterpret_cast<unsigned char *> (std::realloc(data, newsize));
-		if (buf == nullptr)
-		{
-			return;
-		}
-		data = buf;
-		actualCapacity = newsize;
-	}
-	actualSize = newsize;
+    if (newsize == actualSize)
+    {
+        return;
+    }
+    if (newsize > actualCapacity)
+    {
+        auto buf = reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
+        if (buf == nullptr)
+        {
+            return;
+        }
+        data = buf;
+        actualCapacity = newsize;
+    }
+    actualSize = newsize;
 }
 
-}  // namespace common
-}  // namespace helics
+}  // namespace containers
+}  // namespace gmlc

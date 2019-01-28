@@ -7,7 +7,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include "CircularBuffer.hpp"
 #include <benchmark/benchmark.h>
 
-using namespace helics::common;
+using namespace gmlc::containers;
 
 static void BM_BufferPushPop (benchmark::State &state)
 {

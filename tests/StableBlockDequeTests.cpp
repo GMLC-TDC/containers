@@ -10,6 +10,8 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include <iostream>
 #include <string>
 
+using namespace gmlc::containers;
+
 TEST (stackBlockDequeTest, test_simple)
 {
     StableBlockDeque<std::string, 2> sbv;

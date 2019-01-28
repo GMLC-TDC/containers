@@ -7,9 +7,9 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 #include <stdexcept>
 
-namespace helics
+namespace gmlc
 {
-namespace common
+namespace containers
 {
 class CircularBufferRaw
 {
@@ -73,5 +73,5 @@ class CircularBuffer
     CircularBufferRaw buffer;
 };
 
-}  // namespace common
-}  // namespace helics
+}  // namespace containers
+}  // namespace gmlc

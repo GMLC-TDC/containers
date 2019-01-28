@@ -27,6 +27,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** class to create a searchable vector by defined unique indices.
 The result object can be indexed multiple ways both by searching using indices or by numerical index
 */
@@ -416,3 +420,6 @@ class DualMappedVector
                        std::map<searchType2, size_t>>
       lookup2;  //!< map to lookup the index
 };
+
+}  // namespace containers
+}  // namespace gmlc

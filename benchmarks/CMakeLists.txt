@@ -10,6 +10,7 @@ include(AddGooglebenchmark)
 
 set(CONTAINERS_BENCHMARKS
 	CircularBufferBenchmarks
+	SimpleQueueBenchmarks
     )
 
 # Only affects current directory, so safe

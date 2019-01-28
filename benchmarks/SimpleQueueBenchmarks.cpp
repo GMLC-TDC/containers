@@ -4,12 +4,211 @@ Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 All rights reserved. See LICENSE file and DISCLAIMER for more details.
 */
 
-#include "CircularBuffer.hpp"
-#include "gtest/gtest.h"
-#include <iostream>
+#include "SimpleQueue.hpp"
+#include <benchmark/benchmark.h>
+#include <future>
 
 using namespace gmlc::containers;
 
+template <class X>
+class sqFixture : public benchmark::Fixture
+{
+  public:
+    SimpleQueue<X> sq;
+};
+
+BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, SProdSCons, int64_t) (benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1000; ++ii)
+        {
+            sq.push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index == 0)
+        {
+            for (int64_t ii = 1000; ii <= 301000; ++ii)
+            {
+                sq.push (ii);
+            }
+            sq.push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt == 0)
+            {
+                auto res = sq.pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (sqFixture, SProdSCons)->Threads (2)->UseRealTime ()->Unit (benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, MProdSCons, int64_t) (benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1'000; ++ii)
+        {
+            sq.push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index < 3)
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                sq.push (ii);
+            }
+            sq.push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt < 3)
+            {
+                auto res = sq.pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (sqFixture, MProdSCons)->Threads (4)->UseRealTime ()->Unit (benchmark::kMillisecond);
+
+#include <mutex>
+#include <queue>
+template <class X>
+class stdqFixture : public benchmark::Fixture
+{
+  public:
+    std::queue<X> q;
+    std::mutex prot;
+
+    void push (const X &val)
+    {
+        std::lock_guard<std::mutex> lk (prot);
+        q.push (val);
+    }
+
+    opt<X> pop ()
+    {
+        std::lock_guard<std::mutex> lk (prot);
+        if (q.empty ())
+        {
+            return {};
+        }
+        opt<X> v = q.front ();
+        q.pop ();
+        return v;
+    }
+};
+
+BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, SProdSCons_std, int64_t) (benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index == 0)
+        {
+            for (int64_t ii = 1000; ii <= 301000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt == 0)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (stdqFixture, SProdSCons_std)->Threads (2)->UseRealTime ()->Unit (benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, MProdSCons_std, int64_t) (benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1'000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index < 3)
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt < 3)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (stdqFixture, MProdSCons_std)->Threads (4)->UseRealTime ()->Unit (benchmark::kMillisecond);
+/*
 TEST (CircBuff_tests, test_circularbuffraw_simple)
 {
     unsigned char *block = new unsigned char[1024];
@@ -65,7 +264,8 @@ TEST (CircBuff_tests, test_circularbuffraw_loop_around)
 
 TEST (CircBuff_tests, test_circularbuffraw_loop_around_repeat)
 {
-    unsigned char *block = new unsigned char[1520];  // 3x504+4  otherwise there is a potential scenario in which 2
+    unsigned char *block = new unsigned char[1520];  // 3x504+4  otherwise there is a potential scenario in which
+2
                                                      // 500byte messages cannot fit
     CircularBufferRaw buf (block, 1520);
 
@@ -395,3 +595,5 @@ TEST (CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
         EXPECT_TRUE (pushed);
     }
 }
+
+*/

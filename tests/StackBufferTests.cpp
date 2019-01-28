@@ -9,7 +9,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 #include "gtest/gtest.h"
 #include <iostream>
 
-using namespace helics::common;
+using namespace gmlc::containers;
 
 TEST (stackQueueTest, test_stackqueueraw_simple)
 {

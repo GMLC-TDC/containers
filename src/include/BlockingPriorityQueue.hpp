@@ -28,6 +28,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** class implementing a blocking queue with a priority channel
 @details this class uses locks one for push and pull it can exhibit longer blocking times if the internal
 operations require a swap, however in high usage the two locks will reduce contention in most cases.
@@ -479,3 +483,6 @@ bool BlockingPriorityQueue<T, MUTEX, COND>::empty () const
 {
     return queueEmptyFlag;
 }
+
+}  // namespace containers
+}  // namespace gmlc

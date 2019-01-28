@@ -1,8 +1,17 @@
+/*
+Copyright © 2017-2019,
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
+All rights reserved. See LICENSE file and DISCLAIMER for more details.
+*/
 #pragma once
 
 #include "BlockIterator.hpp"
 #include <type_traits>
 
+namespace gmlc
+{
+namespace containers
+{
 /** class to function similarly to a deque  with push/ppp back and front
 But the memory is not contiguous and the elements are stable
 no erase or insert
@@ -296,3 +305,6 @@ class StableBlockDeque
     int freeIndex = 0;  // 48 +4 byte gap
     X **freeblocks;  // 56
 };
+
+}  // namespace containers
+}  // namespace gmlc

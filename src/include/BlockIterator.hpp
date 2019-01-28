@@ -1,6 +1,10 @@
 #pragma once
 #include <type_traits>
 
+namespace gmlc
+{
+namespace containers
+{
 template <typename X, int BLOCKSIZE, typename OUTER>
 class BlockIterator
 {
@@ -102,3 +106,6 @@ class BlockIterator
         }
     }
 };
+
+}  // namespace containers
+}  // namespace gmlc

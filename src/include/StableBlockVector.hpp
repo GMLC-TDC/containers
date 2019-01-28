@@ -1,9 +1,18 @@
+/*
+Copyright © 2017-2019,
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
+All rights reserved. See LICENSE file and DISCLAIMER for more details.
+*/
 #pragma once
 
 #include "BlockIterator.hpp"
 #include <memory>
 #include <type_traits>
 
+namespace gmlc
+{
+namespace containers
+{
 /** class to function as a vector in with push back and pop_back
 But the memory is not contiguous and the elements are stable
 no erase or insert
@@ -315,3 +324,6 @@ class StableBlockVector
     int freeIndex{0};  // 36 +4 byte gap
     X **freeblocks{nullptr};  // 48
 };
+
+}  // namespace containers
+}  // namespace gmlc

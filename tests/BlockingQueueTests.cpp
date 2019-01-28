@@ -13,7 +13,7 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
  */
 
 #include "BlockingQueue.hpp"
-//#include "helics/common/blocking_queue.h"
+using namespace gmlc::containers;
 
 /** test basic operations */
 TEST (blocking_queue_tests, basic_tests)

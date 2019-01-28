@@ -26,6 +26,10 @@ template <class T>
 using opt = stx::optional<T>;
 #endif
 
+namespace gmlc
+{
+namespace containers
+{
 /** class combining a vector of objects with a map to search them by a separate index term
 the main use case is a bunch of inserts then searching with limited to no removal since removal is a rather
 expensive operation
@@ -203,3 +207,6 @@ class MappedVector
                        std::map<searchType, size_t>>
       lookup;  //!< map to lookup the index
 };
+
+}  // namespace containers
+}  // namespace gmlc
