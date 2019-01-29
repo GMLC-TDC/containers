@@ -38,6 +38,30 @@ TEST (stackBlockVectorTest, test_iterator)
     sbv.emplace_back ("bob4");
     sbv.emplace_back ("bob5");
     EXPECT_EQ (sbv.size (), 5);
+    auto it = sbv.begin ();
+    EXPECT_EQ (*it, "bob");
+    ++it;
+    EXPECT_EQ (*it, "bob2");
+    it++;
+    EXPECT_EQ (*it, "bob3");
+    --it;
+    EXPECT_EQ (*it, "bob2");
+    it += 1;
+    EXPECT_EQ (*it, "bob3");
+    it += 2;
+    EXPECT_EQ (*it, "bob5");
+    it -= 1;
+    EXPECT_EQ (*it--, "bob4");
+    EXPECT_EQ (*it, "bob3");
+    it -= 2;
+    EXPECT_EQ (*it, "bob");
+    int ii = 0;
+    while (it != sbv.end ())
+    {
+        ++ii;
+        ++it;
+    }
+    EXPECT_EQ (ii, 5);
 }
 
 TEST (stackBlockVectorTest, test_simple)

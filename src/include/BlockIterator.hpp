@@ -16,10 +16,12 @@ class BlockIterator
   public:
     using constref = typename const std::remove_const<X>::type;
 
-    BlockIterator (OUTER &it, int startoffset) : vec (it), ptr (&((*it)[0])), offset (startoffset)
+    BlockIterator (OUTER &it, int startoffset)
+        : vec{it}, ptr{&((*it)[startoffset])}, offset{startoffset}
     {
-        static_assert (std::is_same<std::remove_reference_t<decltype (*(*it))>, X>::value,
-                       "OUTER *it must be dereferencable to a a type matching X");
+        static_assert (
+          std::is_same<std::remove_reference_t<decltype (*(*it))>, X>::value,
+          "OUTER *it must be dereferencable to a a type matching X");
     }
 
     std::enable_if_t<!std::is_const<X>::value, X> &operator* () { return *ptr; }
@@ -28,8 +30,14 @@ class BlockIterator
     constref *operator-> () const { return ptr; }
 
     operator bool () const { return (ptr != nullptr); }
-    bool operator== (const BlockIterator &it) const { return ((vec == it.vec) && (offset == it.offset)); }
-    bool operator!= (const BlockIterator &it) const { return ((vec != it.vec) || (offset != it.offset)); }
+    bool operator== (const BlockIterator &it) const
+    {
+        return ((vec == it.vec) && (offset == it.offset));
+    }
+    bool operator!= (const BlockIterator &it) const
+    {
+        return ((vec != it.vec) || (offset != it.offset));
+    }
 
     BlockIterator &operator+= (const ptrdiff_t &movement)
     {
@@ -99,9 +107,9 @@ class BlockIterator
     {
         if (offset < 0)
         {
-            auto diff = -offset;
+            auto diff = -offset - 1;
             vec -= (1 + (diff / BLOCKSIZE));
-            offset = diff % BLOCKSIZE;
+            offset = BLOCKSIZE - 1 - (diff % BLOCKSIZE);
             ptr = &((*vec)[offset]);
         }
     }

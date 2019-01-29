@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER
+for more details.
 */
 
 #include "SimpleQueue.hpp"
@@ -17,7 +18,8 @@ class sqFixture : public benchmark::Fixture
     SimpleQueue<X> sq;
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, SProdSCons, int64_t) (benchmark::State &state)
+BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, SProdSCons, int64_t)
+(benchmark::State &state)
 {
     if (state.thread_index == 0)
     {
@@ -56,9 +58,13 @@ BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, SProdSCons, int64_t) (benchmark::State &
     }
 }
 // Register the function as a benchmark
-BENCHMARK_REGISTER_F (sqFixture, SProdSCons)->Threads (2)->UseRealTime ()->Unit (benchmark::kMillisecond);
+BENCHMARK_REGISTER_F (sqFixture, SProdSCons)
+  ->Threads (2)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, MProdSCons, int64_t) (benchmark::State &state)
+BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, MProdSCons, int64_t)
+(benchmark::State &state)
 {
     if (state.thread_index == 0)
     {
@@ -97,7 +103,10 @@ BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, MProdSCons, int64_t) (benchmark::State &
     }
 }
 // Register the function as a benchmark
-BENCHMARK_REGISTER_F (sqFixture, MProdSCons)->Threads (4)->UseRealTime ()->Unit (benchmark::kMillisecond);
+BENCHMARK_REGISTER_F (sqFixture, MProdSCons)
+  ->Threads (4)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
 
 #include <mutex>
 #include <queue>
@@ -127,7 +136,8 @@ class stdqFixture : public benchmark::Fixture
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, SProdSCons_std, int64_t) (benchmark::State &state)
+BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, SProdSCons_std, int64_t)
+(benchmark::State &state)
 {
     if (state.thread_index == 0)
     {
@@ -166,9 +176,13 @@ BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, SProdSCons_std, int64_t) (benchmark::S
     }
 }
 // Register the function as a benchmark
-BENCHMARK_REGISTER_F (stdqFixture, SProdSCons_std)->Threads (2)->UseRealTime ()->Unit (benchmark::kMillisecond);
+BENCHMARK_REGISTER_F (stdqFixture, SProdSCons_std)
+  ->Threads (2)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, MProdSCons_std, int64_t) (benchmark::State &state)
+BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, MProdSCons_std, int64_t)
+(benchmark::State &state)
 {
     if (state.thread_index == 0)
     {
@@ -207,393 +221,191 @@ BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, MProdSCons_std, int64_t) (benchmark::S
     }
 }
 // Register the function as a benchmark
-BENCHMARK_REGISTER_F (stdqFixture, MProdSCons_std)->Threads (4)->UseRealTime ()->Unit (benchmark::kMillisecond);
-/*
-TEST (CircBuff_tests, test_circularbuffraw_simple)
+BENCHMARK_REGISTER_F (stdqFixture, MProdSCons_std)
+  ->Threads (4)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
+
+#include <boost/lockfree/queue.hpp>
+template <class X>
+class blfFixture : public benchmark::Fixture
 {
-    unsigned char *block = new unsigned char[1024];
-    CircularBufferRaw buf (block, 1024);
+  public:
+    boost::lockfree::queue<X> q;
 
-    std::vector<unsigned char> testData (256, 'a');
-    int res = buf.pop (testData.data (), 256);
-    EXPECT_EQ (res, 0);
-    EXPECT_TRUE (buf.empty ());
-
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    testData.assign (256, '\0');
-    EXPECT_FALSE (buf.empty ());
-    res = buf.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-
-    EXPECT_TRUE (buf.empty ());
-    delete[] block;
-}
-
-TEST (CircBuff_tests, test_circularbuffraw_loop_around)
-{
-    unsigned char *block = new unsigned char[1024];
-    CircularBufferRaw buf (block, 1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    pushed = buf.push (testData.data (), 200);
-    EXPECT_FALSE (pushed);
-
-    EXPECT_TRUE (!buf.isSpaceAvailable (20));
-    int res = buf.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_TRUE (buf.isSpaceAvailable (20));
-    pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-
-    buf.clear ();
-    EXPECT_TRUE (buf.empty ());
-    delete[] block;
-}
-
-TEST (CircBuff_tests, test_circularbuffraw_loop_around_repeat)
-{
-    unsigned char *block = new unsigned char[1520];  // 3x504+4  otherwise there is a potential scenario in which
-2
-                                                     // 500byte messages cannot fit
-    CircularBufferRaw buf (block, 1520);
-
-    std::vector<unsigned char> testData (500, 'a');
-    for (int ii = 1; ii <= 500; ++ii)
+    void push (const X &val)
     {
-        bool pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
-        pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
-        int res = buf.pop (testData.data (), 500);
-        EXPECT_EQ (res, ii);
-        res = buf.pop (testData.data (), 500);
-        EXPECT_EQ (res, ii);
-        EXPECT_TRUE (buf.empty ());
+        while (!q.push (val))
+            ;
     }
 
-    delete[] block;
-}
-
-TEST (CircBuff_tests, test_circularbuff_simple)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-    int res = buf.pop (testData.data (), 256);
-    EXPECT_EQ (res, 0);
-    EXPECT_TRUE (buf.empty ());
-
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    testData.assign (256, '\0');
-    EXPECT_FALSE (buf.empty ());
-    res = buf.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-
-    EXPECT_TRUE (buf.empty ());
-}
-
-TEST (CircBuff_tests, test_circularbuff_loop_around)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    pushed = buf.push (testData.data (), 200);
-    EXPECT_FALSE (pushed);
-
-    EXPECT_TRUE (!buf.isSpaceAvailable (20));
-    int res = buf.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_TRUE (buf.isSpaceAvailable (20));
-    pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-
-    buf.clear ();
-    EXPECT_TRUE (buf.empty ());
-}
-
-TEST (CircBuff_tests, test_circularbuff_loop_around_repeat)
-{
-    CircularBuffer buf (1520);
-
-    std::vector<unsigned char> testData (500, 'a');
-    for (int ii = 1; ii <= 500; ++ii)
+    opt<X> pop ()
     {
-        bool pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
-        pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
-        int res = buf.pop (testData.data (), 500);
-        EXPECT_EQ (res, ii);
-        res = buf.pop (testData.data (), 500);
-        EXPECT_EQ (res, ii);
-        EXPECT_TRUE (buf.empty ());
+        X val;
+        if (q.pop (val))
+        {
+            return val;
+        }
+        return {};
+    }
+};
+
+BENCHMARK_TEMPLATE_DEFINE_F (blfFixture, SProdSCons_blf, int64_t)
+(benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index == 0)
+        {
+            for (int64_t ii = 1000; ii <= 301000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt == 0)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
     }
 }
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (blfFixture, SProdSCons_blf)
+  ->Threads (2)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
 
-TEST (CircBuff_tests, test_circularbuff_simple_move)
+BENCHMARK_TEMPLATE_DEFINE_F (blfFixture, MProdSCons_blf, int64_t)
+(benchmark::State &state)
 {
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-    int res = buf.pop (testData.data (), 256);
-    EXPECT_EQ (res, 0);
-    EXPECT_TRUE (buf.empty ());
-
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    testData.assign (256, '\0');
-    EXPECT_FALSE (buf.empty ());
-
-    CircularBuffer buf2 (std::move (buf));
-    res = buf2.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-
-    EXPECT_TRUE (buf2.empty ());
-}
-
-TEST (CircBuff_tests, test_circularbuff_simple_copy)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-    int res = buf.pop (testData.data (), 256);
-    EXPECT_EQ (res, 0);
-    EXPECT_TRUE (buf.empty ());
-
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    testData.assign (256, '\0');
-    EXPECT_FALSE (buf.empty ());
-
-    CircularBuffer buf2 (buf);
-
-    res = buf.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-
-    EXPECT_TRUE (buf.empty ());
-
-    EXPECT_FALSE (buf2.empty ());
-
-    res = buf2.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-}
-
-TEST (CircBuff_tests, test_circularbuff_simple_move_assignment)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-    int res = buf.pop (testData.data (), 256);
-    EXPECT_EQ (res, 0);
-    EXPECT_TRUE (buf.empty ());
-
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    testData.assign (256, '\0');
-    EXPECT_FALSE (buf.empty ());
-
-    CircularBuffer buf2 (200);
-    buf2.push (testData.data (), 10);
-    EXPECT_TRUE (pushed);
-
-    buf2 = std::move (buf);
-    res = buf2.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-
-    EXPECT_TRUE (buf2.empty ());
-}
-
-TEST (CircBuff_tests, test_circularbuff_simple_copy_assignment)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-    int res = buf.pop (testData.data (), 256);
-    EXPECT_EQ (res, 0);
-    EXPECT_TRUE (buf.empty ());
-
-    bool pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    testData.assign (256, '\0');
-    EXPECT_TRUE (!buf.empty ());
-
-    CircularBuffer buf2 (200);
-    buf2.push (testData.data (), 10);
-    EXPECT_TRUE (pushed);
-
-    buf2 = buf;
-    EXPECT_EQ (buf2.capacity (), 1024);
-
-    res = buf2.pop (testData.data (), 1024);
-    EXPECT_EQ (res, 200);
-    EXPECT_EQ (testData[0], 'a');
-    EXPECT_EQ (testData[126], 'a');
-    EXPECT_EQ (testData[199], 'a');
-    EXPECT_EQ (testData[200], 0);
-
-    EXPECT_TRUE (buf2.empty ());
-
-    EXPECT_FALSE (buf.empty ());
-}
-
-TEST (CircBuff_tests, test_circularbuff_resize)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-
-    buf.resize (2048);
-    auto pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-    pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-
-    EXPECT_EQ (buf.capacity (), 2048);
-}
-
-TEST (CircBuff_tests, test_circularbuff_resize_smaller)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 200);
-
-    buf.resize (450);
-    auto pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (!pushed);
-    int sz = buf.pop (testData.data (), 256);
-    EXPECT_EQ (sz, 200);
-    pushed = buf.push (testData.data (), 200);
-    EXPECT_TRUE (pushed);
-
-    EXPECT_EQ (buf.capacity (), 450);
-}
-
-TEST (CircBuff_tests, test_circularbuff_resize_bigger_wrap)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 201);
-    buf.push (testData.data (), 202);
-    buf.push (testData.data (), 203);
-
-    buf.pop (testData.data (), 256);
-    buf.pop (testData.data (), 256);
-    buf.push (testData.data (), 204);
-
-    EXPECT_FALSE (buf.isSpaceAvailable (200));
-    buf.resize (2048);
-    auto pushed = buf.push (testData.data (), 205);
-    EXPECT_TRUE (pushed);
-    pushed = buf.push (testData.data (), 206);
-    EXPECT_TRUE (pushed);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 202);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 203);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 204);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 205);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 206);
-    EXPECT_EQ (buf.capacity (), 2048);
-}
-
-TEST (CircBuff_tests, test_circularbuff_resize_smaller_wrap)
-{
-    CircularBuffer buf (1024);
-
-    std::vector<unsigned char> testData (256, 'a');
-
-    buf.push (testData.data (), 200);
-    buf.push (testData.data (), 201);
-    buf.push (testData.data (), 202);
-    buf.push (testData.data (), 203);
-
-    buf.pop (testData.data (), 256);
-    buf.pop (testData.data (), 256);
-    buf.push (testData.data (), 204);
-    buf.pop (testData.data (), 256);
-    EXPECT_TRUE (buf.isSpaceAvailable (205));
-    buf.resize (620);  // a size that can work
-    EXPECT_TRUE (!buf.isSpaceAvailable (205));
-    auto pushed = buf.push (testData.data (), 205);
-    EXPECT_TRUE (!pushed);
-
-    EXPECT_THROW (buf.resize (200), std::runtime_error);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 203);
-    EXPECT_EQ (buf.pop (testData.data (), 256), 204);
-    EXPECT_EQ (buf.capacity (), 620);
-}
-
-TEST (CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
-{
-    CircularBuffer buf (45);
-
-    std::vector<unsigned char> testData (10000, 'a');
-    for (int ii = 1; ii <= 10000; ++ii)
+    if (state.thread_index == 0)
     {
-        buf.resize (3 * (ii + 8));
-        int res = buf.pop (testData.data (), 10000);
-        EXPECT_EQ (res, ii - 1);
-        bool pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
-        pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
-        res = buf.pop (testData.data (), 10000);
-        EXPECT_EQ (res, ii);
-        res = buf.pop (testData.data (), 10000);
-        EXPECT_EQ (res, ii);
-        EXPECT_TRUE (buf.empty ());
-        pushed = buf.push (testData.data (), ii);
-        EXPECT_TRUE (pushed);
+        for (int64_t ii = 0; ii < 1'000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index < 3)
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt < 3)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
     }
 }
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (blfFixture, MProdSCons_blf)
+  ->Threads (4)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
 
-*/
+#include <boost/lockfree/spsc_queue.hpp>
+template <class X>
+class bspscFixture : public benchmark::Fixture
+{
+  public:
+    boost::lockfree::spsc_queue<X, boost::lockfree::capacity<4048>> q;
+
+    void push (const X &val)
+    {
+        while (!q.push (val))
+            ;
+    }
+
+    opt<X> pop ()
+    {
+        if (q.read_available ())
+        {
+            opt<X> ret = q.front ();
+            q.pop ();
+            return ret;
+        }
+        return {};
+    }
+};
+
+BENCHMARK_TEMPLATE_DEFINE_F (bspscFixture, SProdSCons_bspsc, int64_t)
+(benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index == 0)
+        {
+            for (int64_t ii = 1000; ii <= 301000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt == 0)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (bspscFixture, SProdSCons_bspsc)
+  ->Threads (2)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);

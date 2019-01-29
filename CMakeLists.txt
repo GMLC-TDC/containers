@@ -64,11 +64,23 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(containers_base INTERFACE Threads::Threads)
 
+option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
+# Add boost to test boost::optional if available
+find_package(Boost 1.58)
+if(Boost_FOUND)
+    target_link_libraries(containers_base INTERFACE Boost::boost)
+
+    target_compile_definitions(containers_base INTERFACE USE_BOOST_OPTIONAL)
+	target_compile_definitions(containers_base INTERFACE ENABLE_BOOST_TYPES)
+    #target_compile_definitions(OptionalTest PUBLIC CLI11_BOOST_OPTIONAL)
+endif()
+
+target_include_directories(containers_base INTERFACE ThirdParty)
 
 add_subdirectory(src)
 
 option(GMLC_CONTAINERS_TEST "Enable tests for the containers library" ON)
-option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" OFF)
+option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" ON)
 
 if (GMLC_CONTAINERS_TEST)
 	enable_testing()
@@ -100,6 +112,7 @@ endif()
         'tests/*'
         'interfaces/*'
         'examples/*'
+		'benchmarks/*'
       )
       setup_target_for_coverage(
         NAME
