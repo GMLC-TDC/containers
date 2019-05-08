@@ -77,7 +77,7 @@ endif()
 
 target_include_directories(containers_base INTERFACE ThirdParty)
 
-add_subdirectory(src)
+add_subdirectory(containers)
 
 option(GMLC_CONTAINERS_TEST "Enable tests for the containers library" ON)
 option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" ON)
@@ -159,20 +159,6 @@ if(GENERATE_DOXYGEN_DOC)
 	endif(DOXYGEN_FOUND)
 endif(GENERATE_DOXYGEN_DOC)
 
-
-# -------------------------------------------------------------
-# BOOST  find the boost libraries
-# -------------------------------------------------------------
-#set(
-#  BOOST_REQUIRED_LIBRARIES
-#  program_options
-#  filesystem
-#  system
-#)
-#if (BUILD_TESTING)
-#	list(APPEND BOOST_REQUIRED_LIBRARIES unit_test_framework)
-#endif()
-#include(addBoost)
 
 # -------------------------------------------------------------
 # add threading support
