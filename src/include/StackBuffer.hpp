@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER
+for more details.
 */
 #pragma once
 
@@ -9,8 +10,8 @@ All rights reserved. See LICENSE file and DISCLAIMER for more details.
 
 namespace gmlc
 {
-	namespace containers
-	{
+namespace containers
+{
 struct dataIndex
 {
     int32_t offset;
@@ -18,8 +19,9 @@ struct dataIndex
 };
 /** class containing the raw StackBuffer implementation
 @details the StackBufferRaw class operates on raw memory
-it is given a memory location and uses that for the life of the queue, it does not own the memory so care must be
-taken for memory management  It operates on blocks of raw data
+it is given a memory location and uses that for the life of the queue, it does
+not own the memory so care must be taken for memory management  It operates on
+blocks of raw data
 */
 class StackBufferRaw
 {
@@ -55,7 +57,8 @@ class StackBufferRaw
     friend class StackBuffer;
 };
 
-/** StackBuffer manages memory for a StackBufferRaw and adds some convenience functions */
+/** StackBuffer manages memory for a StackBufferRaw and adds some convenience
+ * functions */
 class StackBuffer
 {
   public:
@@ -74,11 +77,17 @@ class StackBuffer
     bool isSpaceAvailable (int sz) const { return stack.isSpaceAvailable (sz); }
     bool empty () const { return stack.empty (); }
 
-    bool push (const unsigned char *block, int blockSize) { return stack.push (block, blockSize); }
+    bool push (const unsigned char *block, int blockSize)
+    {
+        return stack.push (block, blockSize);
+    }
 
     int nextDataSize () const { return stack.nextDataSize (); }
 
-    int pop (unsigned char *block, int maxSize) { return stack.pop (block, maxSize); }
+    int pop (unsigned char *block, int maxSize)
+    {
+        return stack.pop (block, maxSize);
+    }
 
     void reverse () { stack.reverse (); }
     void clear () { stack.clear (); }
@@ -87,10 +96,10 @@ class StackBuffer
     void resizeMemory (int newsize);
 
   private:
-    unsigned char *data = nullptr;
-    int actualSize = 0;
-    int actualCapacity = 0;
-    StackBufferRaw stack;
+    unsigned char *data = nullptr;  //!< pointer to the memory data block
+    int actualSize = 0;  //!< the stated size of the memory block
+    int actualCapacity = 0;  //!< the actual size of the memory block
+    StackBufferRaw stack;  //!< The actual stack controller
 };
 
 }  // namespace containers

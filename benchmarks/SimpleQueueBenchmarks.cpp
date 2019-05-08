@@ -75,18 +75,10 @@ BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, MProdSCons, int64_t)
     }
     for (auto _ : state)
     {
-        if (state.thread_index < 3)
-        {
-            for (int64_t ii = 1'000; ii <= 101000; ++ii)
-            {
-                sq.push (ii);
-            }
-            sq.push (-1);
-        }
-        else
+        if (state.thread_index == 0)
         {
             int cnt = 0;
-            while (cnt < 3)
+            while (cnt < state.threads - 1)
             {
                 auto res = sq.pop ();
                 if (!res)
@@ -100,11 +92,19 @@ BENCHMARK_TEMPLATE_DEFINE_F (sqFixture, MProdSCons, int64_t)
                 }
             }
         }
+        else
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                sq.push (ii);
+            }
+            sq.push (-1);
+        }
     }
 }
 // Register the function as a benchmark
 BENCHMARK_REGISTER_F (sqFixture, MProdSCons)
-  ->Threads (4)
+  ->ThreadRange (4, 8)
   ->UseRealTime ()
   ->Unit (benchmark::kMillisecond);
 
@@ -193,15 +193,7 @@ BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, MProdSCons_std, int64_t)
     }
     for (auto _ : state)
     {
-        if (state.thread_index < 3)
-        {
-            for (int64_t ii = 1'000; ii <= 101000; ++ii)
-            {
-                push (ii);
-            }
-            push (-1);
-        }
-        else
+        if (state.thread_index == 0)
         {
             int cnt = 0;
             while (cnt < 3)
@@ -218,11 +210,19 @@ BENCHMARK_TEMPLATE_DEFINE_F (stdqFixture, MProdSCons_std, int64_t)
                 }
             }
         }
+        else
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
     }
 }
 // Register the function as a benchmark
 BENCHMARK_REGISTER_F (stdqFixture, MProdSCons_std)
-  ->Threads (4)
+  ->ThreadRange (4, 8)
   ->UseRealTime ()
   ->Unit (benchmark::kMillisecond);
 
@@ -307,18 +307,10 @@ BENCHMARK_TEMPLATE_DEFINE_F (blfFixture, MProdSCons_blf, int64_t)
     }
     for (auto _ : state)
     {
-        if (state.thread_index < 3)
-        {
-            for (int64_t ii = 1'000; ii <= 101000; ++ii)
-            {
-                push (ii);
-            }
-            push (-1);
-        }
-        else
+        if (state.thread_index == 0)
         {
             int cnt = 0;
-            while (cnt < 3)
+            while (cnt < state.threads - 1)
             {
                 auto res = pop ();
                 if (!res)
@@ -332,11 +324,19 @@ BENCHMARK_TEMPLATE_DEFINE_F (blfFixture, MProdSCons_blf, int64_t)
                 }
             }
         }
+        else
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
     }
 }
 // Register the function as a benchmark
 BENCHMARK_REGISTER_F (blfFixture, MProdSCons_blf)
-  ->Threads (4)
+  ->ThreadRange (4, 8)
   ->UseRealTime ()
   ->Unit (benchmark::kMillisecond);
 
@@ -407,5 +407,115 @@ BENCHMARK_TEMPLATE_DEFINE_F (bspscFixture, SProdSCons_bspsc, int64_t)
 // Register the function as a benchmark
 BENCHMARK_REGISTER_F (bspscFixture, SProdSCons_bspsc)
   ->Threads (2)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
+
+#include <moodycamel/concurrentqueue.h>
+template <class X>
+class mcFixture : public benchmark::Fixture
+{
+  public:
+    moodycamel::ConcurrentQueue<X> q;
+
+    void push (const X &val) { q.enqueue (val); }
+
+    opt<X> pop ()
+    {
+        X v;
+        if (q.try_dequeue (v))
+        {
+            return v;
+        }
+        return {};
+    }
+};
+
+BENCHMARK_TEMPLATE_DEFINE_F (mcFixture, SProdSCons_mc, int64_t)
+(benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index == 0)
+        {
+            for (int64_t ii = 1000; ii <= 301000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt == 0)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (mcFixture, SProdSCons_mc)
+  ->Threads (2)
+  ->UseRealTime ()
+  ->Unit (benchmark::kMillisecond);
+
+BENCHMARK_TEMPLATE_DEFINE_F (mcFixture, MProdSCons_mc, int64_t)
+(benchmark::State &state)
+{
+    if (state.thread_index == 0)
+    {
+        for (int64_t ii = 0; ii < 1'000; ++ii)
+        {
+            push (ii);
+        }
+    }
+    for (auto _ : state)
+    {
+        if (state.thread_index != 0)
+        {
+            for (int64_t ii = 1'000; ii <= 101000; ++ii)
+            {
+                push (ii);
+            }
+            push (-1);
+        }
+        else
+        {
+            int cnt = 0;
+            while (cnt < state.threads - 1)
+            {
+                auto res = pop ();
+                if (!res)
+                {  // yield so the producers can catch up
+                    std::this_thread::yield ();
+                    continue;
+                }
+                if (*res < 0)
+                {
+                    ++cnt;
+                }
+            }
+        }
+    }
+}
+// Register the function as a benchmark
+BENCHMARK_REGISTER_F (mcFixture, MProdSCons_mc)
+  ->ThreadRange (4, 8)
   ->UseRealTime ()
   ->Unit (benchmark::kMillisecond);

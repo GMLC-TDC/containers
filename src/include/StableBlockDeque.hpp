@@ -153,7 +153,8 @@ class StableBlockDeque
     void emplace_back (Args &&... args)
     {
         blockCheck ();
-        new (&(dataptr[dataSlotBack][bsize++])) X{std::forward<Args> (args)...};
+        new (&(dataptr[dataSlotBack][bsize++]))
+          X (std::forward<Args> (args)...);
         ++csize;
     }
 
@@ -194,7 +195,7 @@ class StableBlockDeque
     {
         blockCheckFront ();
         new (&(dataptr[dataSlotFront][fsize--]))
-          X{std::forward<Args> (args)...};
+          X (std::forward<Args> (args)...);
         ++csize;
     }
 

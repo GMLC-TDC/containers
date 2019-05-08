@@ -150,7 +150,7 @@ class StableBlockVector
     {
         blockCheck ();
         new (&(dataptr[dataSlotIndex][bsize++]))
-          X{std::forward<Args> (args)...};
+          X (std::forward<Args> (args)...);
         ++csize;
     }
 

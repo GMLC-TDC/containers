@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER
+for more details.
 */
 #pragma once
 
@@ -37,7 +38,8 @@ class CircularBufferRaw
   private:
     friend class CircularBuffer;
 };
-
+/** class implementing a circular buffer with raw memory
+ */
 class CircularBuffer
 {
   public:
@@ -52,14 +54,23 @@ class CircularBuffer
 
     void resize (int newsize);
     int capacity () const { return buffer.capacity (); }
-    bool isSpaceAvailable (int sz) const { return buffer.isSpaceAvailable (sz); }
+    bool isSpaceAvailable (int sz) const
+    {
+        return buffer.isSpaceAvailable (sz);
+    }
     bool empty () const { return buffer.empty (); }
 
-    bool push (const unsigned char *block, int blockSize) { return buffer.push (block, blockSize); }
+    bool push (const unsigned char *block, int blockSize)
+    {
+        return buffer.push (block, blockSize);
+    }
 
     int next_data_size () const { return buffer.nextDataSize (); }
 
-    int pop (unsigned char *block, int maxSize) { return buffer.pop (block, maxSize); }
+    int pop (unsigned char *block, int maxSize)
+    {
+        return buffer.pop (block, maxSize);
+    }
 
     void clear () { buffer.clear (); }
 

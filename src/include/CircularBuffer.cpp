@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER
+for more details.
 */
 
 #include "CircularBuffer.hpp"
@@ -13,7 +14,8 @@ namespace gmlc
 namespace containers
 {
 CircularBufferRaw::CircularBufferRaw (unsigned char *dataBlock, int blockSize)
-    : origin (dataBlock), next_write (origin), next_read (origin), capacity_ (blockSize)
+    : origin (dataBlock), next_write (origin), next_read (origin),
+      capacity_ (blockSize)
 {
 }
 
@@ -52,9 +54,10 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
             *(reinterpret_cast<int *> (next_write)) = blockSize;
             memcpy (next_write + 4, data, blockSize);
             next_write += blockSize + 4;
-            // loop around if there isn't really space for another block of at least 4 bytes and the
-            // next_read>origin
-            if (((capacity_ - (next_write - origin)) < 8) && (next_read > origin))
+            // loop around if there isn't really space for another block of at
+            // least 4 bytes and the next_read>origin
+            if (((capacity_ - (next_write - origin)) < 8) &&
+                (next_read > origin))
             {
                 next_write = origin;
             }
@@ -124,13 +127,14 @@ void CircularBufferRaw::clear () { next_write = next_read = origin; }
 
 CircularBuffer::CircularBuffer () noexcept : buffer (nullptr, 0) {}
 CircularBuffer::CircularBuffer (int size)
-    : data (reinterpret_cast<unsigned char *> (std::malloc (size))), actualSize{size}, actualCapacity{size},
-      buffer (data, size)
+    : data (reinterpret_cast<unsigned char *> (std::malloc (size))),
+      actualSize{size}, actualCapacity{size}, buffer (data, size)
 {
 }
 
 CircularBuffer::CircularBuffer (CircularBuffer &&cb) noexcept
-    : data{cb.data}, actualSize (cb.actualSize), actualCapacity (cb.actualCapacity), buffer (std::move (cb.buffer))
+    : data{cb.data}, actualSize (cb.actualSize),
+      actualCapacity (cb.actualCapacity), buffer (std::move (cb.buffer))
 {
     cb.data = nullptr;
     cb.actualSize = 0;
@@ -142,9 +146,11 @@ CircularBuffer::CircularBuffer (CircularBuffer &&cb) noexcept
 }
 
 CircularBuffer::CircularBuffer (const CircularBuffer &cb)
-    : data{reinterpret_cast<unsigned char *> (std::malloc (cb.actualSize))}, actualSize{cb.actualSize},
-      actualCapacity{cb.actualSize}, buffer (cb.buffer)
+    : data{reinterpret_cast<unsigned char *> (std::malloc (cb.actualSize))},
+      actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
+      buffer (cb.buffer)
 {
+    memcpy (data, cb.data, actualSize);
     auto read_offset = buffer.next_read - buffer.origin;
     auto write_offset = buffer.next_write - buffer.origin;
     buffer.origin = data;
@@ -211,7 +217,8 @@ void CircularBuffer::resize (int newsize)
         else
         {
             int readDiff = buffer.capacity_ - read_offset;
-            memmove (data + newsize - readDiff, data + read_offset, buffer.capacity_ - read_offset);
+            memmove (data + newsize - readDiff, data + read_offset,
+                     buffer.capacity_ - read_offset);
             buffer.origin = data;
             buffer.next_write = buffer.origin + write_offset;
             buffer.next_read = buffer.origin + newsize - readDiff;
@@ -231,11 +238,13 @@ void CircularBuffer::resize (int newsize)
         }
         else
         {
-            int write_offset = static_cast<int> (buffer.next_write - buffer.origin);
+            int write_offset =
+              static_cast<int> (buffer.next_write - buffer.origin);
             int readDiff = buffer.capacity_ - read_offset;
             if (readDiff + write_offset < newsize)
             {
-                memmove (data + newsize - readDiff, data + read_offset, buffer.capacity_ - read_offset);
+                memmove (data + newsize - readDiff, data + read_offset,
+                         buffer.capacity_ - read_offset);
                 buffer.origin = data;
                 buffer.next_write = buffer.origin + write_offset;
                 buffer.next_read = buffer.origin + newsize - readDiff;
@@ -244,7 +253,8 @@ void CircularBuffer::resize (int newsize)
             else
             {
                 throw (std::runtime_error (
-                  "unable to resize, current data exceeds new size, please empty buffer before resizing"));
+                  "unable to resize, current data exceeds new size, please "
+                  "empty buffer before resizing"));
             }
         }
         actualSize = newsize;
@@ -259,7 +269,8 @@ void CircularBuffer::resizeMemory (int newsize)
     }
     if (newsize > actualCapacity)
     {
-        auto buf = reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
+        auto buf =
+          reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
         if (buf == nullptr)
         {
             return;
