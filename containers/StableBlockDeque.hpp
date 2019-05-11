@@ -44,9 +44,11 @@ class StableBlockDeque
     /** construct with a specified size*/
     StableBlockDeque (size_t startSize, const X &init = X{})
         : csize (startSize),
-          dataptr (new X *[std::max ((startSize >> N) + 2, 64)]),
-          dataSlotsAvailable (std::max ((startSize >> N) + 2, 64)),
+          dataptr (new X *[std::max ((startSize >> N) + 2, size_t{64})]),
+          dataSlotsAvailable (
+            std::max (static_cast<int> (startSize >> N) + 2, 64))
     {
+        Allocator a;
         if (startSize == 0)
         {
             dataSlotFront = dataSlotBack = 30;
@@ -90,7 +92,7 @@ class StableBlockDeque
             dataptr = new X *[sbd.dataSlotsAvailable];
             dataSlotsAvailable = sbd.dataSlotsAvailable;
             dataSlotFront = sbd.dataSlotFront;
-            fsize = sdb.fsize;
+            fsize = sbd.fsize;
             bsize = sbd.fsize + 1;
             dataptr[dataSlotFront] = getNewBlock ();
             assign (sbd.begin (), sbd.end ());
@@ -99,8 +101,8 @@ class StableBlockDeque
     StableBlockDeque (StableBlockDeque &&sbd) noexcept
         : csize (sbd.csize), dataptr (sbd.dataptr),
           dataSlotsAvailable (sbd.dataSlotsAvailable),
-          dataSlotIndex (sbd.dataSlotIndex), bsize (sbd.bsize),
-          freeSlotsAvailable (sbd.freeSlotsAvailable),
+          dataSlotBack (sbd.dataSlotBack), dataSlotFront (sbd.dataSlotFront),
+          bsize (sbd.bsize), freeSlotsAvailable (sbd.freeSlotsAvailable),
           freeIndex (sbd.freeIndex), freeblocks (sbd.freeblocks)
     {
         sbd.freeblocks = nullptr;
@@ -120,8 +122,8 @@ class StableBlockDeque
         csize = sbd.csize;
         dataptr = sbd.dataptr;
         dataSlotsAvailable = sbd.dataSlotsAvailable;
-        dataSlotFront = sbd.dataSlotFront;
         dataSlotBack = sbd.dataSlotBack;
+        dataSlotFront = sbd.dataSlotFront;
         bsize = sbd.bsize;
         fsize = sbd.fsize;
         freeSlotsAvailable = sbd.freeSlotsAvailable;
@@ -388,7 +390,7 @@ class StableBlockDeque
   private:
     void blockCheck ()
     {
-        if (bsize >= blockSize)
+        if (bsize >= static_cast<int> (blockSize))
         {
             if (0 == dataSlotsAvailable)
             {
@@ -433,7 +435,7 @@ class StableBlockDeque
             {
                 dataptr = new X *[64];
                 dataSlotsAvailable = 64;
-                dataSlotFront = dataSlotBack 30;
+                dataSlotFront = dataSlotBack = 30;
                 fsize = blockSize / 2 - 1;
                 bsize = fsize + 1;
                 dataptr[dataSlotBack] = getNewBlock ();

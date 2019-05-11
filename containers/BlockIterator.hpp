@@ -6,6 +6,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #pragma once
+#include <cstddef>
 #include <type_traits>
 
 namespace gmlc
@@ -13,6 +14,7 @@ namespace gmlc
 namespace containers
 {
 template <typename X, int BLOCKSIZE, typename OUTER>
+/** helper class for iterating through a sequence of blocks*/
 class BlockIterator
 {
   private:
@@ -21,7 +23,7 @@ class BlockIterator
     int offset;
 
   public:
-    using constref = typename const std::remove_const<X>::type;
+    using constref = const typename std::remove_const<X>::type;
 
     BlockIterator (OUTER &it, int startoffset)
         : vec{it}, ptr{&((*it)[startoffset])}, offset{startoffset}

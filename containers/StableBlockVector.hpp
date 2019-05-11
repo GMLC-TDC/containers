@@ -47,7 +47,7 @@ class StableBlockVector
       const X &init =
         X{}) noexcept (std::is_nothrow_copy_constructible<X>::value)
         : csize (startSize),
-          dataptr (new X *[std::max ((startSize >> N) + 1, 64ul)]),
+          dataptr (new X *[std::max ((startSize >> N) + 1, size_t{64})]),
           dataSlotsAvailable (
             std::max (static_cast<int> (startSize >> N) + 1, 64)),
           dataSlotIndex (static_cast<int> (startSize >> N)),
@@ -301,7 +301,7 @@ class StableBlockVector
   private:
     void blockCheck ()
     {
-        if (bsize >= blockSize)
+        if (bsize >= static_cast<int> (blockSize))
         {
             if (0 == dataSlotsAvailable)
             {
