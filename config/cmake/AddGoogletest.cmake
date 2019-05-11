@@ -6,7 +6,10 @@
 #
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF)
-
+# older version of google tests doesn't support MSYS so needs this flag to compile
+if (MSYS)
+	set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
+endif()
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE BOOL "")
 add_subdirectory("${GMLC_CONTAINERS_SOURCE_DIR}/extern/googletest" "${GMLC_CONTAINERS_BINARY_DIR}/extern/googletest" EXCLUDE_FROM_ALL)
 
@@ -57,9 +60,12 @@ INSTALL_GTEST
 set_target_properties(gtest gtest_main gmock gmock_main
     PROPERTIES FOLDER "Extern")
 
-if(MSVC AND MSVC_VERSION GREATER_EQUAL 1900)
-    target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gmock PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(gmock_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+if(MSVC)
+     #  add_compile_options( /wd4459)
+    if (MSVC_VERSION GREATER_EQUAL 1900)
+        target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+        target_compile_definitions(gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+        target_compile_definitions(gmock PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+        target_compile_definitions(gmock_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
+    endif()
 endif()

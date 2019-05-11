@@ -13,7 +13,7 @@ project (GMLC_CONTAINERS VERSION 0.1)
 # GMLC CONTAINERS library Version number
 #-----------------------------------------------------------------------------
 set (GMLC_CONTAINERS_VERSION_BUILD )
-set (GMLC_CONTAINERS_DATE "01-30-19")
+set (GMLC_CONTAINERS_DATE "05-12-19")
 
 set(GMLC_CONTAINERS_VERSION_STRING "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})")
 
@@ -90,44 +90,6 @@ endif()
 if (GMLC_CONTAINERS_BENCHMARK)
     add_subdirectory(benchmarks)
 endif()
-# -------------------------------------------------------------
-# add coverage target
-# -------------------------------------------------------------
-  cmake_dependent_option(
-    TEST_CODE_COVERAGE
-    "Build a target for testing code coverage"
-    OFF
-    "GMLC_CONTAINERS_TESTS"
-    OFF
-  )
-  if(TEST_CODE_COVERAGE)
-    if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
-      include(CodeCoverage)
-
-      set(
-        COVERAGE_EXCLUDES
-        'usr/*'
-        'dependencies/*'
-        'ThirdParty/*'
-        'tests/*'
-        'interfaces/*'
-        'examples/*'
-		'benchmarks/*'
-      )
-      setup_target_for_coverage(
-        NAME
-        containers_coverage # New target name
-        EXECUTABLE
-        CTest # Executable in PROJECT_BINARY_DIR
-      )
-        else()
-      message(
-        FATAL_ERROR "CMAKE_BUILD_TYPE must be set to Coverage for testing code coverage"
-      )
-        endif()
-	endif(TEST_CODE_COVERAGE)
-
-mark_as_advanced(TEST_CODE_COVERAGE)
 
 # -------------------------------------------------------------
 # Get some configuration for C++17 as that becomes available
