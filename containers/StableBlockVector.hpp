@@ -38,7 +38,7 @@ class StableBlockVector
     static constexpr unsigned int cntmask{blockSize - 1};
 
   public:
-    /** constructor*/
+    /** default constructor*/
     StableBlockVector () noexcept {}
 
     /** construct with a specified size*/
@@ -47,9 +47,11 @@ class StableBlockVector
       const X &init =
         X{}) noexcept (std::is_nothrow_copy_constructible<X>::value)
         : csize (startSize),
-          dataptr (new X *[std::max ((startSize >> N) + 1, 64)]),
-          dataSlotsAvailable (std::max ((startSize >> N) + 1, 64)),
-          dataSlotIndex (startSize >> N), bsize (startSize & cntmask)
+          dataptr (new X *[std::max ((startSize >> N) + 1, 64ul)]),
+          dataSlotsAvailable (
+            std::max (static_cast<int> (startSize >> N) + 1, 64)),
+          dataSlotIndex (static_cast<int> (startSize >> N)),
+          bsize (static_cast<int> (startSize & cntmask))
     {
         Allocator a;
         if (startSize == 0)
