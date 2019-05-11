@@ -27,6 +27,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
 # -----------------------------------------------------------------------------
 # set the module path and include some common macros
 # -----------------------------------------------------------------------------
@@ -47,17 +50,17 @@ endif()
 add_library(containers_base INTERFACE)
 
 include(compiler_flags)
-message(STATUS "setting version build options to \"${VERSION_OPTION}\"")
-if(VERSION_OPTION)
+message(STATUS "setting version build options to \"${CXX_STANDARD_FLAG}\"")
+if(${CXX_STANDARD_FLAG})
   if(MSVC)
-		target_compile_options(containers_base INTERFACE ${VERSION_OPTION})
+		target_compile_options(containers_base INTERFACE ${CXX_STANDARD_FLAG})
 	else()
     target_compile_options(
       containers_base
-      INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${VERSION_OPTION}>
+      INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${CXX_STANDARD_FLAG}}>
     )
   endif(MSVC)
-endif(VERSION_OPTION)
+endif(${CXX_STANDARD_FLAG})
 
 
 # -------------------------------------------------------------
