@@ -34,18 +34,13 @@ foreach(T ${CONTAINERS_TESTS})
    
 endforeach()
 
-# Adding this printout to CTest
-#file(WRITE "${PROJECT_BINARY_DIR}/CTestCustom.cmake"
-#    "set(CTEST_CUSTOM_PRE_TEST \"${CMAKE_BINARY_DIR}/informational\")"
-#    )
-
-#if(CMAKE_BUILD_TYPE STREQUAL Coverage)
-#    include(CodeCoverage)
-#    setup_target_for_coverage(
-#        NAME CLI11_coverage
-#        EXECUTABLE ctest
-#        DEPENDENCIES
-#          ${CLI11_TESTS}
-#          ${CLI11_MULTIONLY_TESTS})
-#endif()
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    include(CodeCoverage)
+    setup_target_for_coverage(
+        NAME CONTAINERS_coverage
+        EXECUTABLE ctest
+        DEPENDENCIES
+          ${CONTAINERS_TESTS}
+          )
+endif()
 

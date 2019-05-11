@@ -7,9 +7,9 @@ set -evx
 cd ${TRAVIS_BUILD_DIR}
 mkdir -p build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Coverage
+cmake .. -DCMAKE_BUILD_TYPE=Coverage -DGMLC_CONTAINERS_BENCHMARK=OFF
 cmake --build . -- -j2
-cmake --build . --target UNITS_coverage
+cmake --build . --target CONTAINERS_coverage
 
 set +evx
 echo -en "travis_fold:end:script.build\\r"
@@ -18,7 +18,7 @@ echo "Capturing and uploading LCov..."
 set -evx
 
 lcov --directory . --capture --output-file coverage.info # capture coverage info
-lcov --remove coverage.info '*/tests/*' '*/examples/*' '*gtest*' '*gmock*' '/usr/*' --output-file coverage.info # filter out system
+lcov --remove coverage.info '*/tests/*' '*/examples/*' '*/benchmarks/*' '*gtest*' '*gmock*' '/usr/*' --output-file coverage.info # filter out system
 lcov --list coverage.info #debug info
 # Uploading report to CodeCov
 bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
