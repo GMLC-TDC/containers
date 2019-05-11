@@ -1,8 +1,10 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
+
 #pragma once
 #include "MapTraits.hpp"
 #include <algorithm>
@@ -32,7 +34,8 @@ namespace gmlc
 namespace containers
 {
 /** class to create a searchable vector by defined unique indices.
-The result object can be indexed multiple ways both by searching using indices or by numerical index
+The result object can be indexed multiple ways both by searching using indices
+or by numerical index
 */
 template <class VType,
           class searchType1,
@@ -48,11 +51,13 @@ class DualMappedVector
     @param searchValue1 the primary unique index of the vector
     @param searchValue2 the secondary unique index of the vector
     @param data the parameters necessary to create a new object
-    @return an optional value that indicates if the insertion was successful and if so contain the index of the
-    insertion
+    @return an optional value that indicates if the insertion was successful and
+    if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1,
+                        const searchType2 &searchValue2,
+                        Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -73,11 +78,13 @@ class DualMappedVector
     /** insert a new element into the vector
     @param searchValue1 the primary unique index of the vector
    @param data the parameters necessary to create a new object
-    @return an optional value that indicates if the insertion was successful and if so contain the index of the
-   insertion
+    @return an optional value that indicates if the insertion was successful and
+   if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert (const searchType1 &searchValue1, std::nullptr_t /*searchValue2*/, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1,
+                        std::nullptr_t /*searchValue2*/,
+                        Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -93,11 +100,13 @@ class DualMappedVector
     /** insert a new element into the vector
     @param searchValue2 the secondary unique index of the vector
     @param data the parameters necessary to create a new object
-    @return an optional value that indicates if the insertion was successful and if so contain the index of the
-    insertion
+    @return an optional value that indicates if the insertion was successful and
+    if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert (std::nullptr_t /*searchValue1*/, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*searchValue1*/,
+                        const searchType2 &searchValue2,
+                        Us &&... data)
     {
         auto fnd = lookup2.find (searchValue2);
         if (fnd != lookup2.end ())
@@ -112,10 +121,12 @@ class DualMappedVector
 
     /** insert a new element into the vector
     @param data the parameters necessary to create a new object
-    @return an optional value that indicates if the insertion was successful and if so contain the index of the
-    insertion*/
+    @return an optional value that indicates if the insertion was successful and
+    if so contain the index of the insertion*/
     template <typename... Us>
-    opt<size_t> insert (std::nullptr_t /*searchValue1*/, std::nullptr_t /*searchValue2*/, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*searchValue1*/,
+                        std::nullptr_t /*searchValue2*/,
+                        Us &&... data)
     {
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::forward<Us> (data)...);
@@ -128,7 +139,9 @@ class DualMappedVector
     @param data the parameters and values necessary to create a new object
     @return the index of the created or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
+    size_t insert_or_assign (const searchType1 &searchValue1,
+                             const searchType2 &searchValue2,
+                             Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -153,7 +166,9 @@ class DualMappedVector
     @param data the data required to create a new object
     @return the index of the inserted or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign (const searchType1 &searchValue1, std::nullptr_t /*searchValue2*/, Us &&... data)
+    size_t insert_or_assign (const searchType1 &searchValue1,
+                             std::nullptr_t /*searchValue2*/,
+                             Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -175,7 +190,9 @@ class DualMappedVector
     @param data the parameters and value necessary to create a new object
     @return the index of the inserted or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign (std::nullptr_t /*searchValue1*/, const searchType2 &searchValue2, Us &&... data)
+    size_t insert_or_assign (std::nullptr_t /*searchValue1*/,
+                             const searchType2 &searchValue2,
+                             Us &&... data)
     {
         auto fnd = lookup2.find (searchValue2);
         if (fnd != lookup2.end ())
@@ -204,7 +221,8 @@ class DualMappedVector
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType1 &searchValue, const searchType1 &existingValue)
+    auto addSearchTerm (const searchType1 &searchValue,
+                        const searchType1 &existingValue)
     {
         auto fnd = lookup1.find (existingValue);
         if (fnd != lookup1.end ())
@@ -227,7 +245,8 @@ class DualMappedVector
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType2 &searchValue, const searchType2 &existingValue)
+    auto addSearchTerm (const searchType2 &searchValue,
+                        const searchType2 &existingValue)
     {
         auto fnd = lookup2.find (existingValue);
         if (fnd != lookup2.end ())
@@ -239,7 +258,8 @@ class DualMappedVector
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType2 &searchValue, const searchType1 &existingValue)
+    auto addSearchTerm (const searchType2 &searchValue,
+                        const searchType1 &existingValue)
     {
         auto fnd = lookup1.find (existingValue);
         if (fnd != lookup1.end ())
@@ -251,7 +271,8 @@ class DualMappedVector
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType1 &searchValue, const searchType2 &existingValue)
+    auto addSearchTerm (const searchType1 &searchValue,
+                        const searchType2 &existingValue)
     {
         auto fnd = lookup2.find (existingValue);
         if (fnd != lookup2.end ())
@@ -392,7 +413,8 @@ class DualMappedVector
     template <class UnaryFunction>
     void transform (UnaryFunction F)
     {
-        std::transform (dataStorage.begin (), dataStorage.end (), dataStorage.begin (), F);
+        std::transform (dataStorage.begin (), dataStorage.end (),
+                        dataStorage.begin (), F);
     }
     auto begin () { return dataStorage.begin (); }
     auto end () { return dataStorage.end (); }
@@ -409,7 +431,9 @@ class DualMappedVector
     }
 
   private:
-    std::conditional_t<STABILITY == reference_stability::unstable, std::vector<VType>, std::deque<VType>>
+    std::conditional_t<STABILITY == reference_stability::unstable,
+                       std::vector<VType>,
+                       std::deque<VType>>
       dataStorage;  //!< primary storage for data
     std::conditional_t<is_easily_hashable<searchType1>::value,
                        std::unordered_map<searchType1, size_t>,

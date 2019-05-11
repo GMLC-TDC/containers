@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #pragma once
@@ -16,8 +17,8 @@ enum class reference_stability
 };
 
 /** type trait to check if a type is easily hashable
-@details this is not necessarily all hashable types, just those which are easily known
-so arithmetic types, pointers, and strings others may be added if needed
+@details this is not necessarily all hashable types, just those which are easily
+known so arithmetic types, pointers, and strings others may be added if needed
 the trait can be overloaded for other types which have a std::hash overload
 */
 template <typename X>

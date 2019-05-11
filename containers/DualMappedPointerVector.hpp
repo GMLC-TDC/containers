@@ -1,8 +1,10 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
+
 #pragma once
 #include "MapTraits.hpp"
 #include <algorithm>
@@ -32,7 +34,8 @@ namespace gmlc
 {
 namespace containers
 {
-/** class merging a vector of pointer with a map that can be used to lookup specific values
+/** class merging a vector of pointer with a map that can be used to lookup
+ * specific values
  */
 template <class VType, class searchType1, class searchType2>
 class DualMappedPointerVector
@@ -45,11 +48,14 @@ class DualMappedPointerVector
     DualMappedPointerVector (DualMappedPointerVector &&mp) = default;
     DualMappedPointerVector &operator= (DualMappedPointerVector &&mp) = default;
     DualMappedPointerVector (const DualMappedPointerVector &mp) = delete;
-    DualMappedPointerVector &operator= (const DualMappedPointerVector &mp) = delete;
+    DualMappedPointerVector &
+    operator= (const DualMappedPointerVector &mp) = delete;
     ~DualMappedPointerVector () = default;
-    /** insert a new element into the vector directly from an existing unique ptr*/
-    opt<size_t>
-    insert (const searchType1 &searchValue1, const searchType2 &searchValue2, std::unique_ptr<VType> &&ptr)
+    /** insert a new element into the vector directly from an existing unique
+     * ptr*/
+    opt<size_t> insert (const searchType1 &searchValue1,
+                        const searchType2 &searchValue2,
+                        std::unique_ptr<VType> &&ptr)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -68,7 +74,9 @@ class DualMappedPointerVector
     }
     /** insert a new element into the vector*/
     template <typename... Us>
-    opt<size_t> insert (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1,
+                        const searchType2 &searchValue2,
+                        Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -80,7 +88,8 @@ class DualMappedPointerVector
             }
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup1.emplace (searchValue1, index);
         lookup2.emplace (searchValue2, index);
         return index;
@@ -88,7 +97,9 @@ class DualMappedPointerVector
 
     /** insert a new element into the vector*/
     template <typename... Us>
-    opt<size_t> insert (const searchType1 &searchValue1, std::nullptr_t /*unused*/, Us &&... data)
+    opt<size_t> insert (const searchType1 &searchValue1,
+                        std::nullptr_t /*unused*/,
+                        Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -96,14 +107,17 @@ class DualMappedPointerVector
             return {};
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup1.emplace (searchValue1, index);
         return index;
     }
 
     /** insert a new element into the vector*/
     template <typename... Us>
-    opt<size_t> insert (std::nullptr_t /*unused*/, const searchType2 &searchValue2, Us &&... data)
+    opt<size_t> insert (std::nullptr_t /*unused*/,
+                        const searchType2 &searchValue2,
+                        Us &&... data)
     {
         auto fnd = lookup2.find (searchValue2);
         if (fnd != lookup2.end ())
@@ -111,12 +125,14 @@ class DualMappedPointerVector
             return {};
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup2.emplace (searchValue2, index);
         return index;
     }
 
-    /** insert a new element into the vector directly from an existing unique ptr*/
+    /** insert a new element into the vector directly from an existing unique
+     * ptr*/
     size_t insert_or_assign (const searchType1 &searchValue1,
                              const searchType2 &searchValue2,
                              std::unique_ptr<VType> &&ptr)
@@ -142,7 +158,9 @@ class DualMappedPointerVector
     }
     /** insert a new element into the vector*/
     template <typename... Us>
-    size_t insert_or_assign (const searchType1 &searchValue1, const searchType2 &searchValue2, Us &&... data)
+    size_t insert_or_assign (const searchType1 &searchValue1,
+                             const searchType2 &searchValue2,
+                             Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
@@ -152,13 +170,15 @@ class DualMappedPointerVector
             {
                 if (fnd2->second == fnd->second)
                 {
-                    dataStorage[fnd->second] = std::make_unique<VType> (std::forward<Us> (data)...);
+                    dataStorage[fnd->second] =
+                      std::make_unique<VType> (std::forward<Us> (data)...);
                     return fnd->second;
                 }
             }
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup1[searchValue1] = index;
         lookup2[searchValue2] = index;
         return index;
@@ -166,32 +186,40 @@ class DualMappedPointerVector
 
     /** insert a new element into the vector*/
     template <typename... Us>
-    size_t insert_or_assign (const searchType1 &searchValue1, std::nullptr_t /*unused*/, Us &&... data)
+    size_t insert_or_assign (const searchType1 &searchValue1,
+                             std::nullptr_t /*unused*/,
+                             Us &&... data)
     {
         auto fnd = lookup1.find (searchValue1);
         if (fnd != lookup1.end ())
         {
-            dataStorage[fnd->second] = std::make_unique<VType> (std::forward<Us> (data)...);
+            dataStorage[fnd->second] =
+              std::make_unique<VType> (std::forward<Us> (data)...);
             return fnd->second;
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup1.emplace (searchValue1, index);
         return index;
     }
 
     /** insert a new element into the vector*/
     template <typename... Us>
-    size_t insert_or_assign (std::nullptr_t /*unused*/, const searchType2 &searchValue2, Us &&... data)
+    size_t insert_or_assign (std::nullptr_t /*unused*/,
+                             const searchType2 &searchValue2,
+                             Us &&... data)
     {
         auto fnd = lookup2.find (searchValue2);
         if (fnd != lookup2.end ())
         {
-            dataStorage[fnd->second] = std::make_unique<VType> (std::forward<Us> (data)...);
+            dataStorage[fnd->second] =
+              std::make_unique<VType> (std::forward<Us> (data)...);
             return fnd->second;
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup2.emplace (searchValue2, index);
         return index;
     }
@@ -224,7 +252,8 @@ class DualMappedPointerVector
 
     VType *operator[] (size_t index) const
     {
-        return (index < dataStorage.size ()) ? (dataStorage[index].get ()) : nullptr;
+        return (index < dataStorage.size ()) ? (dataStorage[index].get ()) :
+                                               nullptr;
     }
 
     /** get a pointer to the last element inserted*/
@@ -382,7 +411,8 @@ class DualMappedPointerVector
     }
 
   private:
-    std::vector<std::unique_ptr<VType>> dataStorage;  //!< storage for the pointers
+    std::vector<std::unique_ptr<VType>>
+      dataStorage;  //!< storage for the pointers
     std::conditional_t<is_easily_hashable<searchType1>::value,
                        std::unordered_map<searchType1, size_t>,
                        std::map<searchType1, size_t>>

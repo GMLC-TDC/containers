@@ -1,9 +1,9 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
-#pragma once
 
 #include "StackBuffer.hpp"
 #include <algorithm>
@@ -18,7 +18,7 @@ namespace containers
 StackBufferRaw::StackBufferRaw (unsigned char *newBlock, int blockSize)
     : origin (newBlock), next (newBlock), dataSize (blockSize)
 {
-    nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - sizeof (dataIndex));
+    nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - diSize);
 }
 
 void StackBufferRaw::swap (StackBufferRaw &other) noexcept
@@ -32,7 +32,7 @@ void StackBufferRaw::swap (StackBufferRaw &other) noexcept
 
 bool StackBufferRaw::isSpaceAvailable (int sz) const
 {
-    return (dataSize - (next - origin) - (dataCount + 1) * static_cast<int> (sizeof (dataIndex))) >= sz;
+    return (dataSize - (next - origin) - (dataCount + 1) * diSize) >= sz;
 }
 
 bool StackBufferRaw::push (const unsigned char *block, int blockSize)
@@ -71,7 +71,8 @@ int StackBufferRaw::pop (unsigned char *block, int maxSize)
         if (maxSize >= blkSize)
         {
             memcpy (block, origin + nextIndex[1].offset, blkSize);
-            if (nextIndex[1].offset + blkSize == static_cast<int> (next - origin))
+            if (nextIndex[1].offset + blkSize ==
+                static_cast<int> (next - origin))
             {
                 next -= blkSize;
             }
@@ -80,7 +81,8 @@ int StackBufferRaw::pop (unsigned char *block, int maxSize)
             if (dataCount == 0)
             {
                 next = origin;
-                nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - sizeof (dataIndex));
+                nextIndex =
+                  reinterpret_cast<dataIndex *> (origin + dataSize - diSize);
             }
             return blkSize;
         }
@@ -102,18 +104,20 @@ void StackBufferRaw::clear ()
 {
     next = origin;
     dataCount = 0;
-    nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - sizeof (dataIndex));
+    nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - diSize);
 }
 
-StackBuffer::StackBuffer () noexcept : stack (nullptr, 0){};
+StackBuffer::StackBuffer () noexcept : stack (nullptr, 0) {}
+
 StackBuffer::StackBuffer (int size)
-    : data (reinterpret_cast<unsigned char *> (std::malloc (size))), actualSize{size}, actualCapacity{size},
-      stack (data, size)
+    : data (reinterpret_cast<unsigned char *> (std::malloc (size))),
+      actualSize{size}, actualCapacity{size}, stack (data, size)
 {
 }
 
 StackBuffer::StackBuffer (StackBuffer &&sq) noexcept
-    : data (sq.data), actualSize (sq.actualSize), actualCapacity (sq.actualCapacity), stack (std::move (sq.stack))
+    : data (sq.data), actualSize (sq.actualSize),
+      actualCapacity (sq.actualCapacity), stack (std::move (sq.stack))
 {
     sq.data = nullptr;
     sq.actualSize = 0;
@@ -126,14 +130,15 @@ StackBuffer::StackBuffer (StackBuffer &&sq) noexcept
 }
 
 StackBuffer::StackBuffer (const StackBuffer &sq)
-    : data{reinterpret_cast<unsigned char *> (std::malloc (sq.actualSize))}, actualSize{sq.actualSize},
-      actualCapacity{sq.actualSize}, stack (sq.stack)
+    : data{reinterpret_cast<unsigned char *> (std::malloc (sq.actualSize))},
+      actualSize{sq.actualSize}, actualCapacity{sq.actualSize}, stack (sq.stack)
 {
     memcpy (data, sq.data, actualSize);
     auto offset = stack.next - stack.origin;
     stack.origin = data;
     stack.next = stack.origin + offset;
-    stack.nextIndex = reinterpret_cast<dataIndex *> (stack.origin + stack.dataSize - sizeof (dataIndex));
+    stack.nextIndex =
+      reinterpret_cast<dataIndex *> (stack.origin + stack.dataSize - diSize);
     stack.nextIndex -= stack.dataCount;
 }
 
@@ -166,7 +171,8 @@ StackBuffer &StackBuffer::operator= (const StackBuffer &sq)
     auto offset = stack.next - stack.origin;
     stack.origin = data;
     stack.next = stack.origin + offset;
-    stack.nextIndex = reinterpret_cast<dataIndex *> (stack.origin + stack.dataSize - sizeof (dataIndex));
+    stack.nextIndex =
+      reinterpret_cast<dataIndex *> (stack.origin + stack.dataSize - diSize);
     stack.nextIndex -= stack.dataCount;
     return *this;
 }
@@ -185,30 +191,35 @@ void StackBuffer::resize (int newsize)
     else if (newsize > actualSize)
     {
         resizeMemory (newsize);
-        int indexOffset = stack.dataSize - sizeof (dataIndex) * stack.dataCount;
-        int newOffset = newsize - sizeof (dataIndex) * stack.dataCount;
-        memmove (data + newOffset, data + indexOffset, sizeof (dataIndex) * stack.dataCount);
+        int indexOffset = stack.dataSize - diSize * stack.dataCount;
+        int newOffset = newsize - diSize * stack.dataCount;
+        memmove (data + newOffset, data + indexOffset,
+                 diSize * stack.dataCount);
         stack.dataSize = newsize;
         stack.origin = data;
         stack.next = stack.origin + newsize;
-        stack.nextIndex = reinterpret_cast<dataIndex *> (stack.origin + stack.dataSize - sizeof (dataIndex));
+        stack.nextIndex = reinterpret_cast<dataIndex *> (
+          stack.origin + stack.dataSize - diSize);
         stack.nextIndex -= stack.dataCount;
     }
     else  // smaller size
     {
-        int indexOffset = stack.dataSize - sizeof (dataIndex) * stack.dataCount;
-        int newOffset = newsize - sizeof (dataIndex) * stack.dataCount;
+        int indexOffset = stack.dataSize - diSize * stack.dataCount;
+        int newOffset = newsize - diSize * stack.dataCount;
         int dataOffset = static_cast<int> (stack.next - stack.origin);
-        if (newsize < dataOffset + sizeof (dataIndex) * stack.dataCount)
+        if (newsize < dataOffset + diSize * stack.dataCount)
         {
-            throw (std::runtime_error (
-              "unable to resize, current data exceeds new size, please empty stack before resizing"));
+            throw (
+              std::runtime_error ("unable to resize, current data exceeds new "
+                                  "size, please empty stack before resizing"));
         }
-        memmove (data + newOffset, data + indexOffset, sizeof (dataIndex) * stack.dataCount);
+        memmove (data + newOffset, data + indexOffset,
+                 diSize * stack.dataCount);
         stack.dataSize = newsize;
         stack.origin = data;
         stack.next = stack.origin + newsize;
-        stack.nextIndex = reinterpret_cast<dataIndex *> (stack.origin + stack.dataSize - sizeof (dataIndex));
+        stack.nextIndex = reinterpret_cast<dataIndex *> (
+          stack.origin + stack.dataSize - diSize);
         stack.nextIndex -= stack.dataCount;
         actualSize = newsize;
     }
@@ -222,7 +233,8 @@ void StackBuffer::resizeMemory (int newsize)
     }
     if (newsize > actualCapacity)
     {
-        auto buf = reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
+        auto buf =
+          reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
         if (buf == nullptr)
         {
             return;

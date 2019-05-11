@@ -1,7 +1,8 @@
 /*
-Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Copyright © 2017-2019,
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "CircularBuffer.hpp"
@@ -65,8 +66,10 @@ TEST (CircBuff_tests, test_circularbuffraw_loop_around)
 
 TEST (CircBuff_tests, test_circularbuffraw_loop_around_repeat)
 {
-    unsigned char *block = new unsigned char[1520];  // 3x504+4  otherwise there is a potential scenario in which 2
-                                                     // 500byte messages cannot fit
+    unsigned char *block =
+      new unsigned char[1520];  // 3x504+4  otherwise there is a potential
+                                // scenario in which 2 500byte messages cannot
+                                // fit
     CircularBufferRaw buf (block, 1520);
 
     std::vector<unsigned char> testData (500, 'a');

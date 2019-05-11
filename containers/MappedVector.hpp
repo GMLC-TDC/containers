@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 #pragma once
 #include "MapTraits.hpp"
@@ -30,9 +31,9 @@ namespace gmlc
 {
 namespace containers
 {
-/** class combining a vector of objects with a map to search them by a separate index term
-the main use case is a bunch of inserts then searching with limited to no removal since removal is a rather
-expensive operation
+/** class combining a vector of objects with a map to search them by a separate
+index term the main use case is a bunch of inserts then searching with limited
+to no removal since removal is a rather expensive operation
 */
 template <class VType,
           class searchType = std::string,
@@ -41,7 +42,8 @@ class MappedVector
 {
   public:
     /** insert an element into the mapped vector
-    @param searchValue the unique index to use for the value if it exists the existing value is replaced
+    @param searchValue the unique index to use for the value if it exists the
+    existing value is replaced
     @param data all other arguments required to create a new data value
     @return an optional with the index of the value placed if it was placed
     */
@@ -70,8 +72,10 @@ class MappedVector
     }
 
     /** insert an element into the mapped vector
-    @param searchValue the unique index to use for the value if it exists the existing value is replaced
-    @param data all other values and parameters required to create a new searchType object
+    @param searchValue the unique index to use for the value if it exists the
+    existing value is replaced
+    @param data all other values and parameters required to create a new
+    searchType object
     @return the index of the value placed
     */
     template <typename... Us>
@@ -177,11 +181,13 @@ class MappedVector
     template <class UnaryFunction>
     void transform (UnaryFunction F)
     {
-        std::transform (dataStorage.begin (), dataStorage.end (), dataStorage.begin (), F);
+        std::transform (dataStorage.begin (), dataStorage.end (),
+                        dataStorage.begin (), F);
     }
-    /*NOTE:: only constant iterators allowed since this would introduce the possibility
-    of using iterators for various algorithms which could cause the object to go to a indeterminate state
-    therefore constant iterators are allowed but not modifiable iterators
+    /*NOTE:: only constant iterators allowed since this would introduce the
+    possibility of using iterators for various algorithms which could cause the
+    object to go to a indeterminate state therefore constant iterators are
+    allowed but not modifiable iterators
     someone determined to screw it up could still easily do so*/
 
     /** get a const iterator to the beginning of the data vector*/
@@ -200,7 +206,9 @@ class MappedVector
     }
 
   private:
-    std::conditional_t<STABILITY == reference_stability::unstable, std::vector<VType>, std::deque<VType>>
+    std::conditional_t<STABILITY == reference_stability::unstable,
+                       std::vector<VType>,
+                       std::deque<VType>>
       dataStorage;  //!< primary storage for data
     std::conditional_t<is_easily_hashable<searchType>::value,
                        std::unordered_map<searchType, size_t>,

@@ -1,8 +1,10 @@
 /*
-Copyright © 2017-2018,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Copyright © 2017-2019,
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
+
 #include "gtest/gtest.h"
 #include <iostream>
 
@@ -175,7 +177,8 @@ TEST (blocking_queue_tests, pop_tests)
             {
                 if (nres > 0)
                 {
-                    printf ("%d came before %d\n", static_cast<int> (nres), static_cast<int> (res));
+                    printf ("%d came before %d\n", static_cast<int> (nres),
+                            static_cast<int> (res));
                 }
             }
             res = nres;

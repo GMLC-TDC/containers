@@ -1,7 +1,8 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC
-All rights reserved. See LICENSE file and DISCLAIMER for more details.
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #pragma once
@@ -31,7 +32,8 @@ namespace gmlc
 {
 namespace containers
 {
-/** class merging a vector of pointer with a map that can be used to lookup specific values
+/** class merging a vector of pointer with a map that can be used to lookup
+ * specific values
  */
 template <class VType, class searchType = std::string>
 class MappedPointerVector
@@ -41,7 +43,8 @@ class MappedPointerVector
     MappedPointerVector (MappedPointerVector &&mp) = default;
     MappedPointerVector &operator= (MappedPointerVector &&mp) = default;
 
-    opt<size_t> insert (const searchType &searchValue, std::unique_ptr<VType> &&ptr)
+    opt<size_t> insert (const searchType &searchValue,
+                        std::unique_ptr<VType> &&ptr)
     {
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
@@ -63,12 +66,14 @@ class MappedPointerVector
             return stx::nullopt;
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup.emplace (searchValue, index);
         return index;
     }
 
-    size_t insert_or_assign (const searchType &searchValue, std::unique_ptr<VType> &&ptr)
+    size_t insert_or_assign (const searchType &searchValue,
+                             std::unique_ptr<VType> &&ptr)
     {
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
@@ -88,11 +93,13 @@ class MappedPointerVector
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
         {
-            dataStorage[fnd->second] = std::make_unique<VType> (std::forward<Us> (data)...);
+            dataStorage[fnd->second] =
+              std::make_unique<VType> (std::forward<Us> (data)...);
             return fnd->second;
         }
         auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::make_unique<VType> (std::forward<Us> (data)...));
+        dataStorage.emplace_back (
+          std::make_unique<VType> (std::forward<Us> (data)...));
         lookup.emplace (searchValue, index);
         return index;
     }
@@ -115,7 +122,8 @@ class MappedPointerVector
 
     VType *operator[] (size_t index) const
     {
-        return (index < dataStorage.size ()) ? (dataStorage[index].get ()) : nullptr;
+        return (index < dataStorage.size ()) ? (dataStorage[index].get ()) :
+                                               nullptr;
     }
 
     /** remove an element at a specific index
@@ -200,7 +208,8 @@ class MappedPointerVector
     }
 
   private:
-    std::vector<std::unique_ptr<VType>> dataStorage;  //!< storage for the pointers
+    std::vector<std::unique_ptr<VType>>
+      dataStorage;  //!< storage for the pointers
     std::conditional_t<is_easily_hashable<searchType>::value,
                        std::unordered_map<searchType, size_t>,
                        std::map<searchType, size_t>>

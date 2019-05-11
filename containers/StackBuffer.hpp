@@ -1,8 +1,8 @@
 /*
-Copyright © 2017-2018,
+Copyright © 2017-2019,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
-for Sustainable Energy, LLC All rights reserved. See LICENSE file and DISCLAIMER
-for more details.
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 #pragma once
 
@@ -17,6 +17,10 @@ struct dataIndex
     int32_t offset;
     int32_t dataSize;
 };
+
+///Helper for size information on the data index
+constexpr int diSize = static_cast<int> (sizeof (dataIndex));
+
 /** class containing the raw StackBuffer implementation
 @details the StackBufferRaw class operates on raw memory
 it is given a memory location and uses that for the life of the queue, it does
@@ -31,7 +35,6 @@ class StackBufferRaw
     dataIndex *nextIndex = nullptr;
     int dataSize = 0;
     int dataCount = 0;
-
   public:
     StackBufferRaw (unsigned char *newBlock, int blockSize);
 
