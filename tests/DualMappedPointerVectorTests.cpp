@@ -12,7 +12,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 using namespace gmlc::containers;
 
 /** test basic operations */
-TEST (dual_mapped_pointer_vector_tests,definition_tests)
+TEST (dual_mapped_pointer_vector_tests, definition_tests)
 {
     DualMappedPointerVector<double, std::string, int64_t> M;
     DualMappedPointerVector<std::string, std::string, double> S2;
@@ -27,7 +27,7 @@ TEST (dual_mapped_pointer_vector_tests,definition_tests)
     decltype (TV2) TV3 (std::move (TV2));
 }
 
-TEST (dual_mapped_pointer_vector_tests,insertion_tests)
+TEST (dual_mapped_pointer_vector_tests, insertion_tests)
 {
     DualMappedPointerVector<std::vector<double>, std::string, int64_t> Mvec;
     Mvec.insert ("el1", 41, 3, 1.7);
@@ -52,7 +52,7 @@ TEST (dual_mapped_pointer_vector_tests,insertion_tests)
     EXPECT_EQ (V5->size (), 3);
 }
 
-TEST (dual_mapped_pointer_vector_tests,iterator_tests)
+TEST (dual_mapped_pointer_vector_tests, iterator_tests)
 {
     DualMappedPointerVector<double, std::string, int64_t> Mvec;
 
@@ -70,7 +70,7 @@ TEST (dual_mapped_pointer_vector_tests,iterator_tests)
     EXPECT_EQ (*Mvec[2], 9.7 + 1.0);
 }
 
-TEST (dual_mapped_pointer_vector_tests,remove_tests)
+TEST (dual_mapped_pointer_vector_tests, remove_tests)
 {
     DualMappedPointerVector<double, std::string, int64_t> Mvec;
 
