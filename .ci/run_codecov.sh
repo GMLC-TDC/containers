@@ -9,7 +9,7 @@ mkdir -p build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Coverage
 cmake --build . -- -j2
-cmake --build . --target containers_coverage
+cmake --build . --target UNITS_coverage
 
 set +evx
 echo -en "travis_fold:end:script.build\\r"

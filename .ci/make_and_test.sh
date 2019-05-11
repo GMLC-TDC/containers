@@ -1,14 +1,13 @@
 #!/usr/bin/env bash
 echo -en "travis_fold:start:script.build\\r"
 echo "Building..."
-STD=$1
-shift
+
 set -evx
 
 
 mkdir -p build
 cd build
-cmake ..  -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER_LAUNCHER=ccache $@
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER_LAUNCHER=ccache $@
 cmake --build . -- -j2
 
 set +evx
