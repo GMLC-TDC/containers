@@ -15,6 +15,8 @@ set(CONTAINERS_TESTS
 	AirLockTests
 	MappedVectorTests
 	DualMappedVectorTests
+	MappedPointerVectorTests
+	DualMappedPointerVectorTests
 	BlockingQueueTests
 	SimpleQueueTests
 	PriorityBlockingQueueTests

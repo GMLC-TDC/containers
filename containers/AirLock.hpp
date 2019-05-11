@@ -1,8 +1,8 @@
 /*
 Copyright © 2017-2019,
-Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance for Sustainable Energy, LLC.  See
-the top-level NOTICE for additional details. All rights reserved.
-SPDX-License-Identifier: BSD-3-Clause
+Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
+for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
+All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #pragma once
@@ -36,10 +36,12 @@ http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
 will check performance at a later time
 */
 /** class implementing a airlock
-@details this class is used to transfer an object from a thread safe context to a single thread so it can be
-accessed without locks
+@details this class is used to transfer an object from a thread safe context to
+a single thread so it can be accessed without locks
 */
-template <typename T, class MUTEX = std::mutex, class COND = std::condition_variable>
+template <typename T,
+          class MUTEX = std::mutex,
+          class COND = std::condition_variable>
 class AirLock
 {
   public:
@@ -49,7 +51,8 @@ class AirLock
     @return true if successful, false if not*/
     template <class Z>
     bool try_load (Z &&val)
-    {  // all modifications to loaded should be inside the mutex otherwise this will contain race conditions
+    {  // all modifications to loaded should be inside the mutex otherwise this
+       // will contain race conditions
         if (!loaded.load (std::memory_order_acquire))
         {
             std::lock_guard<MUTEX> lock (door);
@@ -87,7 +90,8 @@ class AirLock
     }
 
     /** unload the airlock,
-    @return the value is returned in an optional which needs to be checked if it contains a value
+    @return the value is returned in an optional which needs to be checked if it
+    contains a value
     */
     opt<T> try_unload ()
     {
@@ -112,7 +116,8 @@ class AirLock
     bool isLoaded () const { return loaded.load (std::memory_order_acquire); }
 
   private:
-    std::atomic_bool loaded{false};  //!< flag if the airlock is loaded with cargo
+    std::atomic_bool loaded{
+      false};  //!< flag if the airlock is loaded with cargo
     MUTEX door;  //!< check if one of the doors to the airlock is open
     T data;  //!< the data to be stored in the airlock
     COND condition;  //!< condition variable for notification of new data

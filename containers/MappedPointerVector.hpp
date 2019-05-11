@@ -49,7 +49,7 @@ class MappedPointerVector
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (std::move (ptr));
@@ -63,7 +63,7 @@ class MappedPointerVector
         auto fnd = lookup.find (searchValue);
         if (fnd != lookup.end ())
         {
-            return stx::nullopt;
+            return {};
         }
         auto index = dataStorage.size ();
         dataStorage.emplace_back (
