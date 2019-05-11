@@ -14,7 +14,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 /** these test cases test data_block and data_view objects
  */
 
-#include "simpleQueue.hpp"
+#include "SimpleQueue.hpp"
 using namespace gmlc::containers;
 
 /** test basic operations */
