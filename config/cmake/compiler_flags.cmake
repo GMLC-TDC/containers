@@ -33,7 +33,7 @@ if(UNIX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wunreachable-code>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
   #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wundef>)
+  #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wundef>)
   if (NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 	#this produces a lot of noise on newer compilers
       #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
@@ -89,9 +89,9 @@ else(UNIX)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Woverloaded-virtual>)
   #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
   add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wcast-align>)
-  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wundef>)
+  #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wundef>)
 
-  #this options produces lots of warning but is useful for checking ever once in a while with Clang, GCC warning notices with this aren't as useful
+  #this options produces lots of warning but is useful for checking every once in a while with Clang, GCC warning notices with this aren't as useful
   #add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wpadded>)
    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
    # this option produces a number of warnings in third party libraries but useful for checking for any internal usages
