@@ -18,7 +18,7 @@ struct dataIndex
     int32_t dataSize;
 };
 
-///Helper for size information on the data index
+/// Helper for size information on the data index
 constexpr int diSize = static_cast<int> (sizeof (dataIndex));
 
 /** class containing the raw StackBuffer implementation
@@ -35,6 +35,7 @@ class StackBufferRaw
     dataIndex *nextIndex = nullptr;
     int dataSize = 0;
     int dataCount = 0;
+
   public:
     StackBufferRaw (unsigned char *newBlock, int blockSize);
 

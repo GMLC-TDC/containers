@@ -17,6 +17,16 @@ set (GMLC_CONTAINERS_DATE "05-12-19")
 
 set(GMLC_CONTAINERS_VERSION_STRING "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})")
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    # User settable
+    set(CONTAINERS_CXX_STD "14"  CACHE STRING "The CMake standard to require")
+
+  #  set(CUR_PROJ ON)
+    set(CMAKE_CXX_STANDARD ${CONTAINER_CXX_STD})
+    set(CMAKE_CXX_EXTENSIONS OFF)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+endif()
+
 # -----------------------------------------------------------------------------
 # set the module path and include some common macros
 # -----------------------------------------------------------------------------
@@ -72,7 +82,7 @@ if(Boost_FOUND)
 
     target_compile_definitions(containers_base INTERFACE USE_BOOST_OPTIONAL)
 	target_compile_definitions(containers_base INTERFACE ENABLE_BOOST_TYPES)
-    #target_compile_definitions(OptionalTest PUBLIC CLI11_BOOST_OPTIONAL)
+
 endif()
 
 target_include_directories(containers_base INTERFACE ThirdParty)
