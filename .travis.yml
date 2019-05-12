@@ -41,6 +41,7 @@ matrix:
       apt:
         packages:
         - clang-3.5
+		- libpthread-stubs0-dev
     install:
     - export CC=clang-3.5
     - export CXX=clang++-3.5
@@ -93,6 +94,12 @@ matrix:
     script:
     - .ci/make_and_test.sh
 
+addons:
+    apt:
+      packages:
+      - clang-3.5
+	  - libpthread-stubs0-dev
+		
 install: skip
 
 script:
