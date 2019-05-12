@@ -73,9 +73,9 @@ elseif(MSYS)
 else()
 	set(CMAKE_USE_WIN32_THREADS_INIT ON)
 endif()
-find_package(Threads)
+find_package(Threads QUIET)
 
-if (TARGET Threads::Threads)
+if (Threads_FOUND)
   target_link_libraries(containers_base INTERFACE Threads::Threads)
 endif()
 

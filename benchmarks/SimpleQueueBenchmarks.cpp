@@ -226,6 +226,7 @@ BENCHMARK_REGISTER_F (stdqFixture, MProdSCons_std)
   ->UseRealTime ()
   ->Unit (benchmark::kMillisecond);
 
+#ifdef ENABLE_BOOST_TYPES
 #include <boost/lockfree/queue.hpp>
 template <class X>
 class blfFixture : public benchmark::Fixture
@@ -409,6 +410,8 @@ BENCHMARK_REGISTER_F (bspscFixture, SProdSCons_bspsc)
   ->Threads (2)
   ->UseRealTime ()
   ->Unit (benchmark::kMillisecond);
+
+#endif
 
 #include <moodycamel/concurrentqueue.h>
 template <class X>
