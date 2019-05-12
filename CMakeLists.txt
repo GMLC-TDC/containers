@@ -75,10 +75,10 @@ else()
 endif()
 find_package(Threads QUIET)
 
-if (Threads_FOUND)
+if (TARGET Threads::Threads)
   target_link_libraries(containers_base INTERFACE Threads::Threads)
-else()
-  SET(GMLC_CONTAINERS_BENCHMARK OFF)
+#else()
+#  SET(GMLC_CONTAINERS_BENCHMARK OFF)
 endif()
 
 option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
@@ -138,16 +138,4 @@ if(GENERATE_DOXYGEN_DOC)
 	endif(DOXYGEN_FOUND)
 endif(GENERATE_DOXYGEN_DOC)
 
-
-# -------------------------------------------------------------
-# add threading support
-# -------------------------------------------------------------
-if(NOT WIN32)
-	set(THREADS_PREFER_PTHREAD_FLAG ON)
-elseif(MSYS)
-	set(THREADS_PREFER_PTHREAD_FLAG ON)
-else()
-	set(CMAKE_USE_WIN32_THREADS_INIT ON)
-endif()
-find_package(Threads REQUIRED)
 
