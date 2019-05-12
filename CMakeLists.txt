@@ -73,11 +73,13 @@ elseif(MSYS)
 else()
 	set(CMAKE_USE_WIN32_THREADS_INIT ON)
 endif()
-#find_package(Threads QUIET)
+find_package(Threads QUIET)
 
-#if (Threads_FOUND)
-#  target_link_libraries(containers_base INTERFACE Threads::Threads)
-#endif()
+if (Threads_FOUND)
+  target_link_libraries(containers_base INTERFACE Threads::Threads)
+else()
+  SET(GMLC_CONTAINERS_BENCHMARK OFF)
+endif()
 
 option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
 # Add boost to test boost::optional if available
