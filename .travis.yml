@@ -1,5 +1,5 @@
 language: cpp
-dist: trusty
+dist: xenial
 
 # Exclude ghpages,
 # but even better, don't build branch and PR, just PR
