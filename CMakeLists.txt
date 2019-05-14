@@ -66,12 +66,8 @@ endif(${CXX_STANDARD_FLAG})
 # -------------------------------------------------------------
 # add threading support
 # -------------------------------------------------------------
-if(NOT WIN32)
+if(MSYS)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
-elseif(MSYS)
-	set(THREADS_PREFER_PTHREAD_FLAG ON)
-else()
-	set(CMAKE_USE_WIN32_THREADS_INIT ON)
 endif()
 find_package(Threads QUIET)
 
