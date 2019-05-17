@@ -1,5 +1,5 @@
 #
-# Copyright © 2017-2019, Battelle Memorial Institute; Lawrence Livermore National
+# Copyright Â© 2017-2019, Battelle Memorial Institute; Lawrence Livermore National
 # Security, LLC; Alliance for Sustainable Energy, LLC All rights reserved. See LICENSE
 # file and DISCLAIMER for more details.
 #
@@ -147,4 +147,4 @@ elseif (CMAKE_CXX_STANDARD EQUAL 14)
   endif()
 endif ()
 
-set(CMAKE_REQUIRED_FLAGS ${CXX_STANDARD_FLAG})
+#set(CMAKE_REQUIRED_FLAGS ${CXX_STANDARD_FLAG})
