@@ -8,6 +8,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "CircularBuffer.hpp"
 #include <algorithm>
 #include <cstring>
+#include <cstddef>
 
 namespace gmlc
 {

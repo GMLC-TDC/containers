@@ -10,6 +10,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
+#include <cstddef>
 
 namespace gmlc
 {

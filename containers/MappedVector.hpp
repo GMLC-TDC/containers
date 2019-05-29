@@ -13,19 +13,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <unordered_map>
 #include <vector>
 
-#ifdef USE_STD_OPTIONAL
-#include <optional>
-template <class T>
-using opt = std::optional<T>;
-#elif defined(USE_BOOST_OPTIONAL)
-#include <boost/optional.hpp>
-template <class T>
-using opt = boost::optional<T>;
-#else
-#include "extra/optional.hpp"
-template <class T>
-using opt = stx::optional<T>;
-#endif
+#include "optionalDefinition.hpp"
+
 
 namespace gmlc
 {

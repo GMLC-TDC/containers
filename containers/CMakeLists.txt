@@ -20,6 +20,7 @@ set(
   StableBlockVector.hpp
   StableBlockDeque.hpp
   BlockIterator.hpp
+  optionalDefinition.hpp
 )
 
 set(
