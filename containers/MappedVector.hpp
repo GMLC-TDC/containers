@@ -15,7 +15,6 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "optionalDefinition.hpp"
 
-
 namespace gmlc
 {
 namespace containers

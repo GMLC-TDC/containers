@@ -7,10 +7,10 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "StackBuffer.hpp"
 #include <algorithm>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
-#include <cstddef>
 
 namespace gmlc
 {

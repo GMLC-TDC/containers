@@ -7,8 +7,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "CircularBuffer.hpp"
 #include <algorithm>
-#include <cstring>
 #include <cstddef>
+#include <cstring>
 
 namespace gmlc
 {
@@ -24,7 +24,8 @@ bool CircularBufferRaw::isSpaceAvailable (int sz) const
 {
     if (next_write >= next_read)
     {
-        if ((capacity_ - (next_write - origin)) >= static_cast<ptrdiff_t> (sz) + 4)
+        if ((capacity_ - (next_write - origin)) >=
+            static_cast<ptrdiff_t> (sz) + 4)
         {
             return true;
         }
