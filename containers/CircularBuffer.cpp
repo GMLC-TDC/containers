@@ -23,17 +23,17 @@ bool CircularBufferRaw::isSpaceAvailable (int sz) const
 {
     if (next_write >= next_read)
     {
-        if ((capacity_ - (next_write - origin)) >= static_cast<size_t> (sz) + 4)
+        if ((capacity_ - (next_write - origin)) >= static_cast<ptrdiff_t> (sz) + 4)
         {
             return true;
         }
-        if ((next_read - origin) >= static_cast<size_t> (sz) + 4)
+        if ((next_read - origin) >= static_cast<ptrdiff_t> (sz) + 4)
         {
             return true;
         }
         return false;
     }
-    if ((next_read - next_write) >= static_cast<size_t> (sz) + 4)
+    if ((next_read - next_write) >= static_cast<ptrdiff_t> (sz) + 4)
     {
         return true;
     }
@@ -50,11 +50,11 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
     if (next_write >= next_read)
     {
         if ((capacity_ - (next_write - origin)) >=
-            static_cast<size_t> (blockSize) + 4)
+            static_cast<ptrdiff_t> (blockSize) + 4)
         {
             *(reinterpret_cast<int *> (next_write)) = blockSize;
             memcpy (next_write + 4, data, blockSize);
-            next_write += static_cast<size_t> (blockSize) + 4;
+            next_write += static_cast<ptrdiff_t> (blockSize) + 4;
             // loop around if there isn't really space for another block of at
             // least 4 bytes and the next_read>origin
             if (((capacity_ - (next_write - origin)) < 8) &&
@@ -64,7 +64,7 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
             }
             return true;
         }
-        else if ((next_read - origin) >= static_cast<size_t> (blockSize) + 4)
+        else if ((next_read - origin) >= static_cast<ptrdiff_t> (blockSize) + 4)
         {
             *(reinterpret_cast<int *> (next_write)) = -1;
             *(reinterpret_cast<int *> (origin)) = blockSize;
@@ -73,11 +73,11 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
             return true;
         }
     }
-    else if ((next_read - next_write) >= static_cast<size_t> (blockSize) + 4)
+    else if ((next_read - next_write) >= static_cast<ptrdiff_t> (blockSize) + 4)
     {
         *(reinterpret_cast<int *> (next_write)) = blockSize;
         memcpy (next_write + 4, data, blockSize);
-        next_write += static_cast<size_t> (blockSize) + 4;
+        next_write += static_cast<ptrdiff_t> (blockSize) + 4;
         return true;
     }
     return false;

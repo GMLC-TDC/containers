@@ -33,7 +33,7 @@ void StackBufferRaw::swap (StackBufferRaw &other) noexcept
 bool StackBufferRaw::isSpaceAvailable (int sz) const
 {
     return (dataSize - (next - origin) - (dataCount + 1) * diSize) >=
-           static_cast<size_t> (sz);
+           static_cast<ptrdiff_t> (sz);
 }
 
 bool StackBufferRaw::push (const unsigned char *block, int blockSize)
