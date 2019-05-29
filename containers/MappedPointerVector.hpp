@@ -40,7 +40,7 @@ class MappedPointerVector
 {
   public:
     MappedPointerVector () = default;
-    MappedPointerVector (MappedPointerVector &&mp)= default;
+    MappedPointerVector (MappedPointerVector &&mp) = default;
     MappedPointerVector &operator= (MappedPointerVector &&mp) = default;
 
     opt<size_t> insert (const searchType &searchValue,
