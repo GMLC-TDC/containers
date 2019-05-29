@@ -311,7 +311,7 @@ class StableBlockVector
             }
             else if (dataSlotIndex >= dataSlotsAvailable - 1)
             {
-                auto mem = new X *[dataSlotsAvailable * 2];
+                auto mem = new X *[static_cast<size_t>(dataSlotsAvailable) * 2];
                 std::copy (dataptr, dataptr + dataSlotsAvailable, mem);
                 delete[] dataptr;
                 dataptr = mem;
@@ -333,7 +333,7 @@ class StableBlockVector
             }
             else
             {
-                auto mem = new X *[freeSlotsAvailable * 2];
+                auto mem = new X *[static_cast<size_t>(freeSlotsAvailable) * 2];
                 std::copy (freeblocks, freeblocks + freeSlotsAvailable, mem);
                 delete[] freeblocks;
                 freeblocks = mem;

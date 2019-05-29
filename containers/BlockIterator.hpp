@@ -107,7 +107,7 @@ class BlockIterator
         if (offset >= BLOCKSIZE)
         {
             auto diff = offset - BLOCKSIZE;
-            vec += 1 + (diff / BLOCKSIZE);
+            vec += 1 + static_cast<size_t>(diff / BLOCKSIZE);
             offset = diff % BLOCKSIZE;
             ptr = &((*vec)[offset]);
         }
@@ -117,7 +117,7 @@ class BlockIterator
         if (offset < 0)
         {
             auto diff = -offset - 1;
-            vec -= (1 + (diff / BLOCKSIZE));
+            vec -= (1 + static_cast<size_t>(diff / BLOCKSIZE));
             offset = BLOCKSIZE - 1 - (diff % BLOCKSIZE);
             ptr = &((*vec)[offset]);
         }

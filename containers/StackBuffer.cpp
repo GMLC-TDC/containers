@@ -32,7 +32,7 @@ void StackBufferRaw::swap (StackBufferRaw &other) noexcept
 
 bool StackBufferRaw::isSpaceAvailable (int sz) const
 {
-    return (dataSize - (next - origin) - (dataCount + 1) * diSize) >= sz;
+    return (dataSize - (next - origin) - (dataCount + 1) * diSize) >= static_cast<size_t>(sz);
 }
 
 bool StackBufferRaw::push (const unsigned char *block, int blockSize)
@@ -133,7 +133,7 @@ StackBuffer::StackBuffer (const StackBuffer &sq)
     : data{reinterpret_cast<unsigned char *> (std::malloc (sq.actualSize))},
       actualSize{sq.actualSize}, actualCapacity{sq.actualSize}, stack (sq.stack)
 {
-    memcpy (data, sq.data, actualSize);
+    memcpy (data, sq.data, static_cast<size_t>(actualSize));
     auto offset = stack.next - stack.origin;
     stack.origin = data;
     stack.next = stack.origin + offset;
@@ -194,7 +194,7 @@ void StackBuffer::resize (int newsize)
         int indexOffset = stack.dataSize - diSize * stack.dataCount;
         int newOffset = newsize - diSize * stack.dataCount;
         memmove (data + newOffset, data + indexOffset,
-                 diSize * stack.dataCount);
+                 static_cast<size_t>(diSize) * static_cast<size_t>(stack.dataCount));
         stack.dataSize = newsize;
         stack.origin = data;
         stack.next = stack.origin + newsize;
@@ -214,7 +214,7 @@ void StackBuffer::resize (int newsize)
                                   "size, please empty stack before resizing"));
         }
         memmove (data + newOffset, data + indexOffset,
-                 diSize * stack.dataCount);
+                 static_cast<size_t>(diSize) * static_cast<size_t>(stack.dataCount));
         stack.dataSize = newsize;
         stack.origin = data;
         stack.next = stack.origin + newsize;

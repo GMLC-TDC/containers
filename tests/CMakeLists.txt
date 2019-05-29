@@ -14,7 +14,9 @@ set(CONTAINERS_TESTS
 	CircularBufferTests
 	AirLockTests
 	MappedVectorTests
+	MappedVectorTestsStable
 	DualMappedVectorTests
+	DualMappedVectorTestsStable
 	MappedPointerVectorTests
 	DualMappedPointerVectorTests
 	BlockingQueueTests

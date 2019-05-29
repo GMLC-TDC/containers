@@ -23,17 +23,17 @@ bool CircularBufferRaw::isSpaceAvailable (int sz) const
 {
     if (next_write >= next_read)
     {
-        if ((capacity_ - (next_write - origin)) >= sz + 4)
+        if ((capacity_ - (next_write - origin)) >= static_cast<size_t>(sz) + 4)
         {
             return true;
         }
-        if ((next_read - origin) >= sz + 4)
+        if ((next_read - origin) >= static_cast<size_t>(sz) + 4)
         {
             return true;
         }
         return false;
     }
-    if ((next_read - next_write) >= sz + 4)
+    if ((next_read - next_write) >= static_cast<size_t>(sz) + 4)
     {
         return true;
     }
@@ -49,11 +49,11 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
     }
     if (next_write >= next_read)
     {
-        if ((capacity_ - (next_write - origin)) >= blockSize + 4)
+        if ((capacity_ - (next_write - origin)) >= static_cast<size_t>(blockSize) + 4)
         {
             *(reinterpret_cast<int *> (next_write)) = blockSize;
             memcpy (next_write + 4, data, blockSize);
-            next_write += blockSize + 4;
+            next_write += static_cast<size_t>(blockSize) + 4;
             // loop around if there isn't really space for another block of at
             // least 4 bytes and the next_read>origin
             if (((capacity_ - (next_write - origin)) < 8) &&
@@ -63,7 +63,7 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
             }
             return true;
         }
-        else if ((next_read - origin) >= blockSize + 4)
+        else if ((next_read - origin) >= static_cast<size_t>(blockSize) + 4)
         {
             *(reinterpret_cast<int *> (next_write)) = -1;
             *(reinterpret_cast<int *> (origin)) = blockSize;
@@ -72,11 +72,11 @@ bool CircularBufferRaw::push (const unsigned char *data, int blockSize)
             return true;
         }
     }
-    else if ((next_read - next_write) >= blockSize + 4)
+    else if ((next_read - next_write) >= static_cast<size_t>(blockSize) + 4)
     {
         *(reinterpret_cast<int *> (next_write)) = blockSize;
         memcpy (next_write + 4, data, blockSize);
-        next_write += blockSize + 4;
+        next_write += static_cast<size_t>(blockSize) + 4;
         return true;
     }
     return false;
@@ -112,7 +112,7 @@ int CircularBufferRaw::pop (unsigned char *data, int maxLen)
     if (size <= maxLen)
     {
         memcpy (data, next_read + 4, size);
-        next_read += size + 4;
+        next_read += static_cast<size_t>(size) + 4;
         if ((capacity_ - (next_read - origin)) < 8)
         {
             next_read = origin;
@@ -150,12 +150,20 @@ CircularBuffer::CircularBuffer (const CircularBuffer &cb)
       actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
       buffer (cb.buffer)
 {
-    memcpy (data, cb.data, actualSize);
-    auto read_offset = buffer.next_read - buffer.origin;
-    auto write_offset = buffer.next_write - buffer.origin;
-    buffer.origin = data;
-    buffer.next_read = buffer.origin + read_offset;
-    buffer.next_write = buffer.origin + write_offset;
+    if (data != nullptr)
+    {
+        memcpy (data, cb.data, actualSize);
+        auto read_offset = buffer.next_read - buffer.origin;
+        auto write_offset = buffer.next_write - buffer.origin;
+        buffer.origin = data;
+        buffer.next_read = buffer.origin + read_offset;
+        buffer.next_write = buffer.origin + write_offset;
+    }
+    else
+    {
+        actualSize = 0;
+        actualCapacity = 0;
+	}
 }
 
 CircularBuffer &CircularBuffer::operator= (CircularBuffer &&cb) noexcept
@@ -218,7 +226,7 @@ void CircularBuffer::resize (int newsize)
         {
             int readDiff = buffer.capacity_ - read_offset;
             memmove (data + newsize - readDiff, data + read_offset,
-                     buffer.capacity_ - read_offset);
+                     static_cast<size_t>(buffer.capacity_) - read_offset);
             buffer.origin = data;
             buffer.next_write = buffer.origin + write_offset;
             buffer.next_read = buffer.origin + newsize - readDiff;
@@ -244,7 +252,7 @@ void CircularBuffer::resize (int newsize)
             if (readDiff + write_offset < newsize)
             {
                 memmove (data + newsize - readDiff, data + read_offset,
-                         buffer.capacity_ - read_offset);
+                         static_cast<size_t>(buffer.capacity_) - read_offset);
                 buffer.origin = data;
                 buffer.next_write = buffer.origin + write_offset;
                 buffer.next_read = buffer.origin + newsize - readDiff;
