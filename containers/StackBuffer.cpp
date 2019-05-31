@@ -39,7 +39,7 @@ bool StackBufferRaw::isSpaceAvailable (int sz) const
 
 bool StackBufferRaw::push (const unsigned char *block, int blockSize)
 {
-    if (blockSize <= 0)
+    if (blockSize <= 0 || block == nullptr)
     {
         return false;
     }

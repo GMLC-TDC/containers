@@ -69,6 +69,8 @@ TEST (stackQueueTest, test_stackqueueraw_3_push)
     EXPECT_EQ (testData[570], 'a');
 
     EXPECT_TRUE (stack.empty ());
+
+    EXPECT_FALSE (stack.push (nullptr, 0));
     delete[] block;
 }
 
@@ -125,6 +127,7 @@ TEST (stackQueueTest, test_stackqueueraw_push_full)
     EXPECT_EQ (testData[570], 'a');
 
     EXPECT_TRUE (stack.empty ());
+    EXPECT_EQ (stack.nextDataSize (), 0);
     delete[] block;
 }
 
@@ -148,6 +151,7 @@ TEST (stackQueueTest, test_stackqueueraw_reverse)
 
     stack.reverse ();
 
+    EXPECT_EQ (stack.nextDataSize (), 571);
     res = stack.pop (testData.data (), 1024);
     EXPECT_EQ (res, 571);
     EXPECT_EQ (testData[0], 'a');
@@ -167,6 +171,45 @@ TEST (stackQueueTest, test_stackqueueraw_reverse)
 
     EXPECT_TRUE (stack.empty ());
     delete[] block;
+}
+
+TEST (stackQueueTest, test_stackqueue_clear)
+{
+    StackBuffer stack (4096);
+    std::vector<unsigned char> testData (1024, 'a');
+
+    bool pushed = stack.push (testData.data (), 571);
+    EXPECT_TRUE (pushed);
+    testData.assign (1024, '\0');
+    pushed = stack.push (testData.data (), 245);
+    EXPECT_TRUE (pushed);
+
+    EXPECT_FALSE (stack.empty ());
+    stack.clear ();
+    EXPECT_TRUE (stack.empty ());
+}
+
+TEST (stackQueueTest, test_stackqueue_swap)
+{
+    StackBuffer stack (4096);
+
+    StackBuffer stack2 (1092);
+    std::vector<unsigned char> testData (1024, 'a');
+
+    bool pushed = stack.push (testData.data (), 571);
+    EXPECT_TRUE (pushed);
+    testData.assign (1024, '\0');
+    pushed = stack.push (testData.data (), 245);
+    EXPECT_TRUE (pushed);
+
+    stack2.push (testData.data (), 125);
+    stack.swap (stack2);
+
+    EXPECT_EQ (stack.getCurrentCount (), 1);
+    EXPECT_EQ (stack.nextDataSize (), 125);
+
+    EXPECT_EQ (stack2.getCurrentCount (), 2);
+    EXPECT_EQ (stack2.nextDataSize (), 245);
 }
 
 TEST (stackQueueTest, test_stackqueue_simple)

@@ -7,6 +7,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 
 #include <cstdint>
+#include <utility>
 
 namespace gmlc
 {
@@ -95,6 +96,14 @@ class StackBuffer
 
     void reverse () { stack.reverse (); }
     void clear () { stack.clear (); }
+
+    void swap (StackBuffer &other) noexcept
+    {
+        stack.swap (other.stack);
+        std::swap (data, other.data);
+        std::swap (actualCapacity, other.actualCapacity);
+        std::swap (actualSize, other.actualSize);
+    }
 
   private:
     void resizeMemory (int newsize);
