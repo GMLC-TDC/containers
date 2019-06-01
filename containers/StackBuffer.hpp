@@ -146,16 +146,16 @@ class StackBuffer
     StackBuffer () noexcept : stack (nullptr, 0) {}
     explicit StackBuffer (int size)
         : data (reinterpret_cast<unsigned char *> (std::malloc (size))),
-          actualSize{size}, actualCapacity{size}, stack (data, size)
+          statedSize{size}, actualCapacity{size}, stack (data, size)
     {
     }
     ~StackBuffer () = default;
     StackBuffer (StackBuffer &&sq) noexcept
-        : data (sq.data), actualSize (sq.actualSize),
+        : data (sq.data), statedSize (sq.statedSize),
           actualCapacity (sq.actualCapacity), stack (std::move (sq.stack))
     {
         sq.data = nullptr;
-        sq.actualSize = 0;
+        sq.statedSize = 0;
         sq.actualCapacity = 0;
         sq.stack.dataSize = 0;
         sq.stack.origin = nullptr;
@@ -164,11 +164,11 @@ class StackBuffer
         sq.stack.nextIndex = nullptr;
     }
     StackBuffer (const StackBuffer &sq)
-        : data{reinterpret_cast<unsigned char *> (std::malloc (sq.actualSize))},
-          actualSize{sq.actualSize}, actualCapacity{sq.actualSize},
+        : data{reinterpret_cast<unsigned char *> (std::malloc (sq.statedSize))},
+          statedSize{sq.statedSize}, actualCapacity{sq.statedSize},
           stack (sq.stack)
     {
-        memcpy (data, sq.data, static_cast<size_t> (actualSize));
+        memcpy (data, sq.data, static_cast<size_t> (statedSize));
         auto offset = stack.next - stack.origin;
         stack.origin = data;
         stack.next = stack.origin + offset;
@@ -184,11 +184,11 @@ class StackBuffer
             std::free (data);
         }
         data = sq.data;
-        actualSize = sq.actualSize;
+        statedSize = sq.statedSize;
         actualCapacity = sq.actualCapacity;
         stack = std::move (sq.stack);
         sq.data = nullptr;
-        sq.actualSize = 0;
+        sq.statedSize = 0;
         sq.stack.dataSize = 0;
         sq.stack.origin = nullptr;
         sq.stack.next = nullptr;
@@ -199,8 +199,8 @@ class StackBuffer
     StackBuffer &operator= (const StackBuffer &sq)
     {
         stack = sq.stack;
-        resizeMemory (sq.actualSize);
-        std::memcpy (data, sq.data, sq.actualSize);
+        resizeMemory (sq.statedSize);
+        std::memcpy (data, sq.data, sq.statedSize);
 
         auto offset = stack.next - stack.origin;
         stack.origin = data;
@@ -211,18 +211,22 @@ class StackBuffer
         return *this;
     }
 
-    void resize (int newsize)
+    bool resize (int newsize)
     {
+        if (newsize < 0)
+        {
+            return false;
+        }
         if (newsize == stack.dataSize)
         {
-            return;
+            return true;
         }
         if (stack.dataCount == 0)
         {
             resizeMemory (newsize);
             stack = StackBufferRaw (data, newsize);
         }
-        else if (newsize > actualSize)
+        else if (newsize > statedSize)
         {
             resizeMemory (newsize);
             int indexOffset = stack.dataSize - diSize * stack.dataCount;
@@ -257,12 +261,21 @@ class StackBuffer
             stack.nextIndex = reinterpret_cast<dataIndex *> (
               stack.origin + stack.dataSize - diSize);
             stack.nextIndex -= stack.dataCount;
-            actualSize = newsize;
+            statedSize = newsize;
         }
+        return (statedSize == newsize);
     }
+    /** get the number of data blocks in the stack*/
     int getCurrentCount () const { return stack.getCurrentCount (); }
+    /** get the capacity of the stack*/
     int capacity () const { return stack.capacity (); }
+    /** get the actual capacity of the underlying data block which could be
+     * different than the stack capacity this would be the limit that a resize
+     * operation could handle without allocation*/
+    int rawBlockCapacity () const { return actualCapacity; }
+    /** check if space is available in the stack for a block of size sz*/
     bool isSpaceAvailable (int sz) const { return stack.isSpaceAvailable (sz); }
+    /** check if the stack is empty*/
     bool empty () const { return stack.empty (); }
 
     bool push (const unsigned char *block, int blockSize)
@@ -276,8 +289,9 @@ class StackBuffer
     {
         return stack.pop (block, maxSize);
     }
-
+    /** reverse the order of the stack*/
     void reverse () { stack.reverse (); }
+    /** clear all data from a stack*/
     void clear () { stack.clear (); }
 
     void swap (StackBuffer &other) noexcept
@@ -285,13 +299,13 @@ class StackBuffer
         stack.swap (other.stack);
         std::swap (data, other.data);
         std::swap (actualCapacity, other.actualCapacity);
-        std::swap (actualSize, other.actualSize);
+        std::swap (statedSize, other.statedSize);
     }
 
   private:
     void resizeMemory (int newsize)
     {
-        if (newsize == actualSize)
+        if (newsize == statedSize)
         {
             return;
         }
@@ -306,12 +320,12 @@ class StackBuffer
             data = buf;
             actualCapacity = newsize;
         }
-        actualSize = newsize;
+        statedSize = newsize;
     }
 
   private:
     unsigned char *data = nullptr;  //!< pointer to the memory data block
-    int actualSize = 0;  //!< the stated size of the memory block
+    int statedSize = 0;  //!< the stated size of the memory block
     int actualCapacity = 0;  //!< the actual size of the memory block
     StackBufferRaw stack;  //!< The actual stack controller
 };

@@ -542,3 +542,20 @@ TEST (stackQueueTest, test_stackqueue_3_push_resize_shrink)
 
     EXPECT_TRUE (stack.empty ());
 }
+
+TEST (stackQueueTest, test_stackqueue_resize)
+{
+    StackBuffer stack (2048);
+    EXPECT_EQ (stack.capacity (), 2048);
+
+    stack.resize (4096);
+    EXPECT_EQ (stack.capacity (), 4096);
+
+    stack.resize (4096);
+    EXPECT_EQ (stack.capacity (), 4096);
+    stack.resize (2048);
+    EXPECT_EQ (stack.capacity (), 2048);
+    EXPECT_EQ (stack.rawBlockCapacity (), 4096);
+
+    EXPECT_FALSE (stack.resize (-262354));  // this should do nothing
+}
