@@ -4,7 +4,7 @@
 
 The following is a set of guidelines for contributing to HELICS and associated projects. These are suggested guidelines. Use your best judgment.
 
-#### Table Of Contents
+## Table Of Contents
 
 ## Licensing
 HELICS is distributed under the terms of the BSD-3 clause license. All new
@@ -14,8 +14,7 @@ contributions must be made under this [LICENSE](LICENSE) in accordance with the 
 
 If you just have a question check out [![Gitter chat](https://badges.gitter.im/GMLC-TDC/HELICS-src.png)](https://gitter.im/GMLC-TDC/HELICS-src)
 
-
-## How Can I Contribute?
+## How Can I Contribute
 
 ### Reporting Bugs
 
@@ -33,11 +32,9 @@ This section guides you through submitting a feature request, or enhancement for
 
  A pull request including a bug fix or feature will always be welcome.
 
-
 #### Before Submitting An Enhancement Suggestion
 
 * check the issue list for any similar issues
-
 
 ### Your First Code Contribution
 

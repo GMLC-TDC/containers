@@ -5,11 +5,11 @@ If you would like to contribute to the Containers or HELICS project see [CONTRIB
 ### Pacific Northwest National Lab
 
 ### Lawrence Livermore National Lab
- - Ryan Mast*
- - Philip Top*
+- Ryan Mast*
+- Philip Top*
 
 ### National Renewable Energy Lab
- - Dheepak Krishnamurthy*
+- Dheepak Krishnamurthy*
 
 ### Argonne National Lab
 
@@ -32,13 +32,11 @@ As part of the benchmark tests one of the comparisons is against the moodycamel 
 ### [BOOST](https://www.boost.org)
   Boost is used throughout the code.  The boost optional library can optionally be used. Boost is licensed under the boost license.  And some of the benchmark comparisons are done with boost lock-free queues.
 
-
 ### [c++17 headers](https://github.com/tcbrindle/cpp17_headers)
 The containers library makes use of `C++17` headers, but due to `C++14` compatibility requirements these are not available on all supported compilers.  So included library headers are used from @tcbrindle specifically std::optional  These fall under the boost license, this library is an aggregate from a number of different sources, see the readme at the above link for more details.  The Boost versions of these libraries are not used due to incompatibilities through different boost versions that HELICS supports, so a single stable source was used.
 
-
 ### cmake scripts
 Several cmake scripts came from other sources and were either used or modified for use in HELICS.
- - Lars Bilke [CodeCoverage.cmake](https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake)
- - clang-format, clang-tidy scripts were created using tips from [Emmanuel Fleury](http://www.labri.fr/perso/fleury/posts/programming/using-clang-tidy-and-clang-format.html)
- - CLI11 [CLI11](https://github.com/CLIUtils/CLI11)  while CLI11 was not used directly many of the CI scripts and structure were borrowed to set up the CI builds.  
+- Lars Bilke [CodeCoverage.cmake](https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake)
+- clang-format, clang-tidy scripts were created using tips from [Emmanuel Fleury](http://www.labri.fr/perso/fleury/posts/programming/using-clang-tidy-and-clang-format.html)
+- CLI11 [CLI11](https://github.com/CLIUtils/CLI11)  while CLI11 was not used directly many of the CI scripts and structure were borrowed to set up the CI builds.  
