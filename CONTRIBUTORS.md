@@ -5,11 +5,11 @@ If you would like to contribute to the Containers or HELICS project see [CONTRIB
 ### Pacific Northwest National Lab
 
 ### Lawrence Livermore National Lab
-- Ryan Mast*
-- Philip Top*
+ - Ryan Mast*
+ - Philip Top*
 
 ### National Renewable Energy Lab
-- Dheepak Krishnamurthy*
+ - Dheepak Krishnamurthy*
 
 ### Argonne National Lab
 
@@ -37,6 +37,5 @@ The containers library makes use of `C++17` headers, but due to `C++14` compatib
 
 ### cmake scripts
 Several cmake scripts came from other sources and were either used or modified for use in HELICS.
-- Lars Bilke [CodeCoverage.cmake](https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake)
-- clang-format, clang-tidy scripts were created using tips from [Emmanuel Fleury](http://www.labri.fr/perso/fleury/posts/programming/using-clang-tidy-and-clang-format.html)
-- CLI11 [CLI11](https://github.com/CLIUtils/CLI11)  while CLI11 was not used directly many of the CI scripts and structure were borrowed to set up the CI builds.  
+ - Lars Bilke [CodeCoverage.cmake](https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake)
+ - CLI11 [CLI11](https://github.com/CLIUtils/CLI11)  while CLI11 was not used directly many of the CI scripts and structure were borrowed to set up the CI builds.  
