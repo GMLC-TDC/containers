@@ -25,8 +25,7 @@ set(
 
 set(
   container_sources
-  CircularBuffer.cpp
-  StackBuffer.cpp
+  empty.cpp
 )
 
 

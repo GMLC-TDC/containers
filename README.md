@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.com/GMLC-TDC/containers.svg?branch=master)](https://travis-ci.com/GMLC-TDC/containers)
 [![Build Status](https://dev.azure.com/phlptp/containers/_apis/build/status/GMLC-TDC.containers?branchName=master)](https://dev.azure.com/phlptp/containers/_build/latest?definitionId=2&branchName=master)
 [![codecov](https://codecov.io/gh/GMLC-TDC/containers/branch/master/graph/badge.svg)](https://codecov.io/gh/GMLC-TDC/containers)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/357c0c3dfea243079af3e3a8faedea57)](https://www.codacy.com/app/phlptp/containers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GMLC-TDC/containers&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/357c0c3dfea243079af3e3a8faedea57)](https://www.codacy.com/app/GMLC-TDC/containers?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GMLC-TDC/containers&amp;utm_campaign=Badge_Grade)
 [![](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/GMLC-TDC/containers/blob/master/LICENSE)
 
 
