@@ -90,7 +90,7 @@ endif()
 
 target_include_directories(containers_base INTERFACE ThirdParty)
 
-add_subdirectory(containers)
+add_subdirectory(gmlc)
 
 option(GMLC_CONTAINERS_TEST "Enable tests for the containers library" ON)
 option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" ON)
