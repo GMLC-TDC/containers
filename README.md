@@ -5,7 +5,7 @@
 [![](https://img.shields.io/badge/License-BSD-blue.svg)](https://github.com/GMLC-TDC/containers/blob/master/LICENSE)
 
 # Containers
-Collection of containers used inside [HELICS](https://github.com/GMLC-TDC/HELICS-src) and supporting repos.  These containers are used for data storage for different purposes inside the code.  In some cases they were mage more general than needed to support other types or be useful elsewhere.
+Collection of containers used inside [HELICS](https://github.com/GMLC-TDC/HELICS) and supporting repos.  These containers are used for data storage for different purposes inside the code.  In some cases they were mage more general than needed to support other types or be useful elsewhere.
 
 ## General Containers
 

@@ -17,7 +17,7 @@ If you would like to contribute to the Containers or HELICS project see [CONTRIB
  `**` subcontractor
 
 ## Used Libraries or Code
-### [HELICS](https://github.com/GMLC-TDC/HELICS-src)  
+### [HELICS](https://github.com/GMLC-TDC/HELICS)  
 Most of the original code for this library was pulled from use inside HELICS.  It was pulled out as the containers are not core to HELICS and it was useful as a standalone library so it could have better testing and separation of concerns.  HELICS is released with a BSD-3-Clause license.
 
 ### [googleTest](https://github.com/google/googletest)  
