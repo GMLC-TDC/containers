@@ -45,7 +45,7 @@ class AirLock
         {
             std::lock_guard<MUTEX> lock(door);
             // We can use relaxed here since we are behind the mutex
-            if (!loaded.load(std::memory_order_relaxed))
+            if (!loaded.load(std::memory_order_acquire))
             {
                 data = std::forward<Z>(val);
                 loaded.store(true, std::memory_order_release);
@@ -61,7 +61,7 @@ class AirLock
     void load(Z &&val)
     {
         std::unique_lock<MUTEX> lock(door);
-        if (!loaded.load(std::memory_order_relaxed))
+        if (!loaded.load(std::memory_order_acquire))
         {
             data = std::forward<Z>(val);
             loaded.store(true, std::memory_order_release);
@@ -87,7 +87,7 @@ class AirLock
         {
             std::lock_guard<MUTEX> lock(door);
             // can use relaxed since we are behind a mutex
-            if (loaded.load(std::memory_order_relaxed))
+            if (loaded.load(std::memory_order_acquire))
             {
                 opt<T> val{std::move(data)};
                 loaded.store(false, std::memory_order_release);
