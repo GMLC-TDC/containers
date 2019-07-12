@@ -32,8 +32,8 @@ template <class VType,
 class DualMappedVector
 {
   public:
-    static_assert (!std::is_same<searchType1, searchType2>::value,
-                   "searchType1 and searchType2 cannot be the same type");
+    static_assert(!std::is_same<searchType1, searchType2>::value,
+                  "searchType1 and searchType2 cannot be the same type");
 
     /** insert a new element into the vector
     @param searchValue1 the primary unique index of the vector
@@ -43,21 +43,21 @@ class DualMappedVector
     if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert (const searchType1 &searchValue1,
-                        const searchType2 &searchValue2,
-                        Us &&... data)
+    opt<size_t> insert(const searchType1 &searchValue1,
+                       const searchType2 &searchValue2,
+                       Us &&... data)
     {
-        auto fnd = lookup1.find (searchValue1);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(searchValue1);
+        if (fnd != lookup1.end())
         {
-            auto fnd2 = lookup2.find (searchValue2);
-            if (fnd2 != lookup2.end ())
+            auto fnd2 = lookup2.find(searchValue2);
+            if (fnd2 != lookup2.end())
             {
                 return {};
             }
         }
-        auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::forward<Us> (data)...);
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
         lookup1[searchValue1] = index;
         lookup2[searchValue2] = index;
         return index;
@@ -70,18 +70,18 @@ class DualMappedVector
    if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert (const searchType1 &searchValue1,
-                        std::nullptr_t /*searchValue2*/,
-                        Us &&... data)
+    opt<size_t> insert(const searchType1 &searchValue1,
+                       std::nullptr_t /*searchValue2*/,
+                       Us &&... data)
     {
-        auto fnd = lookup1.find (searchValue1);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(searchValue1);
+        if (fnd != lookup1.end())
         {
             return {};
         }
-        auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::forward<Us> (data)...);
-        lookup1.emplace (searchValue1, index);
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
+        lookup1.emplace(searchValue1, index);
         return index;
     }
 
@@ -92,18 +92,18 @@ class DualMappedVector
     if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert (std::nullptr_t /*searchValue1*/,
-                        const searchType2 &searchValue2,
-                        Us &&... data)
+    opt<size_t> insert(std::nullptr_t /*searchValue1*/,
+                       const searchType2 &searchValue2,
+                       Us &&... data)
     {
-        auto fnd = lookup2.find (searchValue2);
-        if (fnd != lookup2.end ())
+        auto fnd = lookup2.find(searchValue2);
+        if (fnd != lookup2.end())
         {
             return {};
         }
-        auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::forward<Us> (data)...);
-        lookup2.emplace (searchValue2, index);
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
+        lookup2.emplace(searchValue2, index);
         return index;
     }
 
@@ -112,12 +112,12 @@ class DualMappedVector
     @return an optional value that indicates if the insertion was successful and
     if so contain the index of the insertion*/
     template <typename... Us>
-    opt<size_t> insert (std::nullptr_t /*searchValue1*/,
-                        std::nullptr_t /*searchValue2*/,
-                        Us &&... data)
+    opt<size_t> insert(std::nullptr_t /*searchValue1*/,
+                       std::nullptr_t /*searchValue2*/,
+                       Us &&... data)
     {
-        auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::forward<Us> (data)...);
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
         return index;
     }
 
@@ -127,23 +127,23 @@ class DualMappedVector
     @param data the parameters and values necessary to create a new object
     @return the index of the created or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign (const searchType1 &searchValue1,
-                             const searchType2 &searchValue2,
-                             Us &&... data)
+    size_t insert_or_assign(const searchType1 &searchValue1,
+                            const searchType2 &searchValue2,
+                            Us &&... data)
     {
-        auto fnd = lookup1.find (searchValue1);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(searchValue1);
+        if (fnd != lookup1.end())
         {
-            auto fnd2 = lookup2.find (searchValue2);
-            if (fnd2 != lookup2.end ())
+            auto fnd2 = lookup2.find(searchValue2);
+            if (fnd2 != lookup2.end())
             {
-                dataStorage[fnd->second] = VType (std::forward<Us> (data)...);
+                dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
                 lookup2[searchValue2] = fnd->second;
                 return fnd->second;
             }
         }
-        auto index = dataStorage.size ();
-        dataStorage.emplace_back (std::forward<Us> (data)...);
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
         lookup1[searchValue1] = index;
         lookup2[searchValue2] = index;
         return index;
@@ -154,21 +154,21 @@ class DualMappedVector
     @param data the data required to create a new object
     @return the index of the inserted or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign (const searchType1 &searchValue1,
-                             std::nullptr_t /*searchValue2*/,
-                             Us &&... data)
+    size_t insert_or_assign(const searchType1 &searchValue1,
+                            std::nullptr_t /*searchValue2*/,
+                            Us &&... data)
     {
-        auto fnd = lookup1.find (searchValue1);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(searchValue1);
+        if (fnd != lookup1.end())
         {
-            dataStorage[fnd->second] = VType (std::forward<Us> (data)...);
+            dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
             return fnd->second;
         }
         else
         {
-            auto index = dataStorage.size ();
-            dataStorage.emplace_back (std::forward<Us> (data)...);
-            lookup1.emplace (searchValue1, index);
+            auto index = dataStorage.size();
+            dataStorage.emplace_back(std::forward<Us>(data)...);
+            lookup1.emplace(searchValue1, index);
             return index;
         }
     }
@@ -178,147 +178,147 @@ class DualMappedVector
     @param data the parameters and value necessary to create a new object
     @return the index of the inserted or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign (std::nullptr_t /*searchValue1*/,
-                             const searchType2 &searchValue2,
-                             Us &&... data)
+    size_t insert_or_assign(std::nullptr_t /*searchValue1*/,
+                            const searchType2 &searchValue2,
+                            Us &&... data)
     {
-        auto fnd = lookup2.find (searchValue2);
-        if (fnd != lookup2.end ())
+        auto fnd = lookup2.find(searchValue2);
+        if (fnd != lookup2.end())
         {
-            dataStorage[fnd->second] = VType (std::forward<Us> (data)...);
+            dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
             return fnd->second;
         }
         else
         {
-            auto index = dataStorage.size ();
-            dataStorage.emplace_back (std::forward<Us> (data)...);
-            lookup2.emplace (searchValue2, index);
+            auto index = dataStorage.size();
+            dataStorage.emplace_back(std::forward<Us>(data)...);
+            lookup2.emplace(searchValue2, index);
             return index;
         }
     }
     /** add an additional index term for searching
     this function does not override existing values*/
-    bool addSearchTermForIndex (const searchType1 &searchValue, size_t index)
+    bool addSearchTermForIndex(const searchType1 &searchValue, size_t index)
     {
-        if (index < dataStorage.size ())
+        if (index < dataStorage.size())
         {
-            auto res = lookup1.emplace (searchValue, index);
+            auto res = lookup1.emplace(searchValue, index);
             return res.second;
         }
         return false;
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType1 &searchValue,
-                        const searchType1 &existingValue)
+    auto addSearchTerm(const searchType1 &searchValue,
+                       const searchType1 &existingValue)
     {
-        auto fnd = lookup1.find (existingValue);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(existingValue);
+        if (fnd != lookup1.end())
         {
-            auto res = lookup1.emplace (searchValue, fnd->second);
+            auto res = lookup1.emplace(searchValue, fnd->second);
             return res.second;
         }
         return false;
     }
 
     /** add an additional index term for searching*/
-    bool addSearchTermForIndex (const searchType2 &searchValue, size_t index)
+    bool addSearchTermForIndex(const searchType2 &searchValue, size_t index)
     {
-        if (index < dataStorage.size ())
+        if (index < dataStorage.size())
         {
-            auto res = lookup2.emplace (searchValue, index);
+            auto res = lookup2.emplace(searchValue, index);
             return res.second;
         }
         return false;
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType2 &searchValue,
-                        const searchType2 &existingValue)
+    auto addSearchTerm(const searchType2 &searchValue,
+                       const searchType2 &existingValue)
     {
-        auto fnd = lookup2.find (existingValue);
-        if (fnd != lookup2.end ())
+        auto fnd = lookup2.find(existingValue);
+        if (fnd != lookup2.end())
         {
-            auto res = lookup2.emplace (searchValue, fnd->second);
+            auto res = lookup2.emplace(searchValue, fnd->second);
             return res.second;
         }
         return false;
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType2 &searchValue,
-                        const searchType1 &existingValue)
+    auto addSearchTerm(const searchType2 &searchValue,
+                       const searchType1 &existingValue)
     {
-        auto fnd = lookup1.find (existingValue);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(existingValue);
+        if (fnd != lookup1.end())
         {
-            auto res = lookup2.emplace (searchValue, fnd->second);
+            auto res = lookup2.emplace(searchValue, fnd->second);
             return res.second;
         }
         return false;
     }
 
     /** add an additional index term for searching*/
-    auto addSearchTerm (const searchType1 &searchValue,
-                        const searchType2 &existingValue)
+    auto addSearchTerm(const searchType1 &searchValue,
+                       const searchType2 &existingValue)
     {
-        auto fnd = lookup2.find (existingValue);
-        if (fnd != lookup2.end ())
+        auto fnd = lookup2.find(existingValue);
+        if (fnd != lookup2.end())
         {
-            auto res = lookup1.emplace (searchValue, fnd->second);
+            auto res = lookup1.emplace(searchValue, fnd->second);
             return res.second;
         }
         return false;
     }
-    auto find (const searchType1 &searchValue) const
+    auto find(const searchType1 &searchValue) const
     {
-        auto fnd = lookup1.find (searchValue);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(searchValue);
+        if (fnd != lookup1.end())
         {
-            return dataStorage.begin () + fnd->second;
+            return dataStorage.begin() + fnd->second;
         }
-        return dataStorage.end ();
+        return dataStorage.end();
     }
 
-    auto find (const searchType2 &searchValue) const
+    auto find(const searchType2 &searchValue) const
     {
-        auto fnd = lookup2.find (searchValue);
-        if (fnd != lookup2.end ())
+        auto fnd = lookup2.find(searchValue);
+        if (fnd != lookup2.end())
         {
-            return dataStorage.begin () + fnd->second;
+            return dataStorage.begin() + fnd->second;
         }
-        return dataStorage.end ();
+        return dataStorage.end();
     }
 
-    auto find (const searchType1 &searchValue)
+    auto find(const searchType1 &searchValue)
     {
-        auto fnd = lookup1.find (searchValue);
-        if (fnd != lookup1.end ())
+        auto fnd = lookup1.find(searchValue);
+        if (fnd != lookup1.end())
         {
-            return dataStorage.begin () + fnd->second;
+            return dataStorage.begin() + fnd->second;
         }
-        return dataStorage.end ();
+        return dataStorage.end();
     }
 
-    auto find (const searchType2 &searchValue)
+    auto find(const searchType2 &searchValue)
     {
-        auto fnd = lookup2.find (searchValue);
-        if (fnd != lookup2.end ())
+        auto fnd = lookup2.find(searchValue);
+        if (fnd != lookup2.end())
         {
-            return dataStorage.begin () + fnd->second;
+            return dataStorage.begin() + fnd->second;
         }
-        return dataStorage.end ();
+        return dataStorage.end();
     }
 
-    void removeIndex (size_t index)
+    void removeIndex(size_t index)
     {
-        if (index >= dataStorage.size ())
+        if (index >= dataStorage.size())
         {
             return;
         }
-        dataStorage.erase (dataStorage.begin () + index);
-        std::vector<searchType1> ind1 (2);
-        std::vector<searchType2> ind2 (2);
+        dataStorage.erase(dataStorage.begin() + index);
+        std::vector<searchType1> ind1(2);
+        std::vector<searchType2> ind2(2);
         for (auto &el2 : lookup1)
         {
             if (el2.second > index)
@@ -327,7 +327,7 @@ class DualMappedVector
             }
             else if (el2.second == index)
             {
-                ind1.push_back (el2.first);
+                ind1.push_back(el2.first);
             }
         }
         for (auto &el2 : lookup2)
@@ -338,84 +338,84 @@ class DualMappedVector
             }
             else if (el2.second == index)
             {
-                ind2.push_back (el2.first);
+                ind2.push_back(el2.first);
             }
         }
         for (auto &ind : ind1)
         {
-            auto fnd1 = lookup1.find (ind);
-            if (fnd1 != lookup1.end ())
+            auto fnd1 = lookup1.find(ind);
+            if (fnd1 != lookup1.end())
             {
-                lookup1.erase (fnd1);
+                lookup1.erase(fnd1);
             }
         }
 
         for (auto &ind : ind2)
         {
-            auto fnd2 = lookup2.find (ind);
-            if (fnd2 != lookup2.end ())
+            auto fnd2 = lookup2.find(ind);
+            if (fnd2 != lookup2.end())
             {
-                lookup2.erase (fnd2);
+                lookup2.erase(fnd2);
             }
         }
     }
 
-    void remove (const searchType1 &search)
+    void remove(const searchType1 &search)
     {
-        auto el = lookup1.find (search);
-        if (el == lookup1.end ())
+        auto el = lookup1.find(search);
+        if (el == lookup1.end())
         {
             return;
         }
         auto index = el->second;
-        removeIndex (index);
+        removeIndex(index);
     }
 
-    void remove (const searchType2 &search)
+    void remove(const searchType2 &search)
     {
-        auto el = lookup2.find (search);
-        if (el == lookup2.end ())
+        auto el = lookup2.find(search);
+        if (el == lookup2.end())
         {
             return;
         }
         auto index = el->second;
-        removeIndex (index);
+        removeIndex(index);
     }
-    VType &operator[] (size_t index) { return dataStorage[index]; }
+    VType &operator[](size_t index) { return dataStorage[index]; }
 
-    const VType &operator[] (size_t index) const { return dataStorage[index]; }
+    const VType &operator[](size_t index) const { return dataStorage[index]; }
 
-    VType &back () { return dataStorage.back (); }
+    VType &back() { return dataStorage.back(); }
 
-    const VType &back () const { return dataStorage.back (); }
+    const VType &back() const { return dataStorage.back(); }
     /** apply a function to all the values
     @param F must be a function with signature like void fun(const VType &a);*/
     template <class UnaryFunction>
-    void apply (UnaryFunction F)
+    void apply(UnaryFunction F)
     {
-        std::for_each (dataStorage.begin (), dataStorage.end (), F);
+        std::for_each(dataStorage.begin(), dataStorage.end(), F);
     }
 
     /** transform all the values
     F must be a function with signature like void VType(const VType &a);*/
     template <class UnaryFunction>
-    void transform (UnaryFunction F)
+    void transform(UnaryFunction F)
     {
-        std::transform (dataStorage.begin (), dataStorage.end (),
-                        dataStorage.begin (), F);
+        std::transform(dataStorage.begin(), dataStorage.end(),
+                       dataStorage.begin(), F);
     }
-    auto begin () { return dataStorage.begin (); }
-    auto end () { return dataStorage.end (); }
-    auto begin () const { return dataStorage.cbegin (); }
-    auto end () const { return dataStorage.cend (); }
+    auto begin() { return dataStorage.begin(); }
+    auto end() { return dataStorage.end(); }
+    auto begin() const { return dataStorage.cbegin(); }
+    auto end() const { return dataStorage.cend(); }
 
-    auto size () const { return dataStorage.size (); }
+    auto size() const { return dataStorage.size(); }
 
-    void clear ()
+    void clear()
     {
-        dataStorage.clear ();
-        lookup1.clear ();
-        lookup2.clear ();
+        dataStorage.clear();
+        lookup1.clear();
+        lookup2.clear();
     }
 
   private:

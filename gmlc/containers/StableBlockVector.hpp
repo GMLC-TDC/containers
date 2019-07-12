@@ -24,11 +24,11 @@ no erase or insert
 template <typename X, unsigned int N, class Allocator = std::allocator<X>>
 class StableBlockVector
 {
-    static_assert (
+    static_assert(
       N < 32,
       "N should be between 0 and 31 data will allocated in block 2^N");
-    static_assert (std::is_default_constructible<X>::value,
-                   " used type must be default constructible");
+    static_assert(std::is_default_constructible<X>::value,
+                  " used type must be default constructible");
 
   public:
     static constexpr unsigned int blockSize{1u << N};
@@ -40,30 +40,28 @@ class StableBlockVector
 
   public:
     /** default constructor*/
-    StableBlockVector () noexcept {}
+    StableBlockVector() noexcept {}
 
     /** construct with a specified size*/
-    explicit StableBlockVector (
-      size_t startSize,
-      const X &init =
-        X{}) noexcept (std::is_nothrow_copy_constructible<X>::value)
-        : csize (startSize),
-          dataptr (new X *[std::max ((startSize >> N) + 1, size_t{64})]),
-          dataSlotsAvailable (
-            std::max (static_cast<int> (startSize >> N) + 1, 64)),
-          dataSlotIndex (static_cast<int> (startSize >> N)),
-          bsize (static_cast<int> (startSize & cntmask))
+    explicit StableBlockVector(size_t startSize, const X &init = X{}) noexcept(
+      std::is_nothrow_copy_constructible<X>::value)
+        : csize(startSize),
+          dataptr(new X *[std::max((startSize >> N) + 1, size_t{64})]),
+          dataSlotsAvailable(
+            std::max(static_cast<int>(startSize >> N) + 1, 64)),
+          dataSlotIndex(static_cast<int>(startSize >> N)),
+          bsize(static_cast<int>(startSize & cntmask))
     {
         Allocator a;
         if (startSize == 0)
         {
-            dataptr[0] = a.allocate (blockSize);
+            dataptr[0] = a.allocate(blockSize);
         }
         else
         {
             for (int ii = 0; ii <= dataSlotIndex; ++ii)
             {
-                dataptr[ii] = a.allocate (blockSize);
+                dataptr[ii] = a.allocate(blockSize);
                 if (ii < dataSlotIndex)
                 {
                     for (int jj = 0; jj < blockSize; ++jj)
@@ -82,26 +80,26 @@ class StableBlockVector
         }
     }
 
-    StableBlockVector (const StableBlockVector &sbv) : StableBlockVector ()
+    StableBlockVector(const StableBlockVector &sbv) : StableBlockVector()
     {
         if (sbv.dataptr != nullptr)
         {
             dataptr = new X *[sbv.dataSlotsAvailable];
             dataSlotsAvailable = sbv.dataSlotsAvailable;
-            dataptr[0] = getNewBlock ();
-            assign (sbv.begin (), sbv.end ());
+            dataptr[0] = getNewBlock();
+            assign(sbv.begin(), sbv.end());
         }
         else
         {
             bsize = blockSize;
         }
     }
-    StableBlockVector (StableBlockVector &&sbv) noexcept
-        : csize (sbv.csize), dataptr (sbv.dataptr),
-          dataSlotsAvailable (sbv.dataSlotsAvailable),
-          dataSlotIndex (sbv.dataSlotIndex), bsize (sbv.bsize),
-          freeSlotsAvailable (sbv.freeSlotsAvailable),
-          freeIndex (sbv.freeIndex), freeblocks (sbv.freeblocks)
+    StableBlockVector(StableBlockVector &&sbv) noexcept
+        : csize(sbv.csize), dataptr(sbv.dataptr),
+          dataSlotsAvailable(sbv.dataSlotsAvailable),
+          dataSlotIndex(sbv.dataSlotIndex), bsize(sbv.bsize),
+          freeSlotsAvailable(sbv.freeSlotsAvailable), freeIndex(sbv.freeIndex),
+          freeblocks(sbv.freeblocks)
     {
         sbv.freeblocks = nullptr;
         sbv.freeSlotsAvailable = 0;
@@ -109,13 +107,13 @@ class StableBlockVector
         sbv.dataptr = nullptr;
     }
 
-    StableBlockVector &operator= (const StableBlockVector &sbv)
+    StableBlockVector &operator=(const StableBlockVector &sbv)
     {
-        clear ();
-        assign (sbv.begin (), sbv.end ());
+        clear();
+        assign(sbv.begin(), sbv.end());
         return *this;
     }
-    StableBlockVector &operator= (StableBlockVector &&sbv) noexcept
+    StableBlockVector &operator=(StableBlockVector &&sbv) noexcept
     {
         csize = sbv.csize;
         dataptr = sbv.dataptr;
@@ -134,14 +132,14 @@ class StableBlockVector
         return *this;
     }
     /** destructor*/
-    ~StableBlockVector ()
+    ~StableBlockVector()
     {
-        clear ();
+        clear();
         Allocator a;
-        a.deallocate (dataptr[0], blockSize);
+        a.deallocate(dataptr[0], blockSize);
         for (int ii = 0; ii < freeIndex; ++ii)
         {
-            a.deallocate (freeblocks[ii], blockSize);
+            a.deallocate(freeblocks[ii], blockSize);
         }
         // delete can handle a nullptr
         delete[] freeblocks;
@@ -149,30 +147,29 @@ class StableBlockVector
     }
 
     template <class... Args>
-    void emplace_back (Args &&... args)
+    void emplace_back(Args &&... args)
     {
-        blockCheck ();
-        new (&(dataptr[dataSlotIndex][bsize++]))
-          X (std::forward<Args> (args)...);
+        blockCheck();
+        new (&(dataptr[dataSlotIndex][bsize++])) X(std::forward<Args>(args)...);
         ++csize;
     }
 
-    void push_back (const X &val) noexcept (
+    void push_back(const X &val) noexcept(
       std::is_nothrow_copy_constructible<X>::value)
     {
-        blockCheck ();
+        blockCheck();
         new (&(dataptr[dataSlotIndex][bsize++])) X{val};
         ++csize;
     }
     void
-    push_back (X &&val) noexcept (std::is_nothrow_move_constructible<X>::value)
+    push_back(X &&val) noexcept(std::is_nothrow_move_constructible<X>::value)
     {
-        blockCheck ();
-        new (&(dataptr[dataSlotIndex][bsize++])) X{std::move (val)};
+        blockCheck();
+        new (&(dataptr[dataSlotIndex][bsize++])) X{std::move(val)};
         ++csize;
     }
 
-    void pop_back () noexcept (std::is_nothrow_destructible<X>::value)
+    void pop_back() noexcept(std::is_nothrow_destructible<X>::value)
     {
         if (csize == 0)
         {
@@ -185,27 +182,27 @@ class StableBlockVector
         }
         else
         {
-            moveBlocktoAvailable (dataptr[dataSlotIndex--]);
+            moveBlocktoAvailable(dataptr[dataSlotIndex--]);
             bsize = blockSize - 1;
         }
-        dataptr[dataSlotIndex][bsize].~X ();
+        dataptr[dataSlotIndex][bsize].~X();
     }
 
     template <class InputIt>
-    void assign (InputIt first, InputIt last)
+    void assign(InputIt first, InputIt last)
     {
     }
 
     template <class InputIt>
-    void move_assign (InputIt first, InputIt last)
+    void move_assign(InputIt first, InputIt last)
     {
     }
 
-    void clear () noexcept (std::is_nothrow_destructible<X>::value)
+    void clear() noexcept(std::is_nothrow_destructible<X>::value)
     {
         for (int jj = bsize - 1; jj >= 0; --jj)
         {  // call destructors on the last block
-            dataptr[dataSlotIndex][jj].~X ();
+            dataptr[dataSlotIndex][jj].~X();
         }
         // start at 1 to leave the first slot in use like the constructor
         // go in reverse order
@@ -213,15 +210,15 @@ class StableBlockVector
         {
             for (int jj = blockSize - 1; jj >= 0; --jj)
             {  // call destructors on the middle blocks
-                dataptr[ii][jj].~X ();
+                dataptr[ii][jj].~X();
             }
-            moveBlocktoAvailable (dataptr[ii]);
+            moveBlocktoAvailable(dataptr[ii]);
         }
         if (dataSlotIndex > 0)
         {
             for (int jj = blockSize - 1; jj >= 0; --jj)
             {  // call destructors on the first block
-                dataptr[0][jj].~X ();
+                dataptr[0][jj].~X();
             }
         }
         csize = 0;
@@ -229,47 +226,44 @@ class StableBlockVector
         dataSlotIndex = 0;
     }
 
-    void shrink_to_fit () noexcept
+    void shrink_to_fit() noexcept
     {
         Allocator a;
         for (int ii = 0; ii <= freeIndex; ++ii)
         {
-            a.deallocate (freeblocks[ii], blockSize);
+            a.deallocate(freeblocks[ii], blockSize);
         }
         freeIndex = 0;
     }
     /** get the last element*/
-    X &back ()
+    X &back()
     {
         return (bsize == 0) ? dataptr[(csize >> N) - 1][blockSize - 1] :
                               dataptr[dataSlotIndex][bsize - 1];
     }
     /** const ref to last element*/
-    const X &back () const
+    const X &back() const
     {
         return (bsize == 0) ? dataptr[(csize >> N) - 1][blockSize - 1] :
                               dataptr[dataSlotIndex][bsize - 1];
     }
 
-    X &front () { return dataptr[0][0]; }
+    X &front() { return dataptr[0][0]; }
 
-    const X &front () const { return dataptr[0][0]; }
+    const X &front() const { return dataptr[0][0]; }
 
-    X &operator[] (size_t n) { return dataptr[n >> N][n & cntmask]; }
+    X &operator[](size_t n) { return dataptr[n >> N][n & cntmask]; }
 
-    const X &operator[] (size_t n) const
-    {
-        return dataptr[n >> N][n & cntmask];
-    }
+    const X &operator[](size_t n) const { return dataptr[n >> N][n & cntmask]; }
 
-    size_t size () const { return csize; }
+    size_t size() const { return csize; }
 
-    bool empty () const { return (csize == 0); }
+    bool empty() const { return (csize == 0); }
     /** define an iterator*/
 
-    iterator begin () { return {dataptr, 0}; }
+    iterator begin() { return {dataptr, 0}; }
 
-    iterator end ()
+    iterator end()
     {
         if (bsize == blockSize)
         {
@@ -283,9 +277,9 @@ class StableBlockVector
         }
     }
 
-    const_iterator begin () const { return {dataptr, 0}; }
+    const_iterator begin() const { return {dataptr, 0}; }
 
-    const_iterator end () const
+    const_iterator end() const
     {
         if (bsize == blockSize)
         {
@@ -300,9 +294,9 @@ class StableBlockVector
     }
 
   private:
-    void blockCheck ()
+    void blockCheck()
     {
-        if (bsize >= static_cast<int> (blockSize))
+        if (bsize >= static_cast<int>(blockSize))
         {
             if (0 == dataSlotsAvailable)
             {
@@ -312,19 +306,18 @@ class StableBlockVector
             }
             else if (dataSlotIndex >= dataSlotsAvailable - 1)
             {
-                auto mem =
-                  new X *[static_cast<size_t> (dataSlotsAvailable) * 2];
-                std::copy (dataptr, dataptr + dataSlotsAvailable, mem);
+                auto mem = new X *[static_cast<size_t>(dataSlotsAvailable) * 2];
+                std::copy(dataptr, dataptr + dataSlotsAvailable, mem);
                 delete[] dataptr;
                 dataptr = mem;
                 dataSlotsAvailable *= 2;
             }
-            dataptr[++dataSlotIndex] = getNewBlock ();
+            dataptr[++dataSlotIndex] = getNewBlock();
             bsize = 0;
         }
     }
 
-    void moveBlocktoAvailable (X *ptr)
+    void moveBlocktoAvailable(X *ptr)
     {
         if (freeIndex >= freeSlotsAvailable)
         {
@@ -335,9 +328,8 @@ class StableBlockVector
             }
             else
             {
-                auto mem =
-                  new X *[static_cast<size_t> (freeSlotsAvailable) * 2];
-                std::copy (freeblocks, freeblocks + freeSlotsAvailable, mem);
+                auto mem = new X *[static_cast<size_t>(freeSlotsAvailable) * 2];
+                std::copy(freeblocks, freeblocks + freeSlotsAvailable, mem);
                 delete[] freeblocks;
                 freeblocks = mem;
                 freeSlotsAvailable *= 2;
@@ -346,12 +338,12 @@ class StableBlockVector
         freeblocks[freeIndex++] = ptr;
     }
 
-    X *getNewBlock ()
+    X *getNewBlock()
     {
         if (freeIndex == 0)
         {
             Allocator a;
-            return a.allocate (blockSize);
+            return a.allocate(blockSize);
         }
         return freeblocks[--freeIndex];
     }

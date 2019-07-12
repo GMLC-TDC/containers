@@ -25,7 +25,7 @@ struct dataIndex
 };
 
 /// Helper for size information on the data index
-constexpr int diSize = static_cast<int> (sizeof (dataIndex));
+constexpr int diSize = static_cast<int>(sizeof(dataIndex));
 
 /** class containing the raw StackBuffer implementation
 @details the StackBufferRaw class operates on raw memory
@@ -43,42 +43,42 @@ class StackBufferRaw
     int dataCount = 0;
 
   public:
-    StackBufferRaw (unsigned char *newBlock, int blockSize)
-        : origin (newBlock), next (newBlock), dataSize (blockSize)
+    StackBufferRaw(unsigned char *newBlock, int blockSize)
+        : origin(newBlock), next(newBlock), dataSize(blockSize)
     {
-        nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - diSize);
+        nextIndex = reinterpret_cast<dataIndex *>(origin + dataSize - diSize);
     }
 
-    void swap (StackBufferRaw &other) noexcept
+    void swap(StackBufferRaw &other) noexcept
     {
-        std::swap (origin, other.origin);
-        std::swap (next, other.next);
-        std::swap (dataSize, other.dataSize);
-        std::swap (nextIndex, other.nextIndex);
-        std::swap (dataCount, other.dataCount);
+        std::swap(origin, other.origin);
+        std::swap(next, other.next);
+        std::swap(dataSize, other.dataSize);
+        std::swap(nextIndex, other.nextIndex);
+        std::swap(dataCount, other.dataCount);
     }
 
-    int capacity () const { return dataSize; };
-    int getCurrentCount () const { return dataCount; }
-    bool isSpaceAvailable (int sz) const
+    int capacity() const { return dataSize; };
+    int getCurrentCount() const { return dataCount; }
+    bool isSpaceAvailable(int sz) const
     {
         return (dataSize - (next - origin) - (dataCount + 1) * diSize) >=
-               static_cast<ptrdiff_t> (sz);
+               static_cast<ptrdiff_t>(sz);
     }
-    bool empty () const { return (dataCount == 0); }
+    bool empty() const { return (dataCount == 0); }
 
-    bool push (const unsigned char *block, int blockSize)
+    bool push(const unsigned char *block, int blockSize)
     {
         if (blockSize <= 0 || block == nullptr)
         {
             return false;
         }
-        if (!isSpaceAvailable (blockSize))
+        if (!isSpaceAvailable(blockSize))
         {
             return false;
         }
-        memcpy (next, block, blockSize);
-        nextIndex->offset = static_cast<int> (next - origin);
+        memcpy(next, block, blockSize);
+        nextIndex->offset = static_cast<int>(next - origin);
         nextIndex->dataSize = blockSize;
         next += blockSize;
         --nextIndex;
@@ -86,21 +86,21 @@ class StackBufferRaw
         return true;
     }
 
-    int nextDataSize () const
+    int nextDataSize() const
     {
         return (dataCount > 0) ? nextIndex[1].dataSize : 0;
     }
 
-    int pop (unsigned char *block, int maxSize)
+    int pop(unsigned char *block, int maxSize)
     {
         if (dataCount > 0)
         {
             int blkSize = nextIndex[1].dataSize;
             if (maxSize >= blkSize)
             {
-                memcpy (block, origin + nextIndex[1].offset, blkSize);
+                memcpy(block, origin + nextIndex[1].offset, blkSize);
                 if (nextIndex[1].offset + blkSize ==
-                    static_cast<int> (next - origin))
+                    static_cast<int>(next - origin))
                 {
                     next -= blkSize;
                 }
@@ -109,8 +109,8 @@ class StackBufferRaw
                 if (dataCount == 0)
                 {
                     next = origin;
-                    nextIndex = reinterpret_cast<dataIndex *> (
-                      origin + dataSize - diSize);
+                    nextIndex =
+                      reinterpret_cast<dataIndex *>(origin + dataSize - diSize);
                 }
                 return blkSize;
             }
@@ -119,19 +119,19 @@ class StackBufferRaw
     }
 
     /** reverse the order in which the data will be extracted*/
-    void reverse ()
+    void reverse()
     {
         if (dataCount > 1)
         {
-            std::reverse (nextIndex + 1, nextIndex + dataCount + 1);
+            std::reverse(nextIndex + 1, nextIndex + dataCount + 1);
         }
     }
     /** clear all data from the StackBufferRaw*/
-    void clear ()
+    void clear()
     {
         next = origin;
         dataCount = 0;
-        nextIndex = reinterpret_cast<dataIndex *> (origin + dataSize - diSize);
+        nextIndex = reinterpret_cast<dataIndex *>(origin + dataSize - diSize);
     }
 
   private:
@@ -143,16 +143,16 @@ class StackBufferRaw
 class StackBuffer
 {
   public:
-    StackBuffer () noexcept : stack (nullptr, 0) {}
-    explicit StackBuffer (int size)
-        : data (reinterpret_cast<unsigned char *> (std::malloc (size))),
-          statedSize{size}, actualCapacity{size}, stack (data, size)
+    StackBuffer() noexcept : stack(nullptr, 0) {}
+    explicit StackBuffer(int size)
+        : data(reinterpret_cast<unsigned char *>(std::malloc(size))),
+          statedSize{size}, actualCapacity{size}, stack(data, size)
     {
     }
-    ~StackBuffer () = default;
-    StackBuffer (StackBuffer &&sq) noexcept
-        : data (sq.data), statedSize (sq.statedSize),
-          actualCapacity (sq.actualCapacity), stack (std::move (sq.stack))
+    ~StackBuffer() = default;
+    StackBuffer(StackBuffer &&sq) noexcept
+        : data(sq.data), statedSize(sq.statedSize),
+          actualCapacity(sq.actualCapacity), stack(std::move(sq.stack))
     {
         sq.data = nullptr;
         sq.statedSize = 0;
@@ -163,30 +163,30 @@ class StackBuffer
         sq.stack.dataCount = 0;
         sq.stack.nextIndex = nullptr;
     }
-    StackBuffer (const StackBuffer &sq)
-        : data{reinterpret_cast<unsigned char *> (std::malloc (sq.statedSize))},
+    StackBuffer(const StackBuffer &sq)
+        : data{reinterpret_cast<unsigned char *>(std::malloc(sq.statedSize))},
           statedSize{sq.statedSize}, actualCapacity{sq.statedSize},
-          stack (sq.stack)
+          stack(sq.stack)
     {
-        memcpy (data, sq.data, static_cast<size_t> (statedSize));
+        memcpy(data, sq.data, static_cast<size_t>(statedSize));
         auto offset = stack.next - stack.origin;
         stack.origin = data;
         stack.next = stack.origin + offset;
-        stack.nextIndex = reinterpret_cast<dataIndex *> (
-          stack.origin + stack.dataSize - diSize);
+        stack.nextIndex =
+          reinterpret_cast<dataIndex *>(stack.origin + stack.dataSize - diSize);
         stack.nextIndex -= stack.dataCount;
     }
 
-    StackBuffer &operator= (StackBuffer &&sq) noexcept
+    StackBuffer &operator=(StackBuffer &&sq) noexcept
     {
         if (data != nullptr)
         {
-            std::free (data);
+            std::free(data);
         }
         data = sq.data;
         statedSize = sq.statedSize;
         actualCapacity = sq.actualCapacity;
-        stack = std::move (sq.stack);
+        stack = std::move(sq.stack);
         sq.data = nullptr;
         sq.statedSize = 0;
         sq.stack.dataSize = 0;
@@ -196,22 +196,22 @@ class StackBuffer
         sq.stack.nextIndex = nullptr;
         return *this;
     }
-    StackBuffer &operator= (const StackBuffer &sq)
+    StackBuffer &operator=(const StackBuffer &sq)
     {
         stack = sq.stack;
-        resizeMemory (sq.statedSize);
-        std::memcpy (data, sq.data, sq.statedSize);
+        resizeMemory(sq.statedSize);
+        std::memcpy(data, sq.data, sq.statedSize);
 
         auto offset = stack.next - stack.origin;
         stack.origin = data;
         stack.next = stack.origin + offset;
-        stack.nextIndex = reinterpret_cast<dataIndex *> (
-          stack.origin + stack.dataSize - diSize);
+        stack.nextIndex =
+          reinterpret_cast<dataIndex *>(stack.origin + stack.dataSize - diSize);
         stack.nextIndex -= stack.dataCount;
         return *this;
     }
 
-    bool resize (int newsize)
+    bool resize(int newsize)
     {
         if (newsize < 0)
         {
@@ -223,21 +223,21 @@ class StackBuffer
         }
         if (stack.dataCount == 0)
         {
-            resizeMemory (newsize);
-            stack = StackBufferRaw (data, newsize);
+            resizeMemory(newsize);
+            stack = StackBufferRaw(data, newsize);
         }
         else if (newsize > statedSize)
         {
-            resizeMemory (newsize);
+            resizeMemory(newsize);
             int indexOffset = stack.dataSize - diSize * stack.dataCount;
             int newOffset = newsize - diSize * stack.dataCount;
-            memmove (data + newOffset, data + indexOffset,
-                     static_cast<size_t> (diSize) *
-                       static_cast<size_t> (stack.dataCount));
+            memmove(data + newOffset, data + indexOffset,
+                    static_cast<size_t>(diSize) *
+                      static_cast<size_t>(stack.dataCount));
             stack.dataSize = newsize;
             stack.origin = data;
             stack.next = stack.origin + newsize;
-            stack.nextIndex = reinterpret_cast<dataIndex *> (
+            stack.nextIndex = reinterpret_cast<dataIndex *>(
               stack.origin + stack.dataSize - diSize);
             stack.nextIndex -= stack.dataCount;
         }
@@ -245,20 +245,20 @@ class StackBuffer
         {
             int indexOffset = stack.dataSize - diSize * stack.dataCount;
             int newOffset = newsize - diSize * stack.dataCount;
-            int dataOffset = static_cast<int> (stack.next - stack.origin);
+            int dataOffset = static_cast<int>(stack.next - stack.origin);
             if (newsize < dataOffset + diSize * stack.dataCount)
             {
-                throw (std::runtime_error (
+                throw(std::runtime_error(
                   "unable to resize, current data exceeds new "
                   "size, please empty stack before resizing"));
             }
-            memmove (data + newOffset, data + indexOffset,
-                     static_cast<size_t> (diSize) *
-                       static_cast<size_t> (stack.dataCount));
+            memmove(data + newOffset, data + indexOffset,
+                    static_cast<size_t>(diSize) *
+                      static_cast<size_t>(stack.dataCount));
             stack.dataSize = newsize;
             stack.origin = data;
             stack.next = stack.origin + newsize;
-            stack.nextIndex = reinterpret_cast<dataIndex *> (
+            stack.nextIndex = reinterpret_cast<dataIndex *>(
               stack.origin + stack.dataSize - diSize);
             stack.nextIndex -= stack.dataCount;
             statedSize = newsize;
@@ -266,44 +266,44 @@ class StackBuffer
         return (statedSize == newsize);
     }
     /** get the number of data blocks in the stack*/
-    int getCurrentCount () const { return stack.getCurrentCount (); }
+    int getCurrentCount() const { return stack.getCurrentCount(); }
     /** get the capacity of the stack*/
-    int capacity () const { return stack.capacity (); }
+    int capacity() const { return stack.capacity(); }
     /** get the actual capacity of the underlying data block which could be
      * different than the stack capacity this would be the limit that a resize
      * operation could handle without allocation*/
-    int rawBlockCapacity () const { return actualCapacity; }
+    int rawBlockCapacity() const { return actualCapacity; }
     /** check if space is available in the stack for a block of size sz*/
-    bool isSpaceAvailable (int sz) const { return stack.isSpaceAvailable (sz); }
+    bool isSpaceAvailable(int sz) const { return stack.isSpaceAvailable(sz); }
     /** check if the stack is empty*/
-    bool empty () const { return stack.empty (); }
+    bool empty() const { return stack.empty(); }
 
-    bool push (const unsigned char *block, int blockSize)
+    bool push(const unsigned char *block, int blockSize)
     {
-        return stack.push (block, blockSize);
+        return stack.push(block, blockSize);
     }
 
-    int nextDataSize () const { return stack.nextDataSize (); }
+    int nextDataSize() const { return stack.nextDataSize(); }
 
-    int pop (unsigned char *block, int maxSize)
+    int pop(unsigned char *block, int maxSize)
     {
-        return stack.pop (block, maxSize);
+        return stack.pop(block, maxSize);
     }
     /** reverse the order of the stack*/
-    void reverse () { stack.reverse (); }
+    void reverse() { stack.reverse(); }
     /** clear all data from a stack*/
-    void clear () { stack.clear (); }
+    void clear() { stack.clear(); }
 
-    void swap (StackBuffer &other) noexcept
+    void swap(StackBuffer &other) noexcept
     {
-        stack.swap (other.stack);
-        std::swap (data, other.data);
-        std::swap (actualCapacity, other.actualCapacity);
-        std::swap (statedSize, other.statedSize);
+        stack.swap(other.stack);
+        std::swap(data, other.data);
+        std::swap(actualCapacity, other.actualCapacity);
+        std::swap(statedSize, other.statedSize);
     }
 
   private:
-    void resizeMemory (int newsize)
+    void resizeMemory(int newsize)
     {
         if (newsize == statedSize)
         {
@@ -312,7 +312,7 @@ class StackBuffer
         if (newsize > actualCapacity)
         {
             auto buf =
-              reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
+              reinterpret_cast<unsigned char *>(std::realloc(data, newsize));
             if (buf == nullptr)
             {
                 return;

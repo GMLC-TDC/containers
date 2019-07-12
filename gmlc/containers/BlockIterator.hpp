@@ -25,84 +25,84 @@ class BlockIterator
   public:
     using constref = const typename std::remove_const<X>::type;
 
-    BlockIterator (OUTER &it, int startoffset)
+    BlockIterator(OUTER &it, int startoffset)
         : vec{it}, ptr{&((*it)[startoffset])}, offset{startoffset}
     {
-        static_assert (
-          std::is_same<std::remove_reference_t<decltype (*(*it))>, X>::value,
+        static_assert(
+          std::is_same<std::remove_reference_t<decltype(*(*it))>, X>::value,
           "OUTER *it must be dereferencable to a a type matching X");
     }
 
-    std::enable_if_t<!std::is_const<X>::value, X> &operator* () { return *ptr; }
-    constref &operator* () const { return *ptr; }
-    std::enable_if_t<!std::is_const<X>::value, X> *operator-> () { return ptr; }
-    constref *operator-> () const { return ptr; }
+    std::enable_if_t<!std::is_const<X>::value, X> &operator*() { return *ptr; }
+    constref &operator*() const { return *ptr; }
+    std::enable_if_t<!std::is_const<X>::value, X> *operator->() { return ptr; }
+    constref *operator->() const { return ptr; }
 
-    operator bool () const { return (ptr != nullptr); }
-    bool operator== (const BlockIterator &it) const
+    operator bool() const { return (ptr != nullptr); }
+    bool operator==(const BlockIterator &it) const
     {
         return ((vec == it.vec) && (offset == it.offset));
     }
-    bool operator!= (const BlockIterator &it) const
+    bool operator!=(const BlockIterator &it) const
     {
         return ((vec != it.vec) || (offset != it.offset));
     }
 
-    BlockIterator &operator+= (const ptrdiff_t &movement)
+    BlockIterator &operator+=(const ptrdiff_t &movement)
     {
         ptr += movement;
         offset += movement;
-        check ();
+        check();
         return (*this);
     }
-    BlockIterator &operator++ ()
+    BlockIterator &operator++()
     {
         ++ptr;
         ++offset;
-        check ();
+        check();
         return (*this);
     }
-    BlockIterator operator++ (int)
+    BlockIterator operator++(int)
     {
-        auto temp (*this);
+        auto temp(*this);
         ++(*this);
         return temp;
     }
-    BlockIterator operator+ (const ptrdiff_t &movement) const
+    BlockIterator operator+(const ptrdiff_t &movement) const
     {
-        auto temp (*this);
+        auto temp(*this);
         temp += movement;
         return temp;
     }
-    BlockIterator &operator-= (const ptrdiff_t &movement)
+    BlockIterator &operator-=(const ptrdiff_t &movement)
     {
         ptr -= movement;
         offset -= movement;
-        checkNeg ();
+        checkNeg();
         return (*this);
     }
-    BlockIterator &operator-- ()
+    BlockIterator &operator--()
     {
         --ptr;
         --offset;
-        checkNeg ();
+        checkNeg();
         return (*this);
     }
-    BlockIterator operator-- (int)
+    BlockIterator operator--(int)
     {
-        auto temp (*this);
+        auto temp(*this);
         --(*this);
         return temp;
     }
-    BlockIterator operator- (const ptrdiff_t &movement) const
+    BlockIterator operator-(const ptrdiff_t &movement) const
     {
-        auto temp (*this);
+        auto temp(*this);
         temp -= movement;
         return temp;
     }
 
   private:
-    void check ()
+    void check()
     {
         if (offset >= BLOCKSIZE)
         {
@@ -112,7 +112,7 @@ class BlockIterator
             ptr = &((*vec)[offset]);
         }
     }
-    void checkNeg ()
+    void checkNeg()
     {
         if (offset < 0)
         {

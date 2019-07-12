@@ -20,36 +20,36 @@ namespace containers
 class CircularBufferRaw
 {
   public:
-    CircularBufferRaw (unsigned char *dataBlock, int blockSize)
-        : origin (dataBlock), next_write (origin), next_read (origin),
-          capacity_ (blockSize)
+    CircularBufferRaw(unsigned char *dataBlock, int blockSize)
+        : origin(dataBlock), next_write(origin), next_read(origin),
+          capacity_(blockSize)
     {
     }
 
-    int capacity () const { return capacity_; }
-    bool isSpaceAvailable (int sz) const
+    int capacity() const { return capacity_; }
+    bool isSpaceAvailable(int sz) const
     {
         if (next_write >= next_read)
         {
             if ((capacity_ - (next_write - origin)) >=
-                static_cast<ptrdiff_t> (sz) + 4)
+                static_cast<ptrdiff_t>(sz) + 4)
             {
                 return true;
             }
-            if ((next_read - origin) >= static_cast<ptrdiff_t> (sz) + 4)
+            if ((next_read - origin) >= static_cast<ptrdiff_t>(sz) + 4)
             {
                 return true;
             }
             return false;
         }
-        if ((next_read - next_write) >= static_cast<ptrdiff_t> (sz) + 4)
+        if ((next_read - next_write) >= static_cast<ptrdiff_t>(sz) + 4)
         {
             return true;
         }
         return false;
     }
     // Return true if push was successful
-    bool push (const unsigned char *data, int blockSize)
+    bool push(const unsigned char *data, int blockSize)
     {
         if (blockSize <= 0)
         {
@@ -58,11 +58,12 @@ class CircularBufferRaw
         if (next_write >= next_read)
         {
             if ((capacity_ - (next_write - origin)) >=
-                static_cast<ptrdiff_t> (blockSize) + 4)
+                static_cast<ptrdiff_t>(blockSize) + 4)
             {
-                *(reinterpret_cast<int *> (next_write)) = blockSize;
-                memcpy (next_write + 4, data, blockSize);
-                next_write += static_cast<ptrdiff_t> (blockSize) + 4;
+                memcpy(next_write, &blockSize, sizeof(int));
+                // *(reinterpret_cast<int *>(next_write)) = blockSize;
+                memcpy(next_write + 4, data, blockSize);
+                next_write += static_cast<ptrdiff_t>(blockSize) + 4;
                 // loop around if there isn't really space for another block of
                 // at least 4 bytes and the next_read>origin
                 if (((capacity_ - (next_write - origin)) < 8) &&
@@ -73,55 +74,58 @@ class CircularBufferRaw
                 return true;
             }
             else if ((next_read - origin) >=
-                     static_cast<ptrdiff_t> (blockSize) + 4)
+                     static_cast<ptrdiff_t>(blockSize) + 4)
             {
-                *(reinterpret_cast<int *> (next_write)) = -1;
-                *(reinterpret_cast<int *> (origin)) = blockSize;
-                memcpy (origin + 4, data, blockSize);
+                int loc = -1;
+                memcpy(next_write, &loc, sizeof(int));
+                memcpy(origin, &blockSize, sizeof(int));
+                memcpy(origin + 4, data, blockSize);
                 next_write = origin + blockSize + 4;
                 return true;
             }
         }
         else if ((next_read - next_write) >=
-                 static_cast<ptrdiff_t> (blockSize) + 4)
+                 static_cast<ptrdiff_t>(blockSize) + 4)
         {
-            *(reinterpret_cast<int *> (next_write)) = blockSize;
-            memcpy (next_write + 4, data, blockSize);
-            next_write += static_cast<ptrdiff_t> (blockSize) + 4;
+            memcpy(next_write, &blockSize, sizeof(int));
+            memcpy(next_write + 4, data, blockSize);
+            next_write += static_cast<ptrdiff_t>(blockSize) + 4;
             return true;
         }
         return false;
     }
-    int nextDataSize () const
+    int nextDataSize() const
     {
         if (next_write == next_read)
         {
             return 0;
         }
-        int size = *(reinterpret_cast<int *> (next_read));
+        int size;
+        memcpy(&size, next_read, sizeof(int));
         if (size < 0)
         {
-            size = *(reinterpret_cast<int *> (origin));
+            memcpy(&size, origin, sizeof(int));
         }
         return size;
     }
     // Return number of bytes read.
-    int pop (unsigned char *data, int maxSize)
+    int pop(unsigned char *data, int maxSize)
     {
         if (next_write == next_read)
         {
             return 0;
         }
-        int size = *(reinterpret_cast<int *> (next_read));
+        int size;
+        memcpy(&size, next_read, sizeof(int));
         if (size < 0)
         {
             next_read = origin;
-            size = *(reinterpret_cast<int *> (next_read));
+            memcpy(&size, next_read, sizeof(int));
         }
         if (size <= maxSize)
         {
-            memcpy (data, next_read + 4, size);
-            next_read += static_cast<size_t> (size) + 4;
+            memcpy(data, next_read + 4, size);
+            next_read += static_cast<size_t>(size) + 4;
             if ((capacity_ - (next_read - origin)) < 8)
             {
                 next_read = origin;
@@ -131,9 +135,9 @@ class CircularBufferRaw
         return 0;
     }
     /** check if the block is Empty or not*/
-    bool empty () const { return (next_write == next_read); }
+    bool empty() const { return (next_write == next_read); }
     /** clear the buffer*/
-    void clear () { next_write = next_read = origin; }
+    void clear() { next_write = next_read = origin; }
 
   private:
     unsigned char *origin;
@@ -149,16 +153,16 @@ class CircularBufferRaw
 class CircularBuffer
 {
   public:
-    CircularBuffer () noexcept : buffer (nullptr, 0) {}
-    explicit CircularBuffer (int size)
-        : data (reinterpret_cast<unsigned char *> (std::malloc (size))),
-          actualSize{size}, actualCapacity{size}, buffer (data, size)
+    CircularBuffer() noexcept : buffer(nullptr, 0) {}
+    explicit CircularBuffer(int size)
+        : data(reinterpret_cast<unsigned char *>(std::malloc(size))),
+          actualSize{size}, actualCapacity{size}, buffer(data, size)
     {
     }
-    ~CircularBuffer () = default;
-    CircularBuffer (CircularBuffer &&cb) noexcept
-        : data{cb.data}, actualSize (cb.actualSize),
-          actualCapacity (cb.actualCapacity), buffer (std::move (cb.buffer))
+    ~CircularBuffer() = default;
+    CircularBuffer(CircularBuffer &&cb) noexcept
+        : data{cb.data}, actualSize(cb.actualSize),
+          actualCapacity(cb.actualCapacity), buffer(std::move(cb.buffer))
     {
         cb.data = nullptr;
         cb.actualSize = 0;
@@ -168,14 +172,14 @@ class CircularBuffer
         cb.buffer.next_read = nullptr;
         cb.buffer.next_write = nullptr;
     }
-    CircularBuffer (const CircularBuffer &cb)
-        : data{reinterpret_cast<unsigned char *> (std::malloc (cb.actualSize))},
+    CircularBuffer(const CircularBuffer &cb)
+        : data{reinterpret_cast<unsigned char *>(std::malloc(cb.actualSize))},
           actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
-          buffer (cb.buffer)
+          buffer(cb.buffer)
     {
         if (data != nullptr)
         {
-            memcpy (data, cb.data, actualSize);
+            memcpy(data, cb.data, actualSize);
             auto read_offset = buffer.next_read - buffer.origin;
             auto write_offset = buffer.next_write - buffer.origin;
             buffer.origin = data;
@@ -189,17 +193,17 @@ class CircularBuffer
         }
     }
 
-    CircularBuffer &operator= (CircularBuffer &&cb) noexcept
+    CircularBuffer &operator=(CircularBuffer &&cb) noexcept
     {
         if (data != nullptr)
         {
-            std::free (data);
+            std::free(data);
         }
         data = cb.data;
         actualSize = cb.actualSize;
         actualCapacity = cb.actualCapacity;
-        buffer = std::move (cb.buffer);
-        data = std::move (cb.data);
+        buffer = std::move(cb.buffer);
+        data = std::move(cb.data);
 
         cb.buffer.capacity_ = 0;
         cb.buffer.origin = nullptr;
@@ -207,11 +211,11 @@ class CircularBuffer
         cb.buffer.next_write = nullptr;
         return *this;
     }
-    CircularBuffer &operator= (const CircularBuffer &cb)
+    CircularBuffer &operator=(const CircularBuffer &cb)
     {
         buffer = cb.buffer;
-        resizeMemory (cb.actualSize);
-        std::memcpy (data, cb.data, cb.actualSize);
+        resizeMemory(cb.actualSize);
+        std::memcpy(data, cb.data, cb.actualSize);
 
         auto read_offset = buffer.next_read - buffer.origin;
         auto write_offset = buffer.next_write - buffer.origin;
@@ -221,24 +225,24 @@ class CircularBuffer
         return *this;
     }
 
-    void resize (int newsize)
+    void resize(int newsize)
     {
         if (newsize == buffer.capacity_)
         {
             return;
         }
-        if (buffer.empty ())
+        if (buffer.empty())
         {
-            resizeMemory (newsize);
-            buffer = CircularBufferRaw (data, newsize);
+            resizeMemory(newsize);
+            buffer = CircularBufferRaw(data, newsize);
         }
         else if (newsize > actualSize)
         {
-            resizeMemory (newsize);
+            resizeMemory(newsize);
             int read_offset =
-              static_cast<int> (buffer.next_read - buffer.origin);
+              static_cast<int>(buffer.next_read - buffer.origin);
             int write_offset =
-              static_cast<int> (buffer.next_write - buffer.origin);
+              static_cast<int>(buffer.next_write - buffer.origin);
             if (buffer.next_read < buffer.next_write)
             {
                 buffer.capacity_ = newsize;
@@ -249,8 +253,8 @@ class CircularBuffer
             else
             {
                 int readDiff = buffer.capacity_ - read_offset;
-                memmove (data + newsize - readDiff, data + read_offset,
-                         static_cast<size_t> (buffer.capacity_) - read_offset);
+                memmove(data + newsize - readDiff, data + read_offset,
+                        static_cast<size_t>(buffer.capacity_) - read_offset);
                 buffer.origin = data;
                 buffer.next_write = buffer.origin + write_offset;
                 buffer.next_read = buffer.origin + newsize - readDiff;
@@ -260,7 +264,7 @@ class CircularBuffer
         else  // smaller size
         {
             int read_offset =
-              static_cast<int> (buffer.next_read - buffer.origin);
+              static_cast<int>(buffer.next_read - buffer.origin);
             if (buffer.next_read < buffer.next_write)
             {
                 if (read_offset <= newsize)
@@ -272,13 +276,13 @@ class CircularBuffer
             else
             {
                 int write_offset =
-                  static_cast<int> (buffer.next_write - buffer.origin);
+                  static_cast<int>(buffer.next_write - buffer.origin);
                 int readDiff = buffer.capacity_ - read_offset;
                 if (readDiff + write_offset < newsize)
                 {
-                    memmove (data + newsize - readDiff, data + read_offset,
-                             static_cast<size_t> (buffer.capacity_) -
-                               read_offset);
+                    memmove(data + newsize - readDiff, data + read_offset,
+                            static_cast<size_t>(buffer.capacity_) -
+                              read_offset);
                     buffer.origin = data;
                     buffer.next_write = buffer.origin + write_offset;
                     buffer.next_read = buffer.origin + newsize - readDiff;
@@ -286,7 +290,7 @@ class CircularBuffer
                 }
                 else
                 {
-                    throw (std::runtime_error (
+                    throw(std::runtime_error(
                       "unable to resize, current data exceeds new size, please "
                       "empty buffer before resizing"));
                 }
@@ -294,29 +298,26 @@ class CircularBuffer
             actualSize = newsize;
         }
     }
-    int capacity () const { return buffer.capacity (); }
-    bool isSpaceAvailable (int sz) const
-    {
-        return buffer.isSpaceAvailable (sz);
-    }
-    bool empty () const { return buffer.empty (); }
+    int capacity() const { return buffer.capacity(); }
+    bool isSpaceAvailable(int sz) const { return buffer.isSpaceAvailable(sz); }
+    bool empty() const { return buffer.empty(); }
 
-    bool push (const unsigned char *block, int blockSize)
+    bool push(const unsigned char *block, int blockSize)
     {
-        return buffer.push (block, blockSize);
+        return buffer.push(block, blockSize);
     }
 
-    int next_data_size () const { return buffer.nextDataSize (); }
+    int next_data_size() const { return buffer.nextDataSize(); }
 
-    int pop (unsigned char *block, int maxSize)
+    int pop(unsigned char *block, int maxSize)
     {
-        return buffer.pop (block, maxSize);
+        return buffer.pop(block, maxSize);
     }
 
-    void clear () { buffer.clear (); }
+    void clear() { buffer.clear(); }
 
   private:
-    void resizeMemory (int newsize)
+    void resizeMemory(int newsize)
     {
         if (newsize == actualSize)
         {
@@ -325,7 +326,7 @@ class CircularBuffer
         if (newsize > actualCapacity)
         {
             auto buf =
-              reinterpret_cast<unsigned char *> (std::realloc (data, newsize));
+              reinterpret_cast<unsigned char *>(std::realloc(data, newsize));
             if (buf == nullptr)
             {
                 return;

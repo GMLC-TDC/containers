@@ -34,21 +34,21 @@ class AirLock
 {
   public:
     /** default constructor */
-    AirLock () = default;
+    AirLock() = default;
     /** try to load the airlock
     @return true if successful, false if not*/
     template <class Z>
-    bool try_load (Z &&val)
+    bool try_load(Z &&val)
     {  // all modifications to loaded should be inside the mutex otherwise this
        // will contain race conditions
-        if (!loaded.load (std::memory_order_acquire))
+        if (!loaded.load(std::memory_order_acquire))
         {
-            std::lock_guard<MUTEX> lock (door);
+            std::lock_guard<MUTEX> lock(door);
             // We can use relaxed here since we are behind the mutex
-            if (!loaded.load (std::memory_order_relaxed))
+            if (!loaded.load(std::memory_order_relaxed))
             {
-                data = std::forward<Z> (val);
-                loaded.store (true, std::memory_order_release);
+                data = std::forward<Z>(val);
+                loaded.store(true, std::memory_order_release);
                 return true;
             }
         }
@@ -58,22 +58,22 @@ class AirLock
     @details the call will block until the airlock is ready to be loaded
     */
     template <class Z>
-    void load (Z &&val)
+    void load(Z &&val)
     {
-        std::unique_lock<MUTEX> lock (door);
-        if (!loaded.load (std::memory_order_relaxed))
+        std::unique_lock<MUTEX> lock(door);
+        if (!loaded.load(std::memory_order_relaxed))
         {
-            data = std::forward<Z> (val);
-            loaded.store (true, std::memory_order_release);
+            data = std::forward<Z>(val);
+            loaded.store(true, std::memory_order_release);
         }
         else
         {
-            while (loaded.load (std::memory_order_acquire))
+            while (loaded.load(std::memory_order_acquire))
             {
-                condition.wait (lock);
+                condition.wait(lock);
             }
-            data = std::forward<Z> (val);
-            loaded.store (true, std::memory_order_release);
+            data = std::forward<Z>(val);
+            loaded.store(true, std::memory_order_release);
         }
     }
 
@@ -81,17 +81,17 @@ class AirLock
     @return the value is returned in an optional which needs to be checked if it
     contains a value
     */
-    opt<T> try_unload ()
+    opt<T> try_unload()
     {
-        if (loaded.load (std::memory_order_acquire))
+        if (loaded.load(std::memory_order_acquire))
         {
-            std::lock_guard<MUTEX> lock (door);
+            std::lock_guard<MUTEX> lock(door);
             // can use relaxed since we are behind a mutex
-            if (loaded.load (std::memory_order_relaxed))
+            if (loaded.load(std::memory_order_relaxed))
             {
-                opt<T> val{std::move (data)};
-                loaded.store (false, std::memory_order_release);
-                condition.notify_one ();
+                opt<T> val{std::move(data)};
+                loaded.store(false, std::memory_order_release);
+                condition.notify_one();
                 return val;
             }
         }
@@ -101,7 +101,7 @@ class AirLock
     @details this may or may  not mean anything depending on usage
     it is correct but may be incorrect immediately after the call
     */
-    bool isLoaded () const { return loaded.load (std::memory_order_acquire); }
+    bool isLoaded() const { return loaded.load(std::memory_order_acquire); }
 
   private:
     std::atomic_bool loaded{

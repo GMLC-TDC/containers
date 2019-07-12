@@ -37,71 +37,71 @@ class SimpleQueue
       true};  //!< flag indicating the queue is Empty
   public:
     /** default constructor */
-    SimpleQueue () = default;
+    SimpleQueue() = default;
     /** destructor*/
-    ~SimpleQueue ()
+    ~SimpleQueue()
     {
         // these locks are primarily for memory synchronization multiple access
         // in the destructor would be a bad thing
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        std::lock_guard<MUTEX> pushLock (m_pushLock);  // second pushLock
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
         /** clear the elements as part of the destruction while the locks are
          * engaged*/
-        pushElements.clear ();
-        pullElements.clear ();
+        pushElements.clear();
+        pullElements.clear();
     }
     /** constructor with a reservation size
     @param capacity  the initial storage capacity of the queue*/
-    explicit SimpleQueue (size_t capacity)
+    explicit SimpleQueue(size_t capacity)
     {  // don't need to lock since we aren't out of the constructor yet
-        pushElements.reserve (capacity);
-        pullElements.reserve (capacity);
+        pushElements.reserve(capacity);
+        pullElements.reserve(capacity);
     }
     /** enable the move constructor not the copy constructor*/
-    SimpleQueue (SimpleQueue &&sq) noexcept
-        : pushElements (std::move (sq.pushElements)),
-          pullElements (std::move (sq.pullElements))
+    SimpleQueue(SimpleQueue &&sq) noexcept
+        : pushElements(std::move(sq.pushElements)),
+          pullElements(std::move(sq.pullElements))
     {
-        queueEmptyFlag = pullElements.empty ();
+        queueEmptyFlag = pullElements.empty();
     }
 
     /** enable the move assignment not the copy assignment*/
-    SimpleQueue &operator= (SimpleQueue &&sq) noexcept
+    SimpleQueue &operator=(SimpleQueue &&sq) noexcept
     {
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        std::lock_guard<MUTEX> pushLock (m_pushLock);  // second pushLock
-        pushElements = std::move (sq.pushElements);
-        pullElements = std::move (sq.pullElements);
-        queueEmptyFlag = pullElements.empty ();
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+        pushElements = std::move(sq.pushElements);
+        pullElements = std::move(sq.pullElements);
+        queueEmptyFlag = pullElements.empty();
         return *this;
     }
     /** DISABLE_COPY_AND_ASSIGN */
-    SimpleQueue (const SimpleQueue &) = delete;
-    SimpleQueue &operator= (const SimpleQueue &) = delete;
+    SimpleQueue(const SimpleQueue &) = delete;
+    SimpleQueue &operator=(const SimpleQueue &) = delete;
 
     /** check whether there are any elements in the queue
     because this is meant for multi threaded applications this may or may not
     have any meaning depending on the number of consumers
     */
-    bool empty () const
+    bool empty() const
     {
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        return pullElements.empty ();
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        return pullElements.empty();
     }
     /** get the current size of the queue*/
-    size_t size () const
+    size_t size() const
     {
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        std::lock_guard<MUTEX> pushLock (m_pushLock);  // second pushLock
-        return pullElements.size () + pushElements.size ();
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+        return pullElements.size() + pushElements.size();
     }
     /** clear the queue*/
-    void clear ()
+    void clear()
     {
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        std::lock_guard<MUTEX> pushLock (m_pushLock);  // second pushLock
-        pullElements.clear ();
-        pushElements.clear ();
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+        pullElements.clear();
+        pushElements.clear();
         queueEmptyFlag = true;
     }
     /** set the capacity of the queue
@@ -109,50 +109,49 @@ class SimpleQueue
     two vectors internally
     @param capacity  the capacity to reserve
     */
-    void reserve (size_t capacity)
+    void reserve(size_t capacity)
     {
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        std::lock_guard<MUTEX> pushLock (m_pushLock);  // second pushLock
-        pullElements.reserve (capacity);
-        pushElements.reserve (capacity);
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+        pullElements.reserve(capacity);
+        pushElements.reserve(capacity);
     }
 
     /** push an element onto the queue
     val the value to push on the queue
     */
     template <class Z>
-    void push (Z &&val)  // forwarding reference
+    void push(Z &&val)  // forwarding reference
     {
-        std::unique_lock<MUTEX> pushLock (
+        std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty ())
+        if (!pushElements.empty())
         {
-            pushElements.push_back (std::forward<Z> (val));
+            pushElements.push_back(std::forward<Z>(val));
         }
         else
         {
             bool expEmpty = true;
-            if (queueEmptyFlag.compare_exchange_strong (expEmpty, false))
+            if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
             {
                 // release the push lock
-                pushLock.unlock ();
-                std::unique_lock<MUTEX> pullLock (
-                  m_pullLock);  // first pullLock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
                 queueEmptyFlag = false;
-                if (pullElements.empty ())
+                if (pullElements.empty())
                 {
-                    pullElements.push_back (std::forward<Z> (val));
-                    pullLock.unlock ();
+                    pullElements.push_back(std::forward<Z>(val));
+                    pullLock.unlock();
                 }
                 else
                 {
-                    pushLock.lock ();
-                    pushElements.push_back (std::forward<Z> (val));
+                    pushLock.lock();
+                    pushElements.push_back(std::forward<Z>(val));
                 }
             }
             else
             {
-                pushElements.push_back (std::forward<Z> (val));
+                pushElements.push_back(std::forward<Z>(val));
             }
         }
     }
@@ -160,41 +159,39 @@ class SimpleQueue
     /** push a vector onto the queue
         val the vector of values to push on the queue
         */
-    void pushVector (const std::vector<X> &val)  // universal reference
+    void pushVector(const std::vector<X> &val)  // universal reference
     {
-        std::unique_lock<MUTEX> pushLock (
+        std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty ())
+        if (!pushElements.empty())
         {
-            pushElements.insert (pushElements.end (), val.begin (), val.end ());
+            pushElements.insert(pushElements.end(), val.begin(), val.end());
         }
         else
         {
             bool expEmpty = true;
-            if (queueEmptyFlag.compare_exchange_strong (expEmpty, false))
+            if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
             {
                 // release the push lock
-                pushLock.unlock ();
-                std::unique_lock<MUTEX> pullLock (
-                  m_pullLock);  // first pullLock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
                 queueEmptyFlag = false;
-                if (pullElements.empty ())
+                if (pullElements.empty())
                 {
-                    pullElements.insert (pullElements.end (), val.rbegin (),
-                                         val.rend ());
-                    pullLock.unlock ();
+                    pullElements.insert(pullElements.end(), val.rbegin(),
+                                        val.rend());
+                    pullLock.unlock();
                 }
                 else
                 {
-                    pushLock.lock ();
-                    pushElements.insert (pushElements.end (), val.begin (),
-                                         val.end ());
+                    pushLock.lock();
+                    pushElements.insert(pushElements.end(), val.begin(),
+                                        val.end());
                 }
             }
             else
             {
-                pushElements.insert (pushElements.end (), val.begin (),
-                                     val.end ());
+                pushElements.insert(pushElements.end(), val.begin(), val.end());
             }
         }
     }
@@ -203,38 +200,37 @@ class SimpleQueue
     val the value to emplace on the queue
     */
     template <class... Args>
-    void emplace (Args &&... args)
+    void emplace(Args &&... args)
     {
-        std::unique_lock<MUTEX> pushLock (
+        std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty ())
+        if (!pushElements.empty())
         {
-            pushElements.emplace_back (std::forward<Args> (args)...);
+            pushElements.emplace_back(std::forward<Args>(args)...);
         }
         else
         {
             bool expEmpty = true;
-            if (queueEmptyFlag.compare_exchange_strong (expEmpty, false))
+            if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
             {
                 // release the push lock
-                pushLock.unlock ();
-                std::unique_lock<MUTEX> pullLock (
-                  m_pullLock);  // first pullLock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
                 queueEmptyFlag = false;
-                if (pullElements.empty ())
+                if (pullElements.empty())
                 {
-                    pullElements.emplace_back (std::forward<Args> (args)...);
-                    pullLock.unlock ();
+                    pullElements.emplace_back(std::forward<Args>(args)...);
+                    pullLock.unlock();
                 }
                 else
                 {
-                    pushLock.lock ();
-                    pushElements.emplace_back (std::forward<Args> (args)...);
+                    pushLock.lock();
+                    pushElements.emplace_back(std::forward<Args>(args)...);
                 }
             }
             else
             {
-                pushElements.emplace_back (std::forward<Args> (args)...);
+                pushElements.emplace_back(std::forward<Args>(args)...);
             }
         }
     }
@@ -247,34 +243,33 @@ class SimpleQueue
     @return an empty optional if there is no element otherwise the optional will
     contain a value
     */
-    opt<X> pop ()
+    opt<X> pop()
     {
-        std::lock_guard<MUTEX> pullLock (m_pullLock);  // first pullLock
-        if (pullElements.empty ())
+        std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+        if (pullElements.empty())
         {
-            std::unique_lock<MUTEX> pushLock (m_pushLock);  // second pushLock
-            if (!pushElements.empty ())
+            std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
+            if (!pushElements.empty())
             {  // on the off chance the queue got out of sync
-                std::swap (pushElements, pullElements);
-                pushLock.unlock ();  // we can free the push function to accept
-                                     // more elements after the swap call;
-                std::reverse (pullElements.begin (), pullElements.end ());
-                opt<X> val (std::move (
+                std::swap(pushElements, pullElements);
+                pushLock.unlock();  // we can free the push function to accept
+                                    // more elements after the swap call;
+                std::reverse(pullElements.begin(), pullElements.end());
+                opt<X> val(std::move(
                   pullElements
-                    .back ()));  // do it this way to allow moveable only types
-                pullElements.pop_back ();
-                if (pullElements.empty ())
+                    .back()));  // do it this way to allow moveable only types
+                pullElements.pop_back();
+                if (pullElements.empty())
                 {
-                    pushLock.lock ();  // second pushLock
+                    pushLock.lock();  // second pushLock
                     if (!pushElements
-                           .empty ())  // more elements could have been added
+                           .empty())  // more elements could have been added
                     {  // this is the potential for slow operations
-                        std::swap (pushElements, pullElements);
+                        std::swap(pushElements, pullElements);
                         // we can free the push function to accept more elements
                         // after the swap call;
-                        pushLock.unlock ();
-                        std::reverse (pullElements.begin (),
-                                      pullElements.end ());
+                        pushLock.unlock();
+                        std::reverse(pullElements.begin(), pullElements.end());
                     }
                     else
                     {
@@ -286,20 +281,19 @@ class SimpleQueue
             queueEmptyFlag = true;
             return {};  // return the empty optional
         }
-        opt<X> val (std::move (
-          pullElements
-            .back ()));  // do it this way to allow moveable only types
-        pullElements.pop_back ();
-        if (pullElements.empty ())
+        opt<X> val(std::move(
+          pullElements.back()));  // do it this way to allow moveable only types
+        pullElements.pop_back();
+        if (pullElements.empty())
         {
-            std::unique_lock<MUTEX> pushLock (m_pushLock);  // second pushLock
-            if (!pushElements.empty ())
+            std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
+            if (!pushElements.empty())
             {  // this is the potential for slow operations
-                std::swap (pushElements, pullElements);
+                std::swap(pushElements, pullElements);
                 // we can free the push function to accept more elements after
                 // the swap call;
-                pushLock.unlock ();
-                std::reverse (pullElements.begin (), pullElements.end ());
+                pushLock.unlock();
+                std::reverse(pullElements.begin(), pullElements.end());
             }
             else
             {
@@ -314,16 +308,16 @@ class SimpleQueue
     @return an optional object with an object of type T if available
     */
     template <typename = std::enable_if<std::is_copy_assignable<X>::value>>
-    opt<X> peek () const
+    opt<X> peek() const
     {
-        std::lock_guard<MUTEX> lock (m_pullLock);
+        std::lock_guard<MUTEX> lock(m_pullLock);
 
-        if (pullElements.empty ())
+        if (pullElements.empty())
         {
             return {};
         }
 
-        auto t = pullElements.back ();
+        auto t = pullElements.back();
         return t;
     }
 };

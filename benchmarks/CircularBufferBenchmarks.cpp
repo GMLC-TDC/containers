@@ -10,51 +10,51 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 using namespace gmlc::containers;
 
-static void BM_BufferPushPop (benchmark::State &state)
+static void BM_BufferPushPop(benchmark::State &state)
 {
-    CircularBuffer buf (state.range (0));
-    int rsize = state.range (0) / 4;
+    CircularBuffer buf(state.range(0));
+    int rsize = state.range(0) / 4;
     unsigned char *dblock = new unsigned char[rsize];
     unsigned char *rblock = new unsigned char[rsize];
     for (int ii = 0; ii < rsize; ++ii)
     {
         dblock[ii] = (unsigned char)(ii & 0xFF);
     }
-    buf.push (dblock, rsize);
-    buf.pop (rblock, rsize);
+    buf.push(dblock, rsize);
+    buf.pop(rblock, rsize);
     for (auto _ : state)
     {
-        buf.push (dblock, rsize - 2);
-        buf.pop (rblock, rsize);
+        buf.push(dblock, rsize - 2);
+        buf.pop(rblock, rsize);
     }
 }
 // Register the function as a benchmark
-BENCHMARK (BM_BufferPushPop)->Range (128, 8 << 20);
+BENCHMARK(BM_BufferPushPop)->Range(128, 8 << 20);
 
-static void BM_BufferPushPopWrap (benchmark::State &state)
+static void BM_BufferPushPopWrap(benchmark::State &state)
 {
-    int rsize = state.range (0) / 4;
-    CircularBuffer buf (state.range (0));
+    int rsize = state.range(0) / 4;
+    CircularBuffer buf(state.range(0));
     unsigned char *dblock = new unsigned char[rsize];
     unsigned char *rblock = new unsigned char[rsize];
     for (int ii = 0; ii < rsize; ++ii)
     {
         dblock[ii] = (unsigned char)(ii & 0xFF);
     }
-    buf.push (dblock, rsize);
-    buf.pop (rblock, rsize);
-    buf.push (dblock, rsize);
-    buf.pop (rblock, rsize);
-    buf.push (dblock, rsize);
-    buf.pop (rblock, rsize);
+    buf.push(dblock, rsize);
+    buf.pop(rblock, rsize);
+    buf.push(dblock, rsize);
+    buf.pop(rblock, rsize);
+    buf.push(dblock, rsize);
+    buf.pop(rblock, rsize);
     for (auto _ : state)
     {
-        buf.push (dblock, rsize - 2);
-        buf.pop (rblock, rsize);
+        buf.push(dblock, rsize - 2);
+        buf.pop(rblock, rsize);
     }
 }
 // Register the function as a benchmark
-BENCHMARK (BM_BufferPushPopWrap)->Range (128, 8 << 20);
+BENCHMARK(BM_BufferPushPopWrap)->Range(128, 8 << 20);
 
 /*
 TEST (CircBuff_tests, test_circularbuffraw_simple)
