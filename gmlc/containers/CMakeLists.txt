@@ -21,6 +21,8 @@ set(
   StableBlockDeque.hpp
   BlockIterator.hpp
   optionalDefinition.hpp
+  TimeSeries.hpp
+  TimeSeriesMulti.hpp
 )
 
 set(
