@@ -16,7 +16,7 @@ A raw data stack taking blocks of raw memory in a LIFO queue.  It works on chunk
 A raw data FIFO queue as a circular buffer.   The buffer and element indexing is generated in a raw data block.  The underlying class itself consists of 3 pointers and a capacity value.  A wrapper class around the raw stack can manage memory, whereas the raw CircularBuffer operates on a given raw memory block.  
 
 ### StableBlockVector
-The stable block vector works like std::vector with a few exceptions.  The memory is not contiguous but is instead allocated in specific block sizes which contain a specified number of the elements.  The intention is to have a stable growth pattern and maintain reference and pointer stability on any elements.  Similar to deque but with no push/pop front.  It does not allow insertion or removal of elements except at the end.   This means any elements are never moved by the Class itself once the initial creation has occured.  It can take a custom allocator and might be ideal to have a block allocator.  It has begin and end() and works with range based for loops.  The iterators are random access so can be used with various algorithms from the standard library.  
+The stable block vector works like std::vector with a few exceptions.  The memory is not contiguous but is instead allocated in specific block sizes which contain a specified number of the elements.  The intention is to have a stable growth pattern and maintain reference and pointer stability on any elements.  Similar to deque but with no push/pop front.  It does not allow insertion or removal of elements except at the end.   This means any elements are never moved by the Class itself once the initial creation has occurred.  It can take a custom allocator and might be ideal to have a block allocator.  It has begin and end() and works with range based for loops.  The iterators are random access so can be used with various algorithms from the standard library.  
 
 ### StableBlockDeque
 Very similar to stableBlockVector but has push/pop front and can grow and contract on both sides.   But is very similar in concept to std::deque.  The memory blocks are reused once allocated, but can be freed with the `shink_to_fit()` method.  
@@ -38,6 +38,12 @@ Similar to MappedPointerVector but with two search terms.
 
 ### MapTraits  
 Not a container but some typetraits that help in the construction of the containers.  
+
+### TimeSeries
+A container representing a timeseries of data
+
+### TimeSeriesMulti
+Similar to TimeSeries, except allows multiple data series for each time series
 
 ## ThreadSafe Queues
 These containers are intended for the purpose of transferring data between threads.  The general idea is that the containers have two vectors in them one for the push data and one for the pull data. So producers and consumer threads interact less often.  This is generally better performant than a simple queue protected with a mutex.  The mutex type and condition variable for the blocking queues is a template parameter.   The characteristics are mostly independent but occasional longer blocking periods as the vectors swap and reverse.  So if you need stable insert and pop times this may  not be ideal.  These are NOT lock-free data types they most definitely use locks.  

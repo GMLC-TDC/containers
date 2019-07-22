@@ -24,6 +24,8 @@ set(CONTAINERS_TESTS
 	PriorityBlockingQueueTests
 	StableBlockDequeTests
 	StableBlockVectorTests
+	TimeSeriesTests
+	TimeSeriesMultiTests
     )
 
 # Only affects current directory, so safe
