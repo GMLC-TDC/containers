@@ -33,9 +33,14 @@ class BlockIterator
           "OUTER *it must be dereferencable to a a type matching X");
     }
 
-    std::enable_if_t<!std::is_const<X>::value, X> &operator*() { return *ptr; }
+    // std::enable_if_t<!std::is_const<X>::value, X> &operator*() { return *ptr;
+    // }
+    X &operator*() { return *ptr; }
     constref &operator*() const { return *ptr; }
-    std::enable_if_t<!std::is_const<X>::value, X> *operator->() { return ptr; }
+    // std::enable_if_t<!std::is_const<X>::value, X> *operator->() { return ptr;
+    // }
+    X *operator->() { return ptr; }
+
     constref *operator->() const { return ptr; }
 
     operator bool() const { return (ptr != nullptr); }

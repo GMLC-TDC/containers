@@ -33,7 +33,7 @@ class StableBlockDeque
   public:
     static constexpr unsigned int blockSize{1u << N};
     using iterator = BlockIterator<X, (1u << N), X **>;
-    using const_iterator = BlockIterator<const X, (1u << N), X *const *>;
+    using const_iterator = BlockIterator<const X, (1u << N), const X *const *>;
 
   private:
     static constexpr unsigned int cntmask{blockSize - 1};
@@ -361,12 +361,12 @@ class StableBlockDeque
     {
         if (fsize == blockSize - 1)
         {
-            X **ptr = &(dataptr[dataSlotFront + 1]);
+            const X *const *ptr = &(dataptr[dataSlotFront + 1]);
             return {ptr, 0};
         }
         else
         {
-            X **ptr = &(dataptr[dataSlotFront]);
+            const X *const *ptr = &(dataptr[dataSlotFront]);
             return {ptr, fsize + 1};
         }
     }
@@ -375,12 +375,12 @@ class StableBlockDeque
     {
         if (bsize == blockSize)
         {
-            X **ptr = &(dataptr[dataSlotBack + 1]);
+            const X *const *ptr = &(dataptr[dataSlotBack + 1]);
             return {ptr, 0};
         }
         else
         {
-            X **ptr = &(dataptr[dataSlotBack]);
+            const X *const *ptr = &(dataptr[dataSlotBack]);
             return {ptr, bsize};
         }
     }

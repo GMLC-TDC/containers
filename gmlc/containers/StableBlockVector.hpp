@@ -33,7 +33,7 @@ class StableBlockVector
   public:
     static constexpr unsigned int blockSize{1u << N};
     using iterator = BlockIterator<X, (1u << N), X **>;
-    using const_iterator = BlockIterator<const X, (1u << N), X *const *>;
+    using const_iterator = BlockIterator<const X, (1u << N), const X *const *>;
 
   private:
     static constexpr unsigned int cntmask{blockSize - 1};
@@ -277,18 +277,22 @@ class StableBlockVector
         }
     }
 
-    const_iterator begin() const { return {dataptr, 0}; }
+    const_iterator begin() const
+    {
+        const X *const *ptr = dataptr;
+        return {ptr, 0};
+    }
 
     const_iterator end() const
     {
         if (bsize == blockSize)
         {
-            X **ptr = &(dataptr[dataSlotIndex + 1]);
+            const X *const *ptr = &(dataptr[dataSlotIndex + 1]);
             return {ptr, 0};
         }
         else
         {
-            X **ptr = &(dataptr[dataSlotIndex]);
+            const X *const *ptr = &(dataptr[dataSlotIndex]);
             return {ptr, bsize};
         }
     }

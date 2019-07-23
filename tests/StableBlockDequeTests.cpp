@@ -64,6 +64,104 @@ TEST(stackBlockDequeTest, test_iterator)
     EXPECT_EQ(ii, 5);
 }
 
+TEST(stackBlockDequeTest, test_iterator2)
+{
+    StableBlockDeque<std::string, 2> sbv;
+    sbv.push_back("bob");
+    sbv.emplace_back("bob2");
+    sbv.emplace_back("bob3");
+    sbv.emplace_back("bob4");
+    EXPECT_EQ(sbv.size(), 4);
+    auto it = sbv.begin();
+    EXPECT_EQ(*it, "bob");
+    ++it;
+    EXPECT_EQ(*it, "bob2");
+    it++;
+    EXPECT_EQ(*it, "bob3");
+    --it;
+    EXPECT_EQ(*it, "bob2");
+    it += 2;
+    EXPECT_EQ(*it--, "bob4");
+    EXPECT_EQ(*it, "bob3");
+    it -= 2;
+    EXPECT_EQ(*it, "bob");
+    int ii = 0;
+    while (it != sbv.end())
+    {
+        ++ii;
+        ++it;
+    }
+    EXPECT_EQ(ii, 4);
+}
+
+TEST(stackBlockDequeTest, test_const_iterator)
+{
+    StableBlockDeque<std::string, 2> sbv;
+    sbv.push_back("bob");
+    sbv.emplace_back("bob2");
+    sbv.emplace_back("bob3");
+    sbv.emplace_back("bob4");
+    sbv.emplace_back("bob5");
+
+    const auto &sbvc = sbv;
+    EXPECT_EQ(sbvc.size(), 5);
+    auto it = sbvc.begin();
+    EXPECT_EQ(*it, "bob");
+    ++it;
+    EXPECT_EQ(*it, "bob2");
+    it++;
+    EXPECT_EQ(*it, "bob3");
+    --it;
+    EXPECT_EQ(*it, "bob2");
+    it += 1;
+    EXPECT_EQ(*it, "bob3");
+    it += 2;
+    EXPECT_EQ(*it, "bob5");
+    it -= 1;
+    EXPECT_EQ(*it--, "bob4");
+    EXPECT_EQ(*it, "bob3");
+    it -= 2;
+    EXPECT_EQ(*it, "bob");
+    int ii = 0;
+    while (it != sbvc.end())
+    {
+        ++ii;
+        ++it;
+    }
+    EXPECT_EQ(ii, 5);
+}
+
+TEST(stackBlockDequeTest, test_const_iterator2)
+{
+    StableBlockDeque<std::string, 2> sbv;
+    sbv.push_back("bob");
+    sbv.emplace_back("bob2");
+    sbv.emplace_back("bob3");
+    sbv.emplace_back("bob4");
+    const auto &sbvc = sbv;
+    EXPECT_EQ(sbvc.size(), 4);
+    auto it = sbvc.begin();
+    EXPECT_EQ(*it, "bob");
+    ++it;
+    EXPECT_EQ(*it, "bob2");
+    it++;
+    EXPECT_EQ(*it, "bob3");
+    --it;
+    EXPECT_EQ(*it, "bob2");
+    it += 2;
+    EXPECT_EQ(*it--, "bob4");
+    EXPECT_EQ(*it, "bob3");
+    it -= 2;
+    EXPECT_EQ(*it, "bob");
+    int ii = 0;
+    while (it != sbvc.end())
+    {
+        ++ii;
+        ++it;
+    }
+    EXPECT_EQ(ii, 4);
+}
+
 TEST(stackBlockDequeTest, test_simple)
 {
     StableBlockDeque<std::string, 2> sbd;
@@ -86,7 +184,7 @@ TEST(stackBlockDequeTest, test_simple)
     for (const auto &el : sbd)
     {
         (void)(el);
-        std::cout << el << "--";
+        // std::cout << el << "--";
         ++ii;
     }
     EXPECT_EQ(sbd.size(), 14);
