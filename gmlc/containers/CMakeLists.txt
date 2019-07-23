@@ -22,6 +22,7 @@ set(
   BlockIterator.hpp
   optionalDefinition.hpp
   mapOps.hpp
+  WorkQueue.hpp
 )
 
 set(
