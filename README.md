@@ -39,11 +39,8 @@ Similar to MappedPointerVector but with two search terms.
 ### MapTraits  
 Not a container but some typetraits that help in the construction of the containers.  
 
-### TimeSeries
-A container representing a timeseries of data
-
-### TimeSeriesMulti
-Similar to TimeSeries, except allows multiple data series for each time series
+### MapOps
+Some Common operations on a map
 
 ## ThreadSafe Queues
 These containers are intended for the purpose of transferring data between threads.  The general idea is that the containers have two vectors in them one for the push data and one for the pull data. So producers and consumer threads interact less often.  This is generally better performant than a simple queue protected with a mutex.  The mutex type and condition variable for the blocking queues is a template parameter.   The characteristics are mostly independent but occasional longer blocking periods as the vectors swap and reverse.  So if you need stable insert and pop times this may  not be ideal.  These are NOT lock-free data types they most definitely use locks.  
@@ -62,3 +59,7 @@ Add a priority channel to the BlockingQueue so data can be inserted at high or n
 ### AirLock
 
 A threadsafe container for transferring a single object between thread.  Its intention is to transfer objects between threads in an asynchronous fashion.  Sort of like a reusable promise/future object,  or a single element blockingQueue.  The one interesting use case was to store a std::any object in a mailbox that was opened as a message went through processing.  The message contained the location and type information, while the Airlock held the actual data waiting for the message to be delivered.  
+
+### WorkQueue
+
+A threaded WorkQueue using a set of 3 SimpleQueue object.  work blocks are added with a priority high/medium/low.   High is executed first,  medium and low are rotated with a priority ratio  N medium block for each low block, if both are full.  
