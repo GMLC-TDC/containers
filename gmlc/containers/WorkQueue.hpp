@@ -492,9 +492,9 @@ value)
     WorkQueue(WorkQueue const &) = delete;
     WorkQueue &operator=(WorkQueue const &) = delete;
 
-    std::atomic<int> priorityRatio =
-      defaultPriorityRatio;  //!< the ratio of medium Priority blocks to low
-                             //!< priority blocks
+    std::atomic<int> priorityRatio{
+      defaultPriorityRatio};  //!< the ratio of medium Priority blocks to low
+                              //!< priority blocks
 
     SimpleQueue<std::shared_ptr<basicWorkBlock>>
       workToDoHigh;  //!< queue containing the work to do
