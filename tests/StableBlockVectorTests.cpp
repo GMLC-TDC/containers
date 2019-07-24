@@ -257,7 +257,7 @@ TEST(stableBlockVectorTest, copy_constructor)
 {
     StableBlockVector<std::string, 7> sbv{15,
                                           "this is an exciting long string"};
-    auto sbv2{sbv};
+    auto sbv2 = sbv;
     EXPECT_EQ(sbv2.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii)
     {
@@ -265,7 +265,7 @@ TEST(stableBlockVectorTest, copy_constructor)
     }
 
     StableBlockVector<std::string, 4> sbv_s;
-    auto sbvd{sbv_s};
+    auto sbvd = sbv_s;
     EXPECT_TRUE(sbvd.empty());
 }
 
@@ -273,7 +273,7 @@ TEST(stableBlockVectorTest, move_constructor)
 {
     StableBlockVector<std::string, 7> sbv{15,
                                           "this is an exciting long string"};
-    auto sbv2{std::move(sbv)};
+    auto sbv2 = std::move(sbv);
     EXPECT_EQ(sbv2.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii)
     {
