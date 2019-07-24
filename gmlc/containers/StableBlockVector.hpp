@@ -80,20 +80,17 @@ class StableBlockVector
         }
     }
 
-    StableBlockVector(const StableBlockVector &sbv) : StableBlockVector()
+    StableBlockVector(const StableBlockVector &sbv)
     {
         if (sbv.dataptr != nullptr)
         {
             dataptr = new X *[sbv.dataSlotsAvailable];
             dataSlotsAvailable = sbv.dataSlotsAvailable;
-            dataptr[0] = getNewBlock();
+            dataSlotIndex = -1;
             assign(sbv.begin(), sbv.end());
         }
-        else
-        {
-            bsize = blockSize;
-        }
     }
+
     StableBlockVector(StableBlockVector &&sbv) noexcept
         : csize(sbv.csize), dataptr(sbv.dataptr),
           dataSlotsAvailable(sbv.dataSlotsAvailable),
@@ -105,6 +102,9 @@ class StableBlockVector
         sbv.freeSlotsAvailable = 0;
         sbv.dataSlotsAvailable = 0;
         sbv.dataptr = nullptr;
+        sbv.bsize = 0;
+        sbv.dataSlotIndex = -1;
+        sbv.csize = 0;
     }
 
     StableBlockVector &operator=(const StableBlockVector &sbv)
@@ -134,16 +134,19 @@ class StableBlockVector
     /** destructor*/
     ~StableBlockVector()
     {
-        clear();
-        Allocator a;
-        a.deallocate(dataptr[0], blockSize);
-        for (int ii = 0; ii < freeIndex; ++ii)
+        if (dataptr != nullptr)
         {
-            a.deallocate(freeblocks[ii], blockSize);
+            clear();
+            Allocator a;
+            a.deallocate(dataptr[0], blockSize);
+            for (int ii = 0; ii < freeIndex; ++ii)
+            {
+                a.deallocate(freeblocks[ii], blockSize);
+            }
+            // delete can handle a nullptr
+            delete[] freeblocks;
+            delete[] dataptr;
         }
-        // delete can handle a nullptr
-        delete[] freeblocks;
-        delete[] dataptr;
     }
 
     template <class... Args>
@@ -191,15 +194,43 @@ class StableBlockVector
     template <class InputIt>
     void assign(InputIt first, InputIt last)
     {
+        int ii = 0;
+        InputIt cur = first;
+        while (ii < csize && cur != last)
+        {
+            operator[](ii++) = *cur;
+            ++cur;
+        }
+        while (cur != last)
+        {
+            push_back(*cur);
+            ++cur;
+        }
     }
 
     template <class InputIt>
     void move_assign(InputIt first, InputIt last)
     {
+        int ii = 0;
+        InputIt cur = first;
+        while (ii < csize && cur != last)
+        {
+            operator[](ii++) = std::move(*cur);
+            ++cur;
+        }
+        while (cur != last)
+        {
+            emplace_back(std::move(*cur));
+            ++cur;
+        }
     }
 
     void clear() noexcept(std::is_nothrow_destructible<X>::value)
     {
+        if (dataSlotsAvailable <= 0)
+        {
+            return;
+        }
         for (int jj = bsize - 1; jj >= 0; --jj)
         {  // call destructors on the last block
             dataptr[dataSlotIndex][jj].~X();
