@@ -130,6 +130,21 @@ TEST(blocking_priority_queue_tests, emplace_tests)
     EXPECT_EQ(b->second, 34.1);
 }
 
+TEST(blocking_priority_queue_tests, clear_tests)
+{
+    BlockingPriorityQueue<int64_t> sq;
+    sq.push(10);
+    sq.push(100);
+    sq.push(1000);
+    sq.pop();
+    sq.push(20);
+    sq.push(20);
+    sq.pushPriority(9);
+    sq.pushPriority(18);
+    EXPECT_FALSE(sq.empty());
+    sq.clear();
+    EXPECT_TRUE(sq.empty());
+}
 /** test with single consumer/single producer*/
 TEST(blocking_priority_queue_tests, multithreaded_tests)
 {

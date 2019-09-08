@@ -163,3 +163,66 @@ TEST(work_queue, WorkQueue_test3)
     }
     EXPECT_EQ(cdiff, 0) << "Execution out of order";
 }
+
+TEST(work_queue, WorkQueue_test3_vector)
+{
+    // Test a queue priority mechanisms
+
+    WorkQueue wq(1);
+    // a sleeper work block to give us time to set up the rest
+    auto fk = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    };
+
+    auto b1 = make_workBlock(fk);
+    // only 1 worker thread so don't worry about locking
+    std::vector<int> order;
+
+    auto hp = [&order] { order.push_back(1); };
+    auto mp = [&order] { order.push_back(2); };
+    auto lp = [&order] { order.push_back(3); };
+    std::vector<std::shared_ptr<basicWorkBlock>> lpv;
+    for (int ii = 0; ii < 3; ++ii)
+    {
+        auto res = make_workBlock(lp);
+        lpv.push_back(std::move(res));
+    }
+
+    std::vector<std::shared_ptr<basicWorkBlock>> mpv;
+    for (int ii = 0; ii < 9; ++ii)
+    {
+        auto res = make_workBlock(mp);
+        mpv.push_back(std::move(res));
+    }
+
+    std::vector<std::shared_ptr<basicWorkBlock>> hpv;
+    for (int ii = 0; ii < 2; ++ii)
+    {
+        auto res = make_workBlock(hp);
+        hpv.push_back(std::move(res));
+    }
+
+    wq.setPriorityRatio(3);
+    wq.addWorkBlock(std::move(b1), WorkQueue::workPriority::high);
+
+    wq.addWorkBlock(lpv, WorkQueue::workPriority::low);
+    wq.addWorkBlock(mpv, WorkQueue::workPriority::medium);
+    wq.addWorkBlock(hpv, WorkQueue::workPriority::high);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(340));
+    while (!wq.isEmpty())
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+    }
+    EXPECT_EQ(order.size(), 14u);
+    std::vector<int> orderCorrect = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
+    int cdiff = 0;
+    for (size_t kk = 0; kk < 14; ++kk)
+    {
+        if (order[kk] != orderCorrect[kk])
+        {
+            ++cdiff;
+        }
+    }
+    EXPECT_EQ(cdiff, 0) << "Execution out of order";
+}

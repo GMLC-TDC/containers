@@ -7,13 +7,13 @@
 cmake_minimum_required(VERSION 3.4)
 cmake_policy(VERSION 3.4)
 
-project (GMLC_CONTAINERS VERSION 0.1)
+project (GMLC_CONTAINERS VERSION 0.1.1)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 #-----------------------------------------------------------------------------
 set (GMLC_CONTAINERS_VERSION_BUILD )
-set (GMLC_CONTAINERS_DATE "05-12-19")
+set (GMLC_CONTAINERS_DATE "09-07-19")
 
 set(GMLC_CONTAINERS_VERSION_STRING "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})")
 
@@ -21,7 +21,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # User settable
     set(CONTAINERS_CXX_STD "14"  CACHE STRING "The CMake standard to require")
 
-  #  set(CUR_PROJ ON)
+    set(GMLC_CONTAINERS_ROOT_PROJ ON)
     set(CMAKE_CXX_STANDARD ${CONTAINER_CXX_STD})
     set(CMAKE_CXX_EXTENSIONS OFF)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -109,9 +109,9 @@ endif()
 # -------------------------------------------------------------
 # message(STATUS ${CMAKE_CXX_FLAGS})
 
-option(GENERATE_DOXYGEN_DOC "Generate Doxygen doc target" OFF)
+option(GMLC_CONTAINERS_GENERATE_DOXYGEN_DOC "Generate Doxygen doc target" OFF)
 
-if(GENERATE_DOXYGEN_DOC)
+if(GMLC_CONTAINERS_GENERATE_DOXYGEN_DOC)
 	find_package(Doxygen)
 	if(DOXYGEN_FOUND)
 
@@ -122,16 +122,16 @@ if(GENERATE_DOXYGEN_DOC)
       "${PROJECT_BINARY_DIR}/docs"
     )
     configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/config/Doxyfile.in
-      ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY
+      ${PROJECT_SOURCE_DIR}/config/Doxyfile.in
+      ${PROJECT_BINARY_DIR}/Doxyfile @ONLY
     )
     add_custom_target(
-      doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+      gmlc_containers_doc ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile
 			WORKING_DIRECTORY ${DOXYGET_OUTPUT_DIR}
-      COMMENT "Generating API documentation with Doxygen"
+      COMMENT "Generating GMLC CONTAINERS API documentation with Doxygen"
       VERBATIM
 		)
 	endif(DOXYGEN_FOUND)
-endif(GENERATE_DOXYGEN_DOC)
+endif(GMLC_CONTAINERS_GENERATE_DOXYGEN_DOC)
 
 
