@@ -10,6 +10,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include <future>
 #include <memory>
+#include <random>
 #include <thread>
 #include <utility>
 /** these test cases test data_block and data_view objects
@@ -145,6 +146,81 @@ TEST(blocking_priority_queue_tests, clear_tests)
     sq.clear();
     EXPECT_TRUE(sq.empty());
 }
+
+TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
+{
+    BlockingPriorityQueue<std::pair<int64_t, int64_t>> sq;
+    auto t1 = [&sq]() {
+        int ii = 0;
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(1, 10);
+        std::pair<int64_t, int64_t> el{10, 10};
+        while (ii < 500)
+        {
+            ++ii;
+            auto res = sq.pop(std::chrono::milliseconds(10));
+
+            switch (dist(rng))
+            {
+            case 1:
+
+                break;
+            case 2:
+                sq.pushPriority(el);
+                break;
+            case 3:
+                if (res)
+                {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
+            default:
+                sq.push(el);
+                break;
+            }
+        }
+    };
+    auto t2 = [&sq]() {
+        int ii = 0;
+        std::random_device dev;
+        std::mt19937 rng(dev());
+        std::uniform_int_distribution<std::mt19937::result_type> dist(1, 10);
+        while (ii < 500)
+        {
+            ++ii;
+            auto res = sq.pop();
+            (void)(res);
+            switch (dist(rng))
+            {
+            case 1:
+
+                break;
+            case 2:
+                sq.emplacePriority(20, 20);
+                break;
+            case 3:
+                std::this_thread::sleep_for(std::chrono::milliseconds(30));
+            default:
+                sq.emplace(30, 30);
+                break;
+            }
+        }
+    };
+
+    auto t3 = [&sq]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1200));
+        int ii = 0;
+        while (ii++ < 500)
+        {
+            sq.emplace(80, 80);
+        }
+    };
+
+    auto res1 = std::async(std::launch::async, t1);
+    auto res2 = std::async(std::launch::async, t2);
+    auto res3 = std::async(std::launch::async, t3);
+    EXPECT_TRUE(true);
+}
 /** test with single consumer/single producer*/
 TEST(blocking_priority_queue_tests, multithreaded_tests)
 {
@@ -169,7 +245,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests)
             ++cnt;
             res = sq.try_pop();
             if (!res)
-            {  // make an additional sleep period so the producer can catch up
+            {  // make an additional sleep period so the producer can catch
+               // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -255,7 +332,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests2)
             ++cnt;
             res = sq.try_pop();
             if (!res)
-            {  // make an additional sleep period so the producer can catch up
+            {  // make an additional sleep period so the producer can catch
+               // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -300,7 +378,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3)
             ++cnt;
             res = sq.try_pop();
             if (!res)
-            {  // make an additional sleep period so the producer can catch up
+            {  // make an additional sleep period so the producer can catch
+               // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
