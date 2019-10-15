@@ -56,7 +56,7 @@ class BlockIterator
     BlockIterator &operator+=(const ptrdiff_t &movement)
     {
         ptr += movement;
-        offset += movement;
+        offset += static_cast<int>(movement);
         check();
         return (*this);
     }
@@ -82,7 +82,7 @@ class BlockIterator
     BlockIterator &operator-=(const ptrdiff_t &movement)
     {
         ptr -= movement;
-        offset -= movement;
+        offset -= static_cast<int>(movement);
         checkNeg();
         return (*this);
     }

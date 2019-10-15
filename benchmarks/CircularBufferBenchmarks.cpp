@@ -12,8 +12,8 @@ using namespace gmlc::containers;
 
 static void BM_BufferPushPop(benchmark::State &state)
 {
-    CircularBuffer buf(state.range(0));
-    int rsize = state.range(0) / 4;
+    CircularBuffer buf(static_cast<int>(state.range(0)));
+    int rsize = static_cast<int>(state.range(0) / 4);
     unsigned char *dblock = new unsigned char[rsize];
     unsigned char *rblock = new unsigned char[rsize];
     for (int ii = 0; ii < rsize; ++ii)
@@ -33,8 +33,8 @@ BENCHMARK(BM_BufferPushPop)->Range(128, 8 << 20);
 
 static void BM_BufferPushPopWrap(benchmark::State &state)
 {
-    int rsize = state.range(0) / 4;
-    CircularBuffer buf(state.range(0));
+    int rsize = static_cast<int>(state.range(0) / 4);
+    CircularBuffer buf(static_cast<int>(state.range(0)));
     unsigned char *dblock = new unsigned char[rsize];
     unsigned char *rblock = new unsigned char[rsize];
     for (int ii = 0; ii < rsize; ++ii)

@@ -7,13 +7,13 @@
 cmake_minimum_required(VERSION 3.4)
 cmake_policy(VERSION 3.4)
 
-project (GMLC_CONTAINERS VERSION 0.1.1)
+project (GMLC_CONTAINERS VERSION 0.2.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 #-----------------------------------------------------------------------------
 set (GMLC_CONTAINERS_VERSION_BUILD )
-set (GMLC_CONTAINERS_DATE "09-07-19")
+set (GMLC_CONTAINERS_DATE "10-15-19")
 
 set(GMLC_CONTAINERS_VERSION_STRING "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})")
 
@@ -21,7 +21,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # User settable
     set(CONTAINERS_CXX_STD "14"  CACHE STRING "The CMake standard to require")
 
-    set(GMLC_CONTAINERS_ROOT_PROJ ON)
     set(CMAKE_CXX_STANDARD ${CONTAINER_CXX_STD})
     set(CMAKE_CXX_EXTENSIONS OFF)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,7 +39,7 @@ include(CMakeDependentOption)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Prohibit in-source build
-if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
   message(
     FATAL_ERROR
       "In-source build is not supported. Please, use an empty directory for building the project."
@@ -66,7 +65,7 @@ endif(${CXX_STANDARD_FLAG})
 # -------------------------------------------------------------
 # add threading support
 # -------------------------------------------------------------
-if(MSYS)
+if(MSYS OR CYGWIN)
 	set(THREADS_PREFER_PTHREAD_FLAG ON)
 endif()
 find_package(Threads QUIET)

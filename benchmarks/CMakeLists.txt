@@ -1,10 +1,11 @@
-if(NOT EXISTS "${GMLC_CONTAINERS_SOURCE_DIR}/extern/benchmark/CMakeLists.txt")
-    message(FATAL_ERROR "You have requested tests be built, but googlebenchmark is not downloaded. Please run:
-    git submodule update --init")
-endif()
-
-list(APPEND CMAKE_MODULE_PATH "${GMLC_CONTAINERS_SOURCE_DIR}/config/cmake")
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Copyright (c) 2017-2019, Battelle Memorial Institute; Lawrence Livermore
+# National Security, LLC; Alliance for Sustainable Energy, LLC.
+# See the top-level NOTICE for additional details.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 include(AddGooglebenchmark)
 
@@ -27,15 +28,15 @@ endforeach()
 
 
 # Add boost to test boost::optional if available
-find_package(Boost 1.58)
-if(Boost_FOUND)
+#find_package(Boost 1.58)
+#if(Boost_FOUND)
   #  target_link_libraries(informational PUBLIC Boost::boost)
   #  target_link_libraries(OptionalTest PUBLIC Boost::boost)
 
     # Enforce Boost::Optional even if __has_include is missing on your compiler
     #target_compile_definitions(informational PUBLIC CLI11_BOOST_OPTIONAL)
     #target_compile_definitions(OptionalTest PUBLIC CLI11_BOOST_OPTIONAL)
-endif()
+#endif()
 
 # Adding this printout to CTest
 #file(WRITE "${PROJECT_BINARY_DIR}/CTestCustom.cmake"

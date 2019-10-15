@@ -1,18 +1,75 @@
-# 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Copyright (c) 2017-2019, Battelle Memorial Institute; Lawrence Livermore
+# National Security, LLC; Alliance for Sustainable Energy, LLC.
+# See the top-level NOTICE for additional details.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #
 # Downloads GTest and provides a helper macro to add tests. Add make check, as well, which
 # gives output on failed tests without having to set an environment variable.
 #
-#
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS OFF)
-# older version of google tests doesn't support MSYS so needs this flag to compile
-if (MSYS)
-	set(gtest_disable_pthreads ON CACHE BOOL "" FORCE)
-endif()
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE BOOL "")
-add_subdirectory("${GMLC_CONTAINERS_SOURCE_DIR}/extern/googletest" "${GMLC_CONTAINERS_BINARY_DIR}/extern/googletest" EXCLUDE_FROM_ALL)
+include(extraMacros)
+set(gtest_version release-1.10.0)
+#depending on what the version is set to the git_clone command may need to change to GIT_TAG||GIT_BRANCH|GIT_COMMIT
 
+string(TOLOWER "googletest" gtName)
+
+if(NOT CMAKE_VERSION VERSION_LESS 3.11)
+include(FetchContent)
+mark_as_advanced(FETCHCONTENT_BASE_DIR)
+mark_as_advanced(FETCHCONTENT_FULLY_DISCONNECTED)
+mark_as_advanced(FETCHCONTENT_QUIET)
+
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG        ${gtest_version}
+)
+
+FetchContent_GetProperties(googletest)
+
+if(NOT ${gtName}_POPULATED)
+  # Fetch the content using previously declared details
+  FetchContent_Populate(googletest)
+
+endif()
+hide_variable(FETCHCONTENT_SOURCE_DIR_GOOGLETEST)
+hide_variable(FETCHCONTENT_UPDATES_DISCONNECTED_GOOGLETEST)
+else() #cmake <3.11
+
+# create the directory first
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/_deps)
+
+include(GitUtils)
+git_clone(
+             PROJECT_NAME                    googletest
+             GIT_URL                         https://github.com/google/googletest.git
+             GIT_TAG                         ${gtest_version}
+			 DIRECTORY                       ${PROJECT_BINARY_DIR}/_deps
+       )
+	   
+set(${gtName}_BINARY_DIR ${PROJECT_BINARY_DIR}/_deps/${gtName}-build)
+
+endif()
+
+set(gtest_force_shared_crt ON CACHE INTERNAL "")
+
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+set(HAVE_STD_REGEX ON CACHE INTERNAL "" )
+
+set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "")
+add_subdirectory(${${gtName}_SOURCE_DIR} ${${gtName}_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+message(STATUS "loading google-test directory ${${gtName}_SOURCE_DIR}")
+if (NOT MSVC)
+#target_Compile_options(gtest PRIVATE "-Wno-undef")
+#target_Compile_options(gmock PRIVATE "-Wno-undef")
+#target_Compile_options(gtest_main PRIVATE "-Wno-undef")
+#target_Compile_options(gmock_main PRIVATE "-Wno-undef")
+endif()
 
 if(GOOGLE_TEST_INDIVIDUAL)
     if(NOT CMAKE_VERSION VERSION_LESS 3.9)
@@ -21,6 +78,14 @@ if(GOOGLE_TEST_INDIVIDUAL)
         set(GOOGLE_TEST_INDIVIDUAL OFF)
     endif()
 endif()
+
+function(add_unit_test test_source_file)
+  get_filename_component(test_name "${test_source_file}" NAME_WE)
+  add_executable("${test_name}" "${test_source_file}")
+  target_link_libraries("${test_name}" gtest gmock gtest_main)
+  add_test(NAME ${test_name} COMMAND $<TARGET_FILE:${test_name}>)
+   set_target_properties(${test_name} PROPERTIES FOLDER "Tests")
+endfunction()
 
 # Target must already exist
 macro(add_gtest TESTNAME)
@@ -45,17 +110,15 @@ macro(add_gtest TESTNAME)
 
 endmacro()
 
-mark_as_advanced(
-gmock_build_tests
-gtest_build_samples
-gtest_build_tests
-gtest_disable_pthreads
-gtest_force_shared_crt
-gtest_hide_internal_symbols
-BUILD_GMOCK
-BUILD_GTEST
-INSTALL_GTEST
-)
+hide_variable(gmock_build_tests)
+hide_variable(gtest_build_samples)
+hide_variable(gtest_build_tests)
+hide_variable(gtest_disable_pthreads)
+hide_variable(gtest_hide_internal_symbols)
+hide_variable(BUILD_GMOCK)
+hide_variable(BUILD_GTEST)
+hide_variable(INSTALL_GTEST)
+
 
 set_target_properties(gtest gtest_main gmock gmock_main
     PROPERTIES FOLDER "Extern")

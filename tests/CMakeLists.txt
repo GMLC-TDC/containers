@@ -1,10 +1,11 @@
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/extern/googletest/CMakeLists.txt")
-    message(FATAL_ERROR "You have requested tests be built, but googletest is not downloaded. Please run:
-    git submodule update --init")
-endif()
-
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/config/cmake")
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Copyright (c) 2017-2019, Battelle Memorial Institute; Lawrence Livermore
+# National Security, LLC; Alliance for Sustainable Energy, LLC.
+# See the top-level NOTICE for additional details.
+# All rights reserved.
+#
+# SPDX-License-Identifier: BSD-3-Clause
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 set(GOOGLE_TEST_INDIVIDUAL OFF)
 include(AddGoogletest)
