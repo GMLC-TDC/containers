@@ -63,3 +63,9 @@ A threadsafe container for transferring a single object between thread.  Its int
 ### WorkQueue
 
 A threaded WorkQueue using a set of 3 SimpleQueue object.  work blocks are added with a priority high/medium/low.   High is executed first,  medium and low are rotated with a priority ratio  N medium block for each low block, if both are full.  
+
+## Release
+The GMLC-TDC containers library is distributed under the terms of the BSD-3 clause license. All new
+contributions must be made under this license. [LICENSE](LICENSE)
+
+SPDX-License-Identifier: BSD-3-Clause
