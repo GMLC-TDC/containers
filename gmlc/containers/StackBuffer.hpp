@@ -149,7 +149,15 @@ class StackBuffer
           statedSize{size}, actualCapacity{size}, stack(data, size)
     {
     }
-    ~StackBuffer() = default;
+
+    ~StackBuffer()
+    {
+		if (actualCapacity > 0)
+		{
+            free(data);
+		}
+	}
+
     StackBuffer(StackBuffer &&sq) noexcept
         : data(sq.data), statedSize(sq.statedSize),
           actualCapacity(sq.actualCapacity), stack(std::move(sq.stack))
@@ -199,7 +207,7 @@ class StackBuffer
     StackBuffer &operator=(const StackBuffer &sq)
     {
         stack = sq.stack;
-        resizeMemory(sq.statedSize);
+        resizeMemory(sq.statedSize,false);
         std::memcpy(data, sq.data, sq.statedSize);
 
         auto offset = stack.next - stack.origin;
@@ -303,7 +311,7 @@ class StackBuffer
     }
 
   private:
-    void resizeMemory(int newsize)
+    void resizeMemory(int newsize, bool copyData=true)
     {
         if (newsize == statedSize)
         {
@@ -311,12 +319,18 @@ class StackBuffer
         }
         if (newsize > actualCapacity)
         {
+
             auto buf =
-              reinterpret_cast<unsigned char *>(std::realloc(data, newsize));
-            if (buf == nullptr)
-            {
-                return;
-            }
+              reinterpret_cast<unsigned char *>(malloc(newsize));
+			if (actualCapacity > 0)
+			{
+				if (copyData)
+				{
+                    memcpy(buf, data, statedSize);
+				}
+                
+                free(data);
+			}
             data = buf;
             actualCapacity = newsize;
         }
