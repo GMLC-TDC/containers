@@ -159,7 +159,13 @@ class CircularBuffer
           actualSize{size}, actualCapacity{size}, buffer(data, size)
     {
     }
-    ~CircularBuffer() = default;
+    ~CircularBuffer()
+    {
+        if (actualCapacity > 0)
+        {
+            free(data);
+        }
+    }
     CircularBuffer(CircularBuffer &&cb) noexcept
         : data{cb.data}, actualSize(cb.actualSize),
           actualCapacity(cb.actualCapacity), buffer(std::move(cb.buffer))
@@ -214,7 +220,7 @@ class CircularBuffer
     CircularBuffer &operator=(const CircularBuffer &cb)
     {
         buffer = cb.buffer;
-        resizeMemory(cb.actualSize);
+        resizeMemory(cb.actualSize,false);
         std::memcpy(data, cb.data, cb.actualSize);
 
         auto read_offset = buffer.next_read - buffer.origin;
@@ -317,7 +323,7 @@ class CircularBuffer
     void clear() { buffer.clear(); }
 
   private:
-    void resizeMemory(int newsize)
+    void resizeMemory(int newsize,bool copyData=true)
     {
         if (newsize == actualSize)
         {
@@ -325,11 +331,15 @@ class CircularBuffer
         }
         if (newsize > actualCapacity)
         {
-            auto buf =
-              reinterpret_cast<unsigned char *>(std::realloc(data, newsize));
-            if (buf == nullptr)
+            auto buf = reinterpret_cast<unsigned char *>(malloc(newsize));
+            if (actualCapacity > 0)
             {
-                return;
+                if (copyData)
+                {
+                    memcpy(buf, data, actualSize);
+                }
+
+                free(data);
             }
             data = buf;
             actualCapacity = newsize;
