@@ -53,15 +53,5 @@ workflows:
       - containersMSan
       - containersASan
       - containersTSan
-  nightly:
-    triggers:
-      - schedule:
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - containersMSan
-      - containersASan
-      - containersTSan
+
 
