@@ -215,6 +215,9 @@ class CircularBuffer
         cb.buffer.origin = nullptr;
         cb.buffer.next_read = nullptr;
         cb.buffer.next_write = nullptr;
+        cb.data = nullptr;
+        cb.actualSize = 0;
+        cb.actualCapacity = 0;
         return *this;
     }
     CircularBuffer &operator=(const CircularBuffer &cb)

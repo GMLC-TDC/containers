@@ -136,9 +136,33 @@ class StableBlockVector
     {
         if (dataptr != nullptr)
         {
-            clear();
             Allocator a;
-            a.deallocate(dataptr[0], blockSize);
+            for (int jj = bsize - 1; jj >= 0; --jj)
+            {  // call destructors on the last block
+                dataptr[dataSlotIndex][jj].~X();
+            }
+            if (dataSlotIndex > 0)
+            {
+                a.deallocate(dataptr[dataSlotIndex], blockSize);
+            }
+            // start at 1 to leave the first slot in use like the constructor
+            // go in reverse order
+            for (int ii = dataSlotIndex - 1; ii >= 1; --ii)
+            {
+                for (int jj = blockSize - 1; jj >= 0; --jj)
+                {  // call destructors on the middle blocks
+                    dataptr[ii][jj].~X();
+                }
+                a.deallocate(dataptr[ii], blockSize);
+            }
+            if (dataSlotIndex > 0)
+            {
+                for (int jj = blockSize - 1; jj >= 0; --jj)
+                {  // call destructors on the first block
+                    dataptr[0][jj].~X();
+                }
+                a.deallocate(dataptr[0], blockSize);
+            }
             for (int ii = 0; ii < freeIndex; ++ii)
             {
                 a.deallocate(freeblocks[ii], blockSize);
@@ -235,6 +259,10 @@ class StableBlockVector
         {  // call destructors on the last block
             dataptr[dataSlotIndex][jj].~X();
         }
+		if (dataSlotIndex > 0)
+		{
+            moveBlocktoAvailable(dataptr[dataSlotIndex]);
+		}
         // start at 1 to leave the first slot in use like the constructor
         // go in reverse order
         for (int ii = dataSlotIndex - 1; ii >= 1; --ii)
@@ -251,10 +279,11 @@ class StableBlockVector
             {  // call destructors on the first block
                 dataptr[0][jj].~X();
             }
+            dataSlotIndex = 0;
         }
         csize = 0;
         bsize = 0;
-        dataSlotIndex = 0;
+        
     }
 
     void shrink_to_fit() noexcept
