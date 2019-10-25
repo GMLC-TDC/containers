@@ -145,9 +145,8 @@ class StableBlockVector
             {
                 a.deallocate(dataptr[dataSlotIndex], blockSize);
             }
-            // start at 1 to leave the first slot in use like the constructor
             // go in reverse order
-            for (int ii = dataSlotIndex - 1; ii >= 1; --ii)
+            for (int ii = dataSlotIndex - 1; ii >= 0; --ii)
             {
                 for (int jj = blockSize - 1; jj >= 0; --jj)
                 {  // call destructors on the middle blocks
@@ -155,14 +154,11 @@ class StableBlockVector
                 }
                 a.deallocate(dataptr[ii], blockSize);
             }
-            if (dataSlotIndex > 0)
+            if (dataSlotIndex == 0)
             {
-                for (int jj = blockSize - 1; jj >= 0; --jj)
-                {  // call destructors on the first block
-                    dataptr[0][jj].~X();
-                }
                 a.deallocate(dataptr[0], blockSize);
             }
+            
             for (int ii = 0; ii < freeIndex; ++ii)
             {
                 a.deallocate(freeblocks[ii], blockSize);
