@@ -259,10 +259,10 @@ class StableBlockVector
         {  // call destructors on the last block
             dataptr[dataSlotIndex][jj].~X();
         }
-		if (dataSlotIndex > 0)
-		{
+        if (dataSlotIndex > 0)
+        {
             moveBlocktoAvailable(dataptr[dataSlotIndex]);
-		}
+        }
         // start at 1 to leave the first slot in use like the constructor
         // go in reverse order
         for (int ii = dataSlotIndex - 1; ii >= 1; --ii)
@@ -283,7 +283,6 @@ class StableBlockVector
         }
         csize = 0;
         bsize = 0;
-        
     }
 
     void shrink_to_fit() noexcept

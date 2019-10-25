@@ -223,7 +223,7 @@ class CircularBuffer
     CircularBuffer &operator=(const CircularBuffer &cb)
     {
         buffer = cb.buffer;
-        resizeMemory(cb.actualSize,false);
+        resizeMemory(cb.actualSize, false);
         std::memcpy(data, cb.data, cb.actualSize);
 
         auto read_offset = buffer.next_read - buffer.origin;
@@ -326,7 +326,7 @@ class CircularBuffer
     void clear() { buffer.clear(); }
 
   private:
-    void resizeMemory(int newsize,bool copyData=true)
+    void resizeMemory(int newsize, bool copyData = true)
     {
         if (newsize == actualSize)
         {
