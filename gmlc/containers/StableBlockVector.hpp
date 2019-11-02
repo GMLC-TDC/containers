@@ -158,7 +158,7 @@ class StableBlockVector
             {
                 a.deallocate(dataptr[0], blockSize);
             }
-            
+
             for (int ii = 0; ii < freeIndex; ++ii)
             {
                 a.deallocate(freeblocks[ii], blockSize);
