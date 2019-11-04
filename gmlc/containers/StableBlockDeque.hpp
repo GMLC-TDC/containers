@@ -141,14 +141,14 @@ class StableBlockDeque
           dataSlotsAvailable(sbd.dataSlotsAvailable),
           dataSlotBack(sbd.dataSlotBack), dataSlotFront(sbd.dataSlotFront),
           bsize(sbd.bsize), fsize(sbd.fsize),
-          freeSlotsAvailable(sbd.freeSlotsAvailable),
-          freeIndex(sbd.freeIndex), freeblocks(sbd.freeblocks)
+          freeSlotsAvailable(sbd.freeSlotsAvailable), freeIndex(sbd.freeIndex),
+          freeblocks(sbd.freeblocks)
     {
         sbd.freeblocks = nullptr;
         sbd.freeSlotsAvailable = 0;
         sbd.dataSlotsAvailable = 0;
         sbd.dataptr = nullptr;
-        sbd.fsize=-1; 
+        sbd.fsize = -1;
         sbd.csize = 0;
     }
 
