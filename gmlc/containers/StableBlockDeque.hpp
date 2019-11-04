@@ -57,15 +57,52 @@ class StableBlockDeque
         }
         else
         {
-            dataSlotFront = (dataSlotsAvailable - (startSize >> N)) / 2;
-            dataSlotBack = dataSlotFront + (startSize >> N);
-            auto med = startSize - (startSize >> N) * blockSize;
-            fsize = blockSize - (med / 2);
-            bsize = med - (med / 2);
-            dataptr[dataSlotFront] = a.allocate(blockSize);
-            for (int jj = fsize + 1; jj < blockSize; ++jj)
+            int blocks = static_cast<int>((startSize >> N));
+            if (blocks > 0)
             {
-                new (&dataptr[dataSlotFront][jj]) X{init};
+                blocks += 1;
+            }
+            else if (startSize > blockSize / 2 - 2)
+            {
+                blocks = 1;
+            }
+
+            if (blocks == 0)
+            {
+                dataSlotFront = dataSlotBack = 30;
+                fsize = blockSize / 2 - static_cast<int>(startSize / 2) - 1;
+                bsize = fsize + static_cast<int>(startSize) + 1;
+            }
+            if (blocks == 1)
+            {
+                dataSlotFront = 30;
+                dataSlotBack = 31;
+                fsize = blockSize - static_cast<int>(startSize / 2) - 1;
+                bsize = static_cast<int>(startSize - (startSize / 2));
+            }
+            else
+            {
+                dataSlotFront = (dataSlotsAvailable / 2 - blocks / 2);
+                dataSlotBack = dataSlotFront + blocks;
+                auto med = startSize - (startSize >> N) * blockSize;
+                fsize = blockSize - static_cast<int>(med / 2) - 1;
+                bsize = static_cast<int>(med - (med / 2));
+            }
+
+            dataptr[dataSlotFront] = a.allocate(blockSize);
+            if (dataSlotBack > dataSlotFront)
+            {
+                for (int jj = fsize + 1; jj < blockSize; ++jj)
+                {
+                    new (&dataptr[dataSlotFront][jj]) X{init};
+                }
+            }
+            else
+            {
+                for (int jj = fsize + 1; jj < bsize; ++jj)
+                {
+                    new (&dataptr[dataSlotFront][jj]) X{init};
+                }
             }
             for (int ii = dataSlotFront + 1; ii <= dataSlotBack - 1; ++ii)
             {
@@ -77,6 +114,7 @@ class StableBlockDeque
             }
             if (dataSlotBack > dataSlotFront)
             {
+                dataptr[dataSlotBack] = a.allocate(blockSize);
                 for (int jj = 0; jj < bsize; ++jj)
                 {
                     new (&dataptr[dataSlotBack][jj]) X{init};
@@ -140,15 +178,46 @@ class StableBlockDeque
     /** destructor*/
     ~StableBlockDeque()
     {
-        clear();
-        Allocator a;
-        a.deallocate(dataptr[dataSlotFront], blockSize);
-        for (int ii = 0; ii < freeIndex; ++ii)
+        if (dataptr != nullptr)
         {
-            a.deallocate(freeblocks[ii], blockSize);
+            Allocator a;
+            if (dataSlotBack == dataSlotFront)
+            {
+                for (int jj = bsize - 1; jj > fsize; --jj)
+                {  // call destructors on the last block
+                    dataptr[dataSlotBack][jj].~X();
+                }
+                a.deallocate(dataptr[dataSlotFront], blockSize);
+            }
+            else
+            {
+                for (int jj = bsize - 1; jj >= 0; --jj)
+                {  // call destructors on the last block
+                    dataptr[dataSlotBack][jj].~X();
+                }
+                a.deallocate(dataptr[dataSlotBack], blockSize);
+                // don't go into the front slot yet
+                for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii)
+                {
+                    for (int jj = blockSize - 1; jj >= 0; --jj)
+                    {  // call destructors on the middle blocks
+                        dataptr[ii][jj].~X();
+                    }
+                    a.deallocate(dataptr[ii], blockSize);
+                }
+                for (int jj = blockSize - 1; jj > fsize; --jj)
+                {  // call destructors on the first block
+                    dataptr[dataSlotFront][jj].~X();
+                }
+                a.deallocate(dataptr[dataSlotFront], blockSize);
+            }
+            for (int ii = 0; ii < freeIndex; ++ii)
+            {
+                a.deallocate(freeblocks[ii], blockSize);
+            }
+            delete[] freeblocks;
+            delete[] dataptr;
         }
-        delete[] freeblocks;
-        delete[] dataptr;
     }
 
     template <class... Args>
@@ -277,7 +346,7 @@ class StableBlockDeque
         dataSlotFront = nindex;
         dataSlotBack = nindex;
     }
-
+    /** remove all block not currently in use*/
     void shrink_to_fit()
     {
         Allocator a;
@@ -350,11 +419,8 @@ class StableBlockDeque
             X **ptr = &(dataptr[dataSlotBack + 1]);
             return {ptr, 0};
         }
-        else
-        {
-            X **ptr = &(dataptr[dataSlotBack]);
-            return {ptr, bsize};
-        }
+        X **ptr = &(dataptr[dataSlotBack]);
+        return {ptr, bsize};
     }
 
     const_iterator begin() const
@@ -364,11 +430,8 @@ class StableBlockDeque
             const X *const *ptr = &(dataptr[dataSlotFront + 1]);
             return {ptr, 0};
         }
-        else
-        {
-            const X *const *ptr = &(dataptr[dataSlotFront]);
-            return {ptr, fsize + 1};
-        }
+        const X *const *ptr = &(dataptr[dataSlotFront]);
+        return {ptr, fsize + 1};
     }
 
     const_iterator end() const
@@ -378,11 +441,8 @@ class StableBlockDeque
             const X *const *ptr = &(dataptr[dataSlotBack + 1]);
             return {ptr, 0};
         }
-        else
-        {
-            const X *const *ptr = &(dataptr[dataSlotBack]);
-            return {ptr, bsize};
-        }
+        const X *const *ptr = &(dataptr[dataSlotBack]);
+        return {ptr, bsize};
     }
 
   private:
@@ -400,7 +460,7 @@ class StableBlockDeque
                 dataptr[dataSlotBack] = getNewBlock();
                 return;
             }
-            else if (dataSlotBack >= dataSlotsAvailable - 1)
+            if (dataSlotBack >= dataSlotsAvailable - 1)
             {
                 if (dataSlotFront > 5)
                 {  // shift the pointers
@@ -440,7 +500,7 @@ class StableBlockDeque
                 dataptr[dataSlotBack] = getNewBlock();
                 return;
             }
-            else if (dataSlotFront == 0)
+            if (dataSlotFront == 0)
             {
                 if (dataSlotBack < dataSlotsAvailable - 5)
                 {

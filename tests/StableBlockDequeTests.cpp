@@ -205,3 +205,41 @@ TEST(stackBlockDequeTest, test_simple)
     EXPECT_EQ(sb2.size(), 10);
     EXPECT_EQ(ii, 10);
 }
+
+TEST(stackBlockDequeTest, iterator_check)
+{
+    StableBlockDeque<std::string, 4> sbd(50);
+
+    auto it = sbd.begin();
+    int ii = 0;
+    while (it != sbd.end())
+    {
+        *it = std::to_string(ii);
+        ++it;
+        ++ii;
+    }
+
+    for (ii = 0; ii < 50; ++ii)
+    {
+        auto tstr = std::to_string(ii);
+        auto res = sbd[ii];
+        EXPECT_EQ(tstr, res);
+    }
+}
+
+TEST(stackBlockDequeTest, test_start)
+{
+    StableBlockDeque<std::string, 4> sbd(367, "frog");
+    EXPECT_EQ(sbd.size(), 367U);
+
+    EXPECT_EQ(sbd[231], "frog");
+    EXPECT_EQ(sbd[0], "frog");
+    EXPECT_EQ(sbd[366], "frog");
+
+    StableBlockDeque<std::string, 2> sbd2(0, "frog");
+    EXPECT_EQ(sbd2.size(), 0U);
+    StableBlockDeque<std::string, 2> sbd3(20);
+    EXPECT_EQ(sbd3.size(), 20U);
+    EXPECT_TRUE(sbd3[19].empty());
+    EXPECT_TRUE(sbd3[0].empty());
+}
