@@ -8,6 +8,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "StableBlockDeque.hpp"
 
 #include "gtest/gtest.h"
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -21,6 +22,22 @@ TEST(stackBlockDequeTest, test_lookup)
     sbd.emplace_back("bob3");
     sbd.emplace_back("bob4");
     sbd.emplace_back("bob5");
+    EXPECT_EQ(sbd.size(), 5);
+    EXPECT_EQ(sbd[0], "bob");
+    EXPECT_EQ(sbd[1], "bob2");
+    EXPECT_EQ(sbd[2], "bob3");
+    EXPECT_EQ(sbd[3], "bob4");
+    EXPECT_EQ(sbd[4], "bob5");
+}
+
+TEST(stackBlockDequeTest, test_lookup_front)
+{
+    StableBlockDeque<std::string, 2> sbd;
+    sbd.push_front("bob5");
+    sbd.emplace_front("bob4");
+    sbd.emplace_front("bob3");
+    sbd.emplace_front("bob2");
+    sbd.emplace_front("bob");
     EXPECT_EQ(sbd.size(), 5);
     EXPECT_EQ(sbd[0], "bob");
     EXPECT_EQ(sbd[1], "bob2");
@@ -208,22 +225,26 @@ TEST(stackBlockDequeTest, test_simple)
 
 TEST(stackBlockDequeTest, iterator_check)
 {
-    StableBlockDeque<std::string, 4> sbd(50);
-
-    auto it = sbd.begin();
-    int ii = 0;
-    while (it != sbd.end())
+    for (size_t sz = 1; sz < 120; ++sz)
     {
-        *it = std::to_string(ii);
-        ++it;
-        ++ii;
-    }
-
-    for (ii = 0; ii < 50; ++ii)
-    {
-        auto tstr = std::to_string(ii);
-        auto res = sbd[ii];
-        EXPECT_EQ(tstr, res);
+        StableBlockDeque<std::string, 4> sbd(sz);
+        const auto &sbdcopy = sbd;
+        auto it = sbd.begin();
+        size_t ii = 0;
+        while (it != sbd.end())
+        {
+            *it = std::to_string(ii);
+            ++it;
+            ++ii;
+        }
+        EXPECT_EQ(ii, sz);
+        for (ii = 0; ii < sz; ++ii)
+        {
+            auto tstr = std::to_string(ii);
+            auto res = sbd[ii];
+            EXPECT_EQ(tstr, res);
+            EXPECT_EQ(tstr, sbdcopy[ii]);
+        }
     }
 }
 
@@ -242,4 +263,27 @@ TEST(stackBlockDequeTest, test_start)
     EXPECT_EQ(sbd3.size(), 20U);
     EXPECT_TRUE(sbd3[19].empty());
     EXPECT_TRUE(sbd3[0].empty());
+}
+
+TEST(stackBlockDequeTest, test_front_back)
+{
+    StableBlockDeque<size_t, 4> sbd(200);
+    const auto &sbdcopy = sbd;
+    size_t ii = 0;
+    for (auto &val : sbd)
+    {
+        val = ii++;
+    }
+    EXPECT_EQ(sbdcopy.front(), 0U);
+    EXPECT_EQ(sbdcopy.back(), 199U);
+    for (ii = 0; ii < 100; ++ii)
+    {
+        EXPECT_EQ(sbd.front(), ii);
+        EXPECT_EQ(sbd.back(), 199 - ii);
+        EXPECT_EQ(sbdcopy[0], ii);
+        EXPECT_EQ(*sbdcopy.begin(), ii);
+
+        sbd.pop_front();
+        sbd.pop_back();
+    }
 }

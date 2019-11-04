@@ -73,7 +73,7 @@ class StableBlockDeque
                 fsize = blockSize / 2 - static_cast<int>(startSize / 2) - 1;
                 bsize = fsize + static_cast<int>(startSize) + 1;
             }
-            if (blocks == 1)
+            else if (blocks == 1)
             {
                 dataSlotFront = 30;
                 dataSlotBack = 31;
