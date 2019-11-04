@@ -140,13 +140,16 @@ class StableBlockDeque
         : csize(sbd.csize), dataptr(sbd.dataptr),
           dataSlotsAvailable(sbd.dataSlotsAvailable),
           dataSlotBack(sbd.dataSlotBack), dataSlotFront(sbd.dataSlotFront),
-          bsize(sbd.bsize), freeSlotsAvailable(sbd.freeSlotsAvailable),
+          bsize(sbd.bsize), fsize(sbd.fsize),
+          freeSlotsAvailable(sbd.freeSlotsAvailable),
           freeIndex(sbd.freeIndex), freeblocks(sbd.freeblocks)
     {
         sbd.freeblocks = nullptr;
         sbd.freeSlotsAvailable = 0;
         sbd.dataSlotsAvailable = 0;
         sbd.dataptr = nullptr;
+        sbd.fsize=-1; 
+        sbd.csize = 0;
     }
 
     StableBlockDeque &operator=(const StableBlockDeque &sbd)
@@ -172,7 +175,8 @@ class StableBlockDeque
         sbd.freeSlotsAvailable = 0;
         sbd.dataSlotsAvailable = 0;
         sbd.dataptr = nullptr;
-
+        sbd.fsize = -1;
+        sbd.csize = 0;
         return *this;
     }
     /** destructor*/

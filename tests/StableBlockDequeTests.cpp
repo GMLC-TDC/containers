@@ -286,4 +286,65 @@ TEST(stackBlockDequeTest, test_front_back)
         sbd.pop_front();
         sbd.pop_back();
     }
+
+    EXPECT_NO_THROW(sbd.pop_front());
+    EXPECT_NO_THROW(sbd.pop_back());
+}
+
+TEST(stackBlockDequeTest, move_construct)
+{
+    StableBlockDeque<size_t, 4> sbd(200);
+    size_t ii = 0;
+    for (auto &val : sbd)
+    {
+        val = ii++;
+    }
+    StableBlockDeque<size_t, 4> sbd2(std::move(sbd));
+    sbd.~StableBlockDeque();  // call the destructor
+    EXPECT_EQ(sbd2.size(), 200);
+    for (ii = 0; ii < 100; ++ii)
+    {
+        EXPECT_EQ(sbd2.front(), ii);
+        EXPECT_EQ(sbd2.back(), 199 - ii);
+
+        sbd2.pop_front();
+        sbd2.pop_back();
+    }
+}
+
+TEST(stackBlockDequeTest, move_assign)
+{
+    StableBlockDeque<size_t, 4> sbd2(100);
+    {
+        StableBlockDeque<size_t, 4> sbd(200);
+        size_t ii = 0;
+        for (auto &val : sbd)
+        {
+            val = ii++;
+        }
+        sbd2 = std::move(sbd);
+    }
+    EXPECT_EQ(sbd2.size(), 200);
+    for (size_t ii = 0; ii < 100; ++ii)
+    {
+        EXPECT_EQ(sbd2.front(), ii);
+        EXPECT_EQ(sbd2.back(), 199 - ii);
+
+        sbd2.pop_front();
+        sbd2.pop_back();
+    }
+}
+
+TEST(stackBlockDequeTest, clear_and_fill)
+{
+    StableBlockDeque<size_t, 4> sbd(200);
+    EXPECT_EQ(sbd.size(), 200U);
+    sbd.clear();
+    EXPECT_EQ(sbd.size(), 0U);
+    for (size_t ii = 0; ii < 200; ++ii)
+    {
+        sbd.push_back(ii);
+        sbd.push_front(ii);
+    }
+    EXPECT_EQ(sbd.size(), 400U);
 }
