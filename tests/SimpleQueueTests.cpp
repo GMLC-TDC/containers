@@ -258,3 +258,59 @@ TEST(simple_queue_tests, multithreaded_tests3)
 
     EXPECT_EQ(V1 + V2 + V3, 3'010'000);
 }
+
+/** test with multiple producer/multiple consumer*/
+TEST(simple_queue_tests, move_construct)
+{
+    SimpleQueue<int64_t> sq;
+    sq.push(54);
+    sq.push(55);
+    SimpleQueue<int64_t> sq2(std::move(sq));
+
+    auto res = sq2.pop();
+    EXPECT_EQ(*res, 54);
+    res = sq2.pop();
+    EXPECT_EQ(*res, 55);
+    res = sq2.pop();
+    EXPECT_FALSE(res);
+}
+
+/** test with multiple producer/multiple consumer*/
+TEST(simple_queue_tests, move_assign)
+{
+    SimpleQueue<int64_t> sq;
+    sq.push(54);
+    sq.push(55);
+    SimpleQueue<int64_t> sq2;
+    sq2 = std::move(sq);
+
+    auto res2 = sq2.peek();
+    EXPECT_EQ(*res2, 54);
+    auto res = sq2.pop();
+    EXPECT_EQ(*res, 54);
+
+    res = sq2.pop();
+    EXPECT_EQ(*res, 55);
+    res = sq2.pop();
+    EXPECT_FALSE(res);
+    res2 = sq2.peek();
+    EXPECT_FALSE(res2);
+}
+
+/** test with multiple producer/multiple consumer*/
+TEST(simple_queue_tests, pop_test)
+{
+    SimpleQueue<int64_t> sq;
+    sq.push(54);
+    sq.push(55);
+    sq.push(56);
+    sq.pushVector(std::vector<int64_t>{57, 58, 59});
+    sq.pop();
+    sq.pop();
+    sq.push(60);
+    EXPECT_TRUE(sq.pop());
+    EXPECT_TRUE(sq.pop());
+    EXPECT_TRUE(sq.pop());
+    EXPECT_TRUE(sq.pop());
+    EXPECT_TRUE(sq.pop());
+}

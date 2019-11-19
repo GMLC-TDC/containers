@@ -216,10 +216,13 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
         }
     };
 
-    auto res1 = std::async(std::launch::async, t1);
-    auto res2 = std::async(std::launch::async, t2);
-    auto res3 = std::async(std::launch::async, t3);
+    auto res1 = std::thread(t1);
+    auto res2 = std::thread(t2);
+    auto res3 = std::thread(t3);
     EXPECT_TRUE(true);
+    res1.join();
+    res2.join();
+    res3.join();
 }
 /** test with single consumer/single producer*/
 TEST(blocking_priority_queue_tests, multithreaded_tests)
@@ -254,13 +257,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests)
         return cnt;
     };
 
-    auto ret = std::async(std::launch::async, prod1);
+    auto prodthread = std::thread(prod1);
 
-    auto res = std::async(std::launch::async, cons);
-
-    ret.wait();
-    auto V = res.get();
+    auto V = cons();
     EXPECT_EQ(V, 1'010'000);
+    prodthread.join();
 }
 
 /** test with single consumer / single producer */
@@ -299,13 +300,10 @@ TEST(blocking_priority_queue_tests, pop_tests)
         return cnt;
     };
 
-    auto ret = std::async(std::launch::async, prod1);
-
-    auto res = std::async(std::launch::async, cons);
-
-    ret.wait();
-    auto V = res.get();
+    auto prodthread = std::thread(prod1);
+    auto V = cons();
     EXPECT_EQ(V, 1'000'000);
+    prodthread.join();
 }
 
 /** test with multiple consumer/single producer*/
@@ -341,17 +339,21 @@ TEST(blocking_priority_queue_tests, multithreaded_tests2)
         return cnt;
     };
 
-    auto ret = std::async(std::launch::async, prod1);
-
-    auto res1 = std::async(std::launch::async, cons);
-    auto res2 = std::async(std::launch::async, cons);
-    auto res3 = std::async(std::launch::async, cons);
-    ret.wait();
+    std::packaged_task<int64_t()> c1(cons);
+    std::packaged_task<int64_t()> c2(cons);
+    auto res1 = c1.get_future();
+    auto res2 = c2.get_future();
+    auto c1thread = std::thread(std::move(c1));
+    auto c2thread = std::thread(std::move(c2));
+    auto prodthread = std::thread(prod1);
+    auto V3 = cons();
     auto V1 = res1.get();
     auto V2 = res2.get();
-    auto V3 = res3.get();
 
     EXPECT_EQ(V1 + V2 + V3, 1'010'000);
+    prodthread.join();
+    c1thread.join();
+    c2thread.join();
 }
 
 /** test with multiple producer/multiple consumer*/
@@ -387,21 +389,27 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3)
         return cnt;
     };
 
-    auto ret1 = std::async(std::launch::async, prod1);
-    auto ret2 = std::async(std::launch::async, prod1);
-    auto ret3 = std::async(std::launch::async, prod1);
+    std::packaged_task<int64_t()> c1(cons);
+    std::packaged_task<int64_t()> c2(cons);
+    auto res1 = c1.get_future();
+    auto res2 = c2.get_future();
+    auto c1thread = std::thread(std::move(c1));
+    auto c2thread = std::thread(std::move(c2));
+    auto prodthread1 = std::thread(prod1);
+    auto prodthread2 = std::thread(prod1);
+    auto prodthread3 = std::thread(prod1);
 
-    auto res1 = std::async(std::launch::async, cons);
-    auto res2 = std::async(std::launch::async, cons);
-    auto res3 = std::async(std::launch::async, cons);
-    ret1.wait();
-    ret2.wait();
-    ret3.wait();
+    auto V3 = cons();
     auto V1 = res1.get();
     auto V2 = res2.get();
-    auto V3 = res3.get();
 
     EXPECT_EQ(V1 + V2 + V3, 3'010'000);
+
+    prodthread1.join();
+    prodthread2.join();
+    prodthread3.join();
+    c1thread.join();
+    c2thread.join();
 }
 
 /** test with multiple producer/multiple consumer*/
@@ -429,21 +437,26 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3_pop)
         return cnt;
     };
 
-    auto ret1 = std::async(std::launch::async, prod1);
-    auto ret2 = std::async(std::launch::async, prod1);
-    auto ret3 = std::async(std::launch::async, prod1);
-
-    auto res1 = std::async(std::launch::async, cons);
-    auto res2 = std::async(std::launch::async, cons);
-    auto res3 = std::async(std::launch::async, cons);
-    ret1.wait();
-    ret2.wait();
-    ret3.wait();
+    std::packaged_task<int64_t()> c1(cons);
+    std::packaged_task<int64_t()> c2(cons);
+    auto res1 = c1.get_future();
+    auto res2 = c2.get_future();
+    auto c1thread = std::thread(std::move(c1));
+    auto c2thread = std::thread(std::move(c2));
+    auto prodthread1 = std::thread(prod1);
+    auto prodthread2 = std::thread(prod1);
+    auto prodthread3 = std::thread(prod1);
+    auto V3 = cons();
     auto V1 = res1.get();
     auto V2 = res2.get();
-    auto V3 = res3.get();
 
     EXPECT_EQ(V1 + V2 + V3, 3'000'000);
+
+    prodthread1.join();
+    prodthread2.join();
+    prodthread3.join();
+    c1thread.join();
+    c2thread.join();
 }
 
 /** test with multiple producer/multiple consumer*/

@@ -20,7 +20,8 @@ But the memory is not contiguous and the elements are stable
 no erase or insert
 @tparam X the type to store in the vector
 @tparam N the blocksize exponent store 2^N objects in an allocation block
-@tparam Allocator and allocator object to get the blocks*/
+@tparam Allocator an allocator object to get the blocks (only requires allocate
+and deallocate methods)*/
 template <typename X, unsigned int N, class Allocator = std::allocator<X>>
 class StableBlockDeque
 {
@@ -82,7 +83,7 @@ class StableBlockDeque
             }
             else
             {
-                dataSlotFront = (dataSlotsAvailable / 2 - blocks / 2);
+                dataSlotFront = (dataSlotsAvailable - blocks) / 2;
                 dataSlotBack = dataSlotFront + blocks;
                 auto med = startSize - (startSize >> N) * blockSize;
                 fsize = blockSize - static_cast<int>(med / 2) - 1;
@@ -123,17 +124,26 @@ class StableBlockDeque
         }
     }
 
-    StableBlockDeque(const StableBlockDeque &sbd) : StableBlockDeque()
+    StableBlockDeque(const StableBlockDeque &sbd)
+        : dataptr(new X *[std::max(static_cast<size_t>(sbd.dataSlotsAvailable),
+                                   size_t{64})]),
+          dataSlotsAvailable(std::max(sbd.dataSlotsAvailable, 64))
     {
         if (sbd.dataptr != nullptr)
         {
-            dataptr = new X *[sbd.dataSlotsAvailable];
-            dataSlotsAvailable = sbd.dataSlotsAvailable;
             dataSlotFront = sbd.dataSlotFront;
+            dataSlotBack = dataSlotFront;
             fsize = sbd.fsize;
             bsize = sbd.fsize + 1;
             dataptr[dataSlotFront] = getNewBlock();
             assign(sbd.begin(), sbd.end());
+        }
+        else
+        {
+            Allocator a;
+            dataSlotFront = dataSlotBack = 30;
+            dataptr[30] = a.allocate(blockSize);
+            bsize = fsize = blockSize / 2;
         }
     }
     StableBlockDeque(StableBlockDeque &&sbd) noexcept
@@ -154,12 +164,12 @@ class StableBlockDeque
 
     StableBlockDeque &operator=(const StableBlockDeque &sbd)
     {
-        clear();
         assign(sbd.begin(), sbd.end());
         return *this;
     }
     StableBlockDeque &operator=(StableBlockDeque &&sbd) noexcept
     {
+        freeAll();
         csize = sbd.csize;
         dataptr = sbd.dataptr;
         dataSlotsAvailable = sbd.dataSlotsAvailable;
@@ -180,49 +190,7 @@ class StableBlockDeque
         return *this;
     }
     /** destructor*/
-    ~StableBlockDeque()
-    {
-        if (dataptr != nullptr)
-        {
-            Allocator a;
-            if (dataSlotBack == dataSlotFront)
-            {
-                for (int jj = bsize - 1; jj > fsize; --jj)
-                {  // call destructors on the last block
-                    dataptr[dataSlotBack][jj].~X();
-                }
-                a.deallocate(dataptr[dataSlotFront], blockSize);
-            }
-            else
-            {
-                for (int jj = bsize - 1; jj >= 0; --jj)
-                {  // call destructors on the last block
-                    dataptr[dataSlotBack][jj].~X();
-                }
-                a.deallocate(dataptr[dataSlotBack], blockSize);
-                // don't go into the front slot yet
-                for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii)
-                {
-                    for (int jj = blockSize - 1; jj >= 0; --jj)
-                    {  // call destructors on the middle blocks
-                        dataptr[ii][jj].~X();
-                    }
-                    a.deallocate(dataptr[ii], blockSize);
-                }
-                for (int jj = blockSize - 1; jj > fsize; --jj)
-                {  // call destructors on the first block
-                    dataptr[dataSlotFront][jj].~X();
-                }
-                a.deallocate(dataptr[dataSlotFront], blockSize);
-            }
-            for (int ii = 0; ii < freeIndex; ++ii)
-            {
-                a.deallocate(freeblocks[ii], blockSize);
-            }
-            delete[] freeblocks;
-            delete[] dataptr;
-        }
-    }
+    ~StableBlockDeque() { freeAll(); }
 
     template <class... Args>
     void emplace_back(Args &&... args)
@@ -301,22 +269,90 @@ class StableBlockDeque
             moveBlocktoAvailable(dataptr[dataSlotFront++]);
             fsize = 0;
         }
-        dataptr[dataSlotFront][bsize].~X();
+        dataptr[dataSlotFront][fsize].~X();
     }
 
     template <class InputIt>
     void assign(InputIt first, InputIt last)
     {
+        auto copyFrom = first;
+        if (csize != 0)
+        {
+            auto assignTo = begin();
+            auto endAssign = end();
+            // copy the first block with equal numbers
+            while (copyFrom != last && assignTo != endAssign)
+            {
+                *assignTo = *copyFrom;
+                assignTo++;
+                copyFrom++;
+            }
+
+            if (copyFrom == last)
+            {
+                // now clear out the extras
+                int extracnt = 0;
+                while (assignTo != endAssign)
+                {
+                    ++assignTo;
+                    ++extracnt;
+                }
+                for (int ii = 0; ii < extracnt; ++ii)
+                {
+                    pop_back();
+                }
+            }
+        }
+        // now add the extra elements
+        while (copyFrom != last)
+        {
+            emplace_back(*copyFrom);
+            ++copyFrom;
+        }
     }
 
     template <class InputIt>
     void move_assign(InputIt first, InputIt last)
     {
+        auto copyFrom = first;
+        if (csize != 0)
+        {
+            auto assignTo = begin();
+            auto endAssign = end();
+            // copy the first block with equal numbers
+            while (copyFrom != last && assignTo != endAssign)
+            {
+                *assignTo = std::move(*copyFrom);
+                assignTo++;
+                copyFrom++;
+            }
+
+            if (copyFrom == last)
+            {
+                // now clear out the extras
+                int extracnt = 0;
+                while (assignTo != endAssign)
+                {
+                    ++assignTo;
+                    ++extracnt;
+                }
+                for (int ii = 0; ii < extracnt; ++ii)
+                {
+                    pop_back();
+                }
+            }
+        }
+        // now add the extra elements
+        while (copyFrom != last)
+        {
+            emplace_back(std::move(*copyFrom));
+            ++copyFrom;
+        }
     }
 
     void clear() noexcept(std::is_nothrow_destructible<X>::value)
     {
-        if (dataSlotsAvailable == 0)
+        if (dataSlotsAvailable == 0 || csize == 0)
         {
             return;
         }
@@ -354,7 +390,7 @@ class StableBlockDeque
     void shrink_to_fit()
     {
         Allocator a;
-        for (int ii = 0; ii <= freeIndex; ++ii)
+        for (int ii = 0; ii < freeIndex; ++ii)
         {
             a.deallocate(freeblocks[ii], blockSize);
         }
@@ -404,23 +440,26 @@ class StableBlockDeque
 
     iterator begin()
     {
+        if (csize == 0)
+        {
+            return end();
+        }
         if (fsize == blockSize - 1)
         {
             X **ptr = &(dataptr[dataSlotFront + 1]);
             return {ptr, 0};
         }
-        else
-        {
-            X **ptr = &(dataptr[dataSlotFront]);
-            return {ptr, fsize + 1};
-        }
+        X **ptr = &(dataptr[dataSlotFront]);
+        return {ptr, fsize + 1};
     }
 
     iterator end()
     {
+        static X *emptyValue{nullptr};
         if (bsize == blockSize)
         {
-            X **ptr = &(dataptr[dataSlotBack + 1]);
+            X **ptr =
+              (dataptr != nullptr) ? &(dataptr[dataSlotBack + 1]) : &emptyValue;
             return {ptr, 0};
         }
         X **ptr = &(dataptr[dataSlotBack]);
@@ -429,6 +468,10 @@ class StableBlockDeque
 
     const_iterator begin() const
     {
+        if (csize == 0)
+        {
+            return end();
+        }
         if (fsize == blockSize - 1)
         {
             const X *const *ptr = &(dataptr[dataSlotFront + 1]);
@@ -440,9 +483,11 @@ class StableBlockDeque
 
     const_iterator end() const
     {
+        static const X *const emptyValue{nullptr};
         if (bsize == blockSize)
         {
-            const X *const *ptr = &(dataptr[dataSlotBack + 1]);
+            const X *const *ptr =
+              (dataptr != nullptr) ? &(dataptr[dataSlotBack + 1]) : &emptyValue;
             return {ptr, 0};
         }
         const X *const *ptr = &(dataptr[dataSlotBack]);
@@ -506,8 +551,15 @@ class StableBlockDeque
             }
             if (dataSlotFront == 0)
             {
+                auto diff = dataSlotBack - dataSlotFront;
                 if (dataSlotBack < dataSlotsAvailable - 5)
                 {
+                    // shift the pointers
+                    std::copy(dataptr, dataptr + dataSlotBack + 1,
+                              dataptr +
+                                (dataSlotsAvailable - dataSlotBack) / 2);
+
+                    dataSlotFront = (dataSlotsAvailable - dataSlotBack) / 2;
                 }
                 else
                 {
@@ -519,6 +571,7 @@ class StableBlockDeque
                     dataSlotFront = dataSlotsAvailable;
                     dataSlotsAvailable *= 2;
                 }
+                dataSlotBack = dataSlotFront + diff;
             }
             dataptr[--dataSlotFront] = getNewBlock();
             fsize = blockSize - 1;
@@ -556,6 +609,50 @@ class StableBlockDeque
         return freeblocks[--freeIndex];
     }
 
+    void freeAll()
+    {
+        if (dataptr != nullptr)
+        {
+            Allocator a;
+            if (dataSlotBack == dataSlotFront)
+            {
+                for (int jj = bsize - 1; jj > fsize; --jj)
+                {  // call destructors on the last block
+                    dataptr[dataSlotBack][jj].~X();
+                }
+                a.deallocate(dataptr[dataSlotFront], blockSize);
+            }
+            else
+            {
+                for (int jj = bsize - 1; jj >= 0; --jj)
+                {  // call destructors on the last block
+                    dataptr[dataSlotBack][jj].~X();
+                }
+                a.deallocate(dataptr[dataSlotBack], blockSize);
+                // don't go into the front slot yet
+                for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii)
+                {
+                    for (int jj = blockSize - 1; jj >= 0; --jj)
+                    {  // call destructors on the middle blocks
+                        dataptr[ii][jj].~X();
+                    }
+                    a.deallocate(dataptr[ii], blockSize);
+                }
+                for (int jj = blockSize - 1; jj > fsize; --jj)
+                {  // call destructors on the first block
+                    dataptr[dataSlotFront][jj].~X();
+                }
+                a.deallocate(dataptr[dataSlotFront], blockSize);
+            }
+            for (int ii = 0; ii < freeIndex; ++ii)
+            {
+                a.deallocate(freeblocks[ii], blockSize);
+            }
+            delete[] freeblocks;
+            delete[] dataptr;
+        }
+    }
+
   private:
     size_t csize{0};  // 8
     X **dataptr{nullptr};  // 16
@@ -567,7 +664,7 @@ class StableBlockDeque
     int freeSlotsAvailable{0};  // 40
     int freeIndex{0};  // 48 +4 byte gap
     X **freeblocks{nullptr};  // 56
-};
+};  // namespace containers
 
 }  // namespace containers
 }  // namespace gmlc

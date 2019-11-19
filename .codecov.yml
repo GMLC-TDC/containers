@@ -31,3 +31,4 @@ ignore:
   - "examples"
   - "test"
   - "FuzzTargets"
+  - "gmlc/containers/extra"

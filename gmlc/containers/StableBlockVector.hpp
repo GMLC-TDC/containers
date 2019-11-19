@@ -109,12 +109,12 @@ class StableBlockVector
 
     StableBlockVector &operator=(const StableBlockVector &sbv)
     {
-        clear();
         assign(sbv.begin(), sbv.end());
         return *this;
     }
     StableBlockVector &operator=(StableBlockVector &&sbv) noexcept
     {
+        freeAll();
         csize = sbv.csize;
         dataptr = sbv.dataptr;
         dataSlotsAvailable = sbv.dataSlotsAvailable;
@@ -132,42 +132,7 @@ class StableBlockVector
         return *this;
     }
     /** destructor*/
-    ~StableBlockVector()
-    {
-        if (dataptr != nullptr)
-        {
-            Allocator a;
-            for (int jj = bsize - 1; jj >= 0; --jj)
-            {  // call destructors on the last block
-                dataptr[dataSlotIndex][jj].~X();
-            }
-            if (dataSlotIndex > 0)
-            {
-                a.deallocate(dataptr[dataSlotIndex], blockSize);
-            }
-            // go in reverse order
-            for (int ii = dataSlotIndex - 1; ii >= 0; --ii)
-            {
-                for (int jj = blockSize - 1; jj >= 0; --jj)
-                {  // call destructors on the middle blocks
-                    dataptr[ii][jj].~X();
-                }
-                a.deallocate(dataptr[ii], blockSize);
-            }
-            if (dataSlotIndex == 0)
-            {
-                a.deallocate(dataptr[0], blockSize);
-            }
-
-            for (int ii = 0; ii < freeIndex; ++ii)
-            {
-                a.deallocate(freeblocks[ii], blockSize);
-            }
-            // delete can handle a nullptr
-            delete[] freeblocks;
-            delete[] dataptr;
-        }
-    }
+    ~StableBlockVector() { freeAll(); }
 
     template <class... Args>
     void emplace_back(Args &&... args)
@@ -221,10 +186,20 @@ class StableBlockVector
             operator[](ii++) = *cur;
             ++cur;
         }
-        while (cur != last)
+        if (cur == last)
         {
-            push_back(*cur);
-            ++cur;
+            while (csize > ii)
+            {
+                pop_back();
+            }
+        }
+        else
+        {
+            while (cur != last)
+            {
+                push_back(*cur);
+                ++cur;
+            }
         }
     }
 
@@ -238,10 +213,20 @@ class StableBlockVector
             operator[](ii++) = std::move(*cur);
             ++cur;
         }
-        while (cur != last)
+        if (cur == last)
         {
-            emplace_back(std::move(*cur));
-            ++cur;
+            while (csize > ii)
+            {
+                pop_back();
+            }
+        }
+        else
+        {
+            while (cur != last)
+            {
+                emplace_back(std::move(*cur));
+                ++cur;
+            }
         }
     }
 
@@ -284,7 +269,7 @@ class StableBlockVector
     void shrink_to_fit() noexcept
     {
         Allocator a;
-        for (int ii = 0; ii <= freeIndex; ++ii)
+        for (int ii = 0; ii < freeIndex; ++ii)
         {
             a.deallocate(freeblocks[ii], blockSize);
         }
@@ -316,13 +301,22 @@ class StableBlockVector
     bool empty() const { return (csize == 0); }
     /** define an iterator*/
 
-    iterator begin() { return {dataptr, 0}; }
+    iterator begin()
+    {
+        if (csize == 0)
+        {
+            return end();
+        }
+        return {dataptr, 0};
+    }
 
     iterator end()
     {
+        static X *emptyValue{nullptr};
         if (bsize == blockSize)
         {
-            X **ptr = &(dataptr[dataSlotIndex + 1]);
+            X **ptr = (dataptr != nullptr) ? &(dataptr[dataSlotIndex + 1]) :
+                                             &emptyValue;
             return {ptr, 0};
         }
         else
@@ -334,25 +328,65 @@ class StableBlockVector
 
     const_iterator begin() const
     {
+        if (csize == 0)
+        {
+            return end();
+        }
         const X *const *ptr = dataptr;
         return {ptr, 0};
     }
 
     const_iterator end() const
     {
+        static const X *const emptyValue{nullptr};
         if (bsize == blockSize)
         {
-            const X *const *ptr = &(dataptr[dataSlotIndex + 1]);
+            const X *const *ptr = (dataptr != nullptr) ?
+                                    &(dataptr[dataSlotIndex + 1]) :
+                                    &emptyValue;
             return {ptr, 0};
         }
-        else
-        {
-            const X *const *ptr = &(dataptr[dataSlotIndex]);
-            return {ptr, bsize};
-        }
+        const X *const *ptr = &(dataptr[dataSlotIndex]);
+        return {ptr, bsize};
     }
 
   private:
+    void freeAll()
+    {
+        if (dataptr != nullptr)
+        {
+            Allocator a;
+            for (int jj = bsize - 1; jj >= 0; --jj)
+            {  // call destructors on the last block
+                dataptr[dataSlotIndex][jj].~X();
+            }
+            if (dataSlotIndex > 0)
+            {
+                a.deallocate(dataptr[dataSlotIndex], blockSize);
+            }
+            // go in reverse order
+            for (int ii = dataSlotIndex - 1; ii >= 0; --ii)
+            {
+                for (int jj = blockSize - 1; jj >= 0; --jj)
+                {  // call destructors on the middle blocks
+                    dataptr[ii][jj].~X();
+                }
+                a.deallocate(dataptr[ii], blockSize);
+            }
+            if (dataSlotIndex == 0)
+            {
+                a.deallocate(dataptr[0], blockSize);
+            }
+
+            for (int ii = 0; ii < freeIndex; ++ii)
+            {
+                a.deallocate(freeblocks[ii], blockSize);
+            }
+            // delete can handle a nullptr
+            delete[] freeblocks;
+            delete[] dataptr;
+        }
+    }
     void blockCheck()
     {
         if (bsize >= static_cast<int>(blockSize))

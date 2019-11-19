@@ -37,6 +37,24 @@ TEST(airlock_tests, basic_tests)
     EXPECT_TRUE(alock.try_load(54));
 }
 
+/** test basic operations */
+TEST(airlock_tests, empty_load_test)
+{
+    AirLock<int> alock;
+
+    alock.load(45);
+    EXPECT_TRUE(!alock.try_load(54));
+
+    EXPECT_TRUE(alock.isLoaded());
+
+    auto res = alock.try_unload();
+    ASSERT_TRUE(res);
+
+    EXPECT_EQ(*res, 45);
+    EXPECT_TRUE(!alock.isLoaded());
+    EXPECT_TRUE(alock.try_load(54));
+}
+
 /** test with a move only element*/
 TEST(airlock_tests, move_only_tests)
 {

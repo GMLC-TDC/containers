@@ -424,6 +424,30 @@ because this is meant for multi-threaded applications this may or may not have
 any meaning depending on the number of consumers
 */
     bool empty() const;
+
+  private:
+    /** If pullElements is empty check push and swap and reverse if needed
+  assumes pullLock is active and pushLock is not
+  */
+    void checkPullAndSwap()
+    {
+        if (pullElements.empty())
+        {
+            std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
+            if (!pushElements.empty())
+            {  // this is the potential for slow operations
+                std::swap(pushElements, pullElements);
+                // we can free the push function to accept more elements after
+                // the swap call;
+                pushLock.unlock();
+                std::reverse(pullElements.begin(), pullElements.end());
+            }
+            else
+            {
+                queueEmptyFlag = true;
+            }
+        }
+    }
 };
 
 template <typename T, class MUTEX, class COND>
@@ -436,66 +460,22 @@ opt<T> BlockingPriorityQueue<T, MUTEX, COND>::try_pop()
         priorityQueue.pop();
         return val;
     }
-    if (pullElements.empty())
+    checkPullAndSwap();
+    if (queueEmptyFlag.load())
     {
-        std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
-        if (!pushElements.empty())
-        {  // on the off chance the queue got out of sync
-            std::swap(pushElements, pullElements);
-            pushLock.unlock();  // we can free the push function to accept more
-                                // elements after the swap call;
-            std::reverse(pullElements.begin(), pullElements.end());
-            // do it this way to allow movable only types
-            opt<T> val(std::move(pullElements.back()));
-            pullElements.pop_back();
-            if (pullElements.empty())
-            {
-                pushLock.lock();  // second pushLock
-                // more elements could have been added
-                if (!pushElements.empty())
-                {  // this is the potential for slow operations
-                    std::swap(pushElements, pullElements);
-                    // we can free the push function to accept more elements
-                    // after the swap call;
-                    pushLock.unlock();
-                    std::reverse(pullElements.begin(), pullElements.end());
-                }
-                else
-                {
-                    queueEmptyFlag = true;
-                }
-            }
-            return val;
-        }
-        queueEmptyFlag = true;
-        return {};  // return the empty optional
+        return {};
     }
     // do it this way to allow movable only types
     opt<T> val(std::move(pullElements.back()));
     pullElements.pop_back();
-    if (pullElements.empty())
-    {
-        std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
-        if (!pushElements.empty())
-        {  // this is the potential for slow operations
-            std::swap(pushElements, pullElements);
-            // we can free the push function to accept more elements after the
-            // swap call;
-            pushLock.unlock();
-            std::reverse(pullElements.begin(), pullElements.end());
-        }
-        else
-        {
-            queueEmptyFlag = true;
-        }
-    }
+    checkPullAndSwap();
     return val;
 }
 
 template <typename T, class MUTEX, class COND>
 bool BlockingPriorityQueue<T, MUTEX, COND>::empty() const
 {
-    return queueEmptyFlag;
+    return queueEmptyFlag.load();
 }
 
 }  // namespace containers

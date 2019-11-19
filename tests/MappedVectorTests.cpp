@@ -49,6 +49,77 @@ TEST(mapped_vector_tests, insertion_tests)
 
     auto V4 = Mvec.find("a2");
     EXPECT_EQ(V4->size(), 45);
+
+    auto loc = Mvec.insert("a2", std::vector<double>(14));
+    EXPECT_FALSE(loc);
+
+    auto V5 = Mvec.find("not_available");
+    EXPECT_EQ(V5, Mvec.end());
+
+    const auto &Mvecc = Mvec;
+    auto V4c = Mvecc.find("a2");
+    EXPECT_EQ(V4c->size(), 45);
+
+    auto V5c = Mvecc.find("not_available");
+    EXPECT_EQ(V5c, Mvecc.end());
+
+    auto &V2c = Mvecc[1];
+    EXPECT_EQ(V2.size(), 45);
+    EXPECT_EQ(Mvecc.back().size(), 45);
+}
+
+TEST(mapped_vector_tests, insert_or_assign)
+{
+    MappedVector<std::vector<double>> Mvec;
+    Mvec.insert("el1", 3, 1.7);
+    EXPECT_EQ(Mvec.size(), 1u);
+    auto loca2 = Mvec.insert("a2", std::vector<double>(45));
+    EXPECT_TRUE(loca2);
+    EXPECT_EQ(Mvec.size(), 2u);
+    auto &V = Mvec[0];
+    EXPECT_EQ(V.size(), 3u);
+    EXPECT_EQ(V[0], 1.7);
+    EXPECT_EQ(V[2], 1.7);
+
+    auto &V2 = Mvec[1];
+    EXPECT_EQ(V2.size(), 45);
+
+    auto V3 = Mvec.find("el1");
+    EXPECT_EQ(V3->size(), 3);
+
+    auto V4 = Mvec.find("a2");
+    EXPECT_EQ(V4->size(), 45);
+
+    auto loc = Mvec.insert("a2", std::vector<double>(14));
+    EXPECT_FALSE(loc);
+
+    auto loca2i = Mvec.insert_or_assign("a2", std::vector<double>(14));
+    EXPECT_EQ(loca2i, *loca2);
+    auto V5 = Mvec.find("a2");
+    EXPECT_EQ(V5->size(), 14);
+
+    EXPECT_EQ(Mvec.back().size(), 14);
+}
+
+TEST(mapped_vector_tests, insertion_tests_nomap)
+{
+    MappedVector<std::vector<double>> Mvec;
+    Mvec.insert("el1", 3, 1.7);
+    EXPECT_EQ(Mvec.size(), 1u);
+    Mvec.insert("a2", std::vector<double>(45));
+    EXPECT_EQ(Mvec.size(), 2u);
+    auto &V = Mvec[0];
+    EXPECT_EQ(V.size(), 3u);
+    EXPECT_EQ(V[0], 1.7);
+    EXPECT_EQ(V[2], 1.7);
+
+    auto &V2 = Mvec[1];
+    EXPECT_EQ(V2.size(), 45);
+
+    auto loc = Mvec.insert(nullptr, std::vector<double>(22));
+    EXPECT_TRUE(loc);
+    auto &V4 = Mvec[*loc];
+    EXPECT_EQ(V4.size(), 22);
 }
 
 TEST(mapped_vector_tests, iterator_tests)

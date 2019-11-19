@@ -246,60 +246,15 @@ class SimpleQueue
     opt<X> pop()
     {
         std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
-        if (pullElements.empty())
+        checkPullandSwap();
+        if (queueEmptyFlag.load())
         {
-            std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
-            if (!pushElements.empty())
-            {  // on the off chance the queue got out of sync
-                std::swap(pushElements, pullElements);
-                pushLock.unlock();  // we can free the push function to accept
-                                    // more elements after the swap call;
-                std::reverse(pullElements.begin(), pullElements.end());
-                opt<X> val(std::move(
-                  pullElements
-                    .back()));  // do it this way to allow moveable only types
-                pullElements.pop_back();
-                if (pullElements.empty())
-                {
-                    pushLock.lock();  // second pushLock
-                    if (!pushElements
-                           .empty())  // more elements could have been added
-                    {  // this is the potential for slow operations
-                        std::swap(pushElements, pullElements);
-                        // we can free the push function to accept more elements
-                        // after the swap call;
-                        pushLock.unlock();
-                        std::reverse(pullElements.begin(), pullElements.end());
-                    }
-                    else
-                    {
-                        queueEmptyFlag = true;
-                    }
-                }
-                return val;
-            }
-            queueEmptyFlag = true;
-            return {};  // return the empty optional
+            return {};
         }
         opt<X> val(std::move(
           pullElements.back()));  // do it this way to allow moveable only types
         pullElements.pop_back();
-        if (pullElements.empty())
-        {
-            std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
-            if (!pushElements.empty())
-            {  // this is the potential for slow operations
-                std::swap(pushElements, pullElements);
-                // we can free the push function to accept more elements after
-                // the swap call;
-                pushLock.unlock();
-                std::reverse(pullElements.begin(), pullElements.end());
-            }
-            else
-            {
-                queueEmptyFlag = true;
-            }
-        }
+        checkPullandSwap();
         return val;
     }
 
@@ -319,6 +274,30 @@ class SimpleQueue
 
         auto t = pullElements.back();
         return t;
+    }
+
+  private:
+    /** If pullElements is empty check push and swap and reverse if needed
+      assumes pullLock is active and pushLock is not
+      */
+    void checkPullandSwap()
+    {
+        if (pullElements.empty())
+        {
+            std::unique_lock<MUTEX> pushLock(m_pushLock);  // second pushLock
+            if (!pushElements.empty())
+            {  // this is the potential for slow operations
+                std::swap(pushElements, pullElements);
+                // we can free the push function to accept more elements after
+                // the swap call;
+                pushLock.unlock();
+                std::reverse(pullElements.begin(), pullElements.end());
+            }
+            else
+            {
+                queueEmptyFlag = true;
+            }
+        }
     }
 };
 

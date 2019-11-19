@@ -16,6 +16,7 @@ TEST(CircBuff_tests, test_circularbuffraw_simple)
     unsigned char *block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
 
+    EXPECT_TRUE(buf.isSpaceAvailable(256));
     std::vector<unsigned char> testData(256, 'a');
     int res = buf.pop(testData.data(), 256);
     EXPECT_EQ(res, 0);
@@ -25,6 +26,9 @@ TEST(CircBuff_tests, test_circularbuffraw_simple)
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_FALSE(buf.empty());
+    // this is too small a space
+    auto res0 = buf.pop(testData.data(), 10);
+    EXPECT_EQ(res0, 0);
     res = buf.pop(testData.data(), 1024);
     EXPECT_EQ(res, 200);
     EXPECT_EQ(testData[0], 'a');
@@ -33,6 +37,7 @@ TEST(CircBuff_tests, test_circularbuffraw_simple)
     EXPECT_EQ(testData[200], 0);
 
     EXPECT_TRUE(buf.empty());
+    EXPECT_EQ(buf.nextDataSize(), 0);
     delete[] block;
 }
 
@@ -81,8 +86,10 @@ TEST(CircBuff_tests, test_circularbuffraw_loop_around_repeat)
         EXPECT_TRUE(pushed);
         int res = buf.pop(testData.data(), 500);
         EXPECT_EQ(res, ii);
+        int nds = buf.nextDataSize();
         res = buf.pop(testData.data(), 500);
         EXPECT_EQ(res, ii);
+        EXPECT_EQ(nds, ii);
         EXPECT_TRUE(buf.empty());
     }
 
@@ -397,4 +404,32 @@ TEST(CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
         pushed = buf.push(testData.data(), ii);
         EXPECT_TRUE(pushed);
     }
+}
+
+TEST(CircBuff_tests, odd_conditions)
+{
+    CircularBuffer buf(1024);
+
+    std::vector<unsigned char> testData(256, 'a');
+
+    EXPECT_FALSE(buf.push(testData.data(), 0));
+    EXPECT_FALSE(buf.push(testData.data(), -15));
+    EXPECT_FALSE(buf.push(nullptr, 10));
+
+    EXPECT_TRUE(buf.push(testData.data(), 200));
+    EXPECT_EQ(buf.next_data_size(), 200);
+
+    CircularBuffer buf2;
+
+    CircularBuffer buf3(std::move(buf2));
+    buf3.resize(1024);
+    EXPECT_EQ(buf3.capacity(), 1024);
+    EXPECT_NO_THROW(buf3.resize(1024));
+    EXPECT_EQ(buf3.capacity(), 1024);
+    buf3.resize(512);
+    EXPECT_EQ(buf3.capacity(), 512);
+    buf3.resize(512);
+    EXPECT_EQ(buf3.capacity(), 512);
+    buf3.resize(1024);
+    EXPECT_EQ(buf3.capacity(), 1024);
 }

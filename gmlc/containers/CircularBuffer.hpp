@@ -51,7 +51,7 @@ class CircularBufferRaw
     // Return true if push was successful
     bool push(const unsigned char *data, int blockSize)
     {
-        if (blockSize <= 0)
+        if (blockSize <= 0 || data == nullptr)
         {
             return false;
         }
@@ -276,10 +276,26 @@ class CircularBuffer
               static_cast<int>(buffer.next_read - buffer.origin);
             if (buffer.next_read < buffer.next_write)
             {
-                if (read_offset <= newsize)
+                int write_offset =
+                  static_cast<int>(buffer.next_write - buffer.origin);
+                if (write_offset <= newsize)
                 {
-                    actualSize = newsize;
                     buffer.capacity_ = newsize;
+                }
+                else if (write_offset - read_offset < newsize)
+                {
+                    memmove(buffer.origin, buffer.next_read,
+                            write_offset - read_offset);
+                    buffer.next_read = buffer.origin;
+                    buffer.next_write =
+                      buffer.origin + write_offset - read_offset;
+                    buffer.capacity_ = newsize;
+                }
+                else
+                {
+                    throw(std::runtime_error(
+                      "unable to resize, current data exceeds new size, please "
+                      "empty buffer before resizing"));
                 }
             }
             else
@@ -328,10 +344,6 @@ class CircularBuffer
   private:
     void resizeMemory(int newsize, bool copyData = true)
     {
-        if (newsize == actualSize)
-        {
-            return;
-        }
         if (newsize > actualCapacity)
         {
             auto buf = reinterpret_cast<unsigned char *>(malloc(newsize));
