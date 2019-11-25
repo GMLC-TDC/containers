@@ -176,13 +176,22 @@ class StackBuffer
           statedSize{sq.statedSize}, actualCapacity{sq.statedSize},
           stack(sq.stack)
     {
-        memcpy(data, sq.data, static_cast<size_t>(statedSize));
-        auto offset = stack.next - stack.origin;
-        stack.origin = data;
-        stack.next = stack.origin + offset;
-        stack.nextIndex =
-          reinterpret_cast<dataIndex *>(stack.origin + stack.dataSize - diSize);
-        stack.nextIndex -= stack.dataCount;
+        if (data != nullptr && sq.data != nullptr)
+        {
+            memcpy(data, sq.data, static_cast<size_t>(statedSize));
+            auto offset = stack.next - stack.origin;
+            stack.origin = data;
+            stack.next = stack.origin + offset;
+            stack.nextIndex = reinterpret_cast<dataIndex *>(
+              stack.origin + stack.dataSize - diSize);
+            stack.nextIndex -= stack.dataCount;
+        }
+        else
+        {
+            free(data);
+            statedSize = 0;
+            actualCapacity = 0;
+        }
     }
 
     StackBuffer &operator=(StackBuffer &&sq) noexcept

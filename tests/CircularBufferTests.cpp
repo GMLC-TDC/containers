@@ -382,6 +382,25 @@ TEST(CircBuff_tests, test_circularbuff_resize_smaller_wrap)
     EXPECT_EQ(buf.capacity(), 620);
 }
 
+TEST(CircBuff_tests, test_circularbuff_resize_wrap)
+{
+    CircularBuffer buf(1024);
+    std::vector<unsigned char> testData(256, 'a');
+    buf.push(testData.data(), 200);
+    buf.push(testData.data(), 201);
+    buf.push(testData.data(), 202);
+    buf.push(testData.data(), 203);
+
+    EXPECT_THROW(buf.resize(512), std::runtime_error);
+
+    buf.pop(testData.data(), 256);
+    buf.pop(testData.data(), 256);
+    buf.resize(512);
+    EXPECT_EQ(buf.pop(testData.data(), 256), 202);
+    EXPECT_EQ(buf.pop(testData.data(), 256), 203);
+    EXPECT_EQ(buf.capacity(), 512);
+}
+
 TEST(CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
 {
     CircularBuffer buf(45);
@@ -432,4 +451,9 @@ TEST(CircBuff_tests, odd_conditions)
     EXPECT_EQ(buf3.capacity(), 512);
     buf3.resize(1024);
     EXPECT_EQ(buf3.capacity(), 1024);
+
+    CircularBuffer buf4;
+    EXPECT_TRUE(buf4.empty());
+    CircularBuffer buf5(buf4);
+    EXPECT_TRUE(buf5.empty());
 }

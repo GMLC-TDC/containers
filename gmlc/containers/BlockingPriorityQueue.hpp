@@ -461,7 +461,7 @@ opt<T> BlockingPriorityQueue<T, MUTEX, COND>::try_pop()
         return val;
     }
     checkPullAndSwap();
-    if (queueEmptyFlag.load())
+    if (pullElements.empty())
     {
         return {};
     }

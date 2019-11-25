@@ -183,7 +183,7 @@ class CircularBuffer
           actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
           buffer(cb.buffer)
     {
-        if (data != nullptr)
+        if (data != nullptr && cb.data != nullptr)
         {
             memcpy(data, cb.data, actualSize);
             auto read_offset = buffer.next_read - buffer.origin;
@@ -194,6 +194,7 @@ class CircularBuffer
         }
         else
         {
+            free(data);
             actualSize = 0;
             actualCapacity = 0;
         }

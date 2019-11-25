@@ -116,11 +116,7 @@ class BlockingQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.push_back(std::forward<Z>(val));
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -135,18 +131,12 @@ class BlockingQueue
                     pullElements.push_back(std::forward<Z>(val));
                     // pullLock.unlock ();
                     condition.notify_all();
+                    return;
                 }
-                else
-                {
-                    pushLock.lock();
-                    pushElements.push_back(std::forward<Z>(val));
-                }
-            }
-            else
-            {
-                pushElements.push_back(std::forward<Z>(val));
+                pushLock.lock();
             }
         }
+        pushElements.push_back(std::forward<Z>(val));
     }
 
     /** construct on object in place on the queue */
@@ -155,11 +145,7 @@ class BlockingQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.emplace_back(std::forward<Args>(args)...);
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -174,18 +160,12 @@ class BlockingQueue
                     pullElements.emplace_back(std::forward<Args>(args)...);
                     // pullLock.unlock ();
                     condition.notify_all();
+                    return;
                 }
-                else
-                {
-                    pushLock.lock();
-                    pushElements.emplace_back(std::forward<Args>(args)...);
-                }
-            }
-            else
-            {
-                pushElements.emplace_back(std::forward<Args>(args)...);
+                pushLock.lock();
             }
         }
+        pushElements.emplace_back(std::forward<Args>(args)...);
     }
 
     /** try to peek at an object without popping it from the stack
@@ -352,7 +332,7 @@ opt<T> BlockingQueue<T, MUTEX, COND>::try_pop()
 {
     std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
     checkPullAndSwap();
-    if (queueEmptyFlag.load())
+    if (pullElements.empty())
     {
         return {};
     }

@@ -125,11 +125,7 @@ class SimpleQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.push_back(std::forward<Z>(val));
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -137,23 +133,19 @@ class SimpleQueue
                 // release the push lock
                 pushLock.unlock();
                 std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
-                queueEmptyFlag = false;
+                queueEmptyFlag =
+                  false;  // set the flag to false again just in case
                 if (pullElements.empty())
                 {
                     pullElements.push_back(std::forward<Z>(val));
-                    pullLock.unlock();
+                    return;
                 }
-                else
-                {
-                    pushLock.lock();
-                    pushElements.push_back(std::forward<Z>(val));
-                }
-            }
-            else
-            {
-                pushElements.push_back(std::forward<Z>(val));
+                // we do need to keep pulllock engaged here to prevent some odd
+                // conditions;
+                pushLock.lock();
             }
         }
+        pushElements.push_back(std::forward<Z>(val));
     }
 
     /** push a vector onto the queue
@@ -163,11 +155,7 @@ class SimpleQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.insert(pushElements.end(), val.begin(), val.end());
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -175,25 +163,20 @@ class SimpleQueue
                 // release the push lock
                 pushLock.unlock();
                 std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
-                queueEmptyFlag = false;
+                queueEmptyFlag =
+                  false;  // set the flag to false again just in case
                 if (pullElements.empty())
                 {
                     pullElements.insert(pullElements.end(), val.rbegin(),
                                         val.rend());
-                    pullLock.unlock();
+                    return;
                 }
-                else
-                {
-                    pushLock.lock();
-                    pushElements.insert(pushElements.end(), val.begin(),
-                                        val.end());
-                }
-            }
-            else
-            {
-                pushElements.insert(pushElements.end(), val.begin(), val.end());
+                // we do need to keep pulllock engaged here to prevent some odd
+                // conditions;
+                pushLock.lock();
             }
         }
+        pushElements.insert(pushElements.end(), val.begin(), val.end());
     }
 
     /** emplace an element onto the queue
@@ -204,11 +187,7 @@ class SimpleQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.emplace_back(std::forward<Args>(args)...);
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -220,19 +199,14 @@ class SimpleQueue
                 if (pullElements.empty())
                 {
                     pullElements.emplace_back(std::forward<Args>(args)...);
-                    pullLock.unlock();
+                    return;
                 }
-                else
-                {
-                    pushLock.lock();
-                    pushElements.emplace_back(std::forward<Args>(args)...);
-                }
-            }
-            else
-            {
-                pushElements.emplace_back(std::forward<Args>(args)...);
+                pushLock.lock();
+                // we do need to keep pulllock engaged here to prevent some odd
+                // conditions;
             }
         }
+        pushElements.emplace_back(std::forward<Args>(args)...);
     }
     /*make sure there is no path to lock the push first then the pull second
     as that would be a race condition
@@ -247,7 +221,7 @@ class SimpleQueue
     {
         std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
         checkPullandSwap();
-        if (queueEmptyFlag.load())
+        if (pullElements.empty())
         {
             return {};
         }
