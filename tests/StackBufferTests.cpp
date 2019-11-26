@@ -559,3 +559,36 @@ TEST(stackQueueTest, test_stackqueue_resize)
 
     EXPECT_FALSE(stack.resize(-262354));  // this should do nothing
 }
+
+TEST(stackQueueTest, odd_conditions)
+{
+    StackBuffer buf(1024);
+
+    std::vector<unsigned char> testData(256, 'a');
+
+    EXPECT_FALSE(buf.push(testData.data(), 0));
+    EXPECT_FALSE(buf.push(testData.data(), -15));
+    EXPECT_FALSE(buf.push(nullptr, 10));
+
+    EXPECT_TRUE(buf.push(testData.data(), 200));
+    EXPECT_EQ(buf.nextDataSize(), 200);
+
+    StackBuffer buf2;
+
+    StackBuffer buf3(std::move(buf2));
+    buf3.resize(1024);
+    EXPECT_EQ(buf3.capacity(), 1024);
+    EXPECT_NO_THROW(buf3.resize(1024));
+    EXPECT_EQ(buf3.capacity(), 1024);
+    buf3.resize(512);
+    EXPECT_EQ(buf3.capacity(), 512);
+    buf3.resize(512);
+    EXPECT_EQ(buf3.capacity(), 512);
+    buf3.resize(1024);
+    EXPECT_EQ(buf3.capacity(), 1024);
+
+    StackBuffer buf4;
+    EXPECT_TRUE(buf4.empty());
+    StackBuffer buf5(buf4);
+    EXPECT_TRUE(buf5.empty());
+}

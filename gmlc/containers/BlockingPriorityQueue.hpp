@@ -116,11 +116,7 @@ class BlockingPriorityQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.push_back(std::forward<Z>(val));
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -134,13 +130,14 @@ class BlockingPriorityQueue
                 {
                     pullElements.push_back(std::forward<Z>(val));
                     // pullLock.unlock ();
-                    condition.notify_all();
                 }
                 else
                 {
                     pushLock.lock();
                     pushElements.push_back(std::forward<Z>(val));
                 }
+                condition.notify_all();
+                return;
             }
             else
             {
@@ -150,8 +147,10 @@ class BlockingPriorityQueue
                 {
                     condition.notify_all();
                 }
+                return;
             }
         }
+        pushElements.push_back(std::forward<Z>(val));
     }
 
     /** push an element onto the queue
@@ -188,11 +187,7 @@ class BlockingPriorityQueue
     {
         std::unique_lock<MUTEX> pushLock(
           m_pushLock);  // only one lock on this branch
-        if (!pushElements.empty())
-        {
-            pushElements.emplace_back(std::forward<Args>(args)...);
-        }
-        else
+        if (pushElements.empty())
         {
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
@@ -206,14 +201,15 @@ class BlockingPriorityQueue
                 if (pullElements.empty())
                 {
                     pullElements.emplace_back(std::forward<Args>(args)...);
-                    //  pullLock.unlock ();
-                    condition.notify_all();
                 }
                 else
                 {
                     pushLock.lock();
                     pushElements.emplace_back(std::forward<Args>(args)...);
                 }
+
+                condition.notify_all();
+                return;
             }
             else
             {
@@ -223,8 +219,10 @@ class BlockingPriorityQueue
                 {
                     condition.notify_all();
                 }
+                return;
             }
         }
+        pushElements.emplace_back(std::forward<Args>(args)...);
     }
 
     /** emplace an element onto the priority queue

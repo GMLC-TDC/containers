@@ -140,9 +140,10 @@ class SimpleQueue
                     pullElements.push_back(std::forward<Z>(val));
                     return;
                 }
-                // we do need to keep pulllock engaged here to prevent some odd
-                // conditions;
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
                 pushLock.lock();
+                // LCOV_EXCL_STOP
             }
         }
         pushElements.push_back(std::forward<Z>(val));
@@ -171,9 +172,10 @@ class SimpleQueue
                                         val.rend());
                     return;
                 }
-                // we do need to keep pulllock engaged here to prevent some odd
-                // conditions;
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
                 pushLock.lock();
+                // LCOV_EXCL_STOP
             }
         }
         pushElements.insert(pushElements.end(), val.begin(), val.end());
@@ -201,9 +203,10 @@ class SimpleQueue
                     pullElements.emplace_back(std::forward<Args>(args)...);
                     return;
                 }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
                 pushLock.lock();
-                // we do need to keep pulllock engaged here to prevent some odd
-                // conditions;
+                // LCOV_EXCL_STOP
             }
         }
         pushElements.emplace_back(std::forward<Args>(args)...);

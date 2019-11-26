@@ -333,7 +333,7 @@ class CircularBuffer
         return buffer.push(block, blockSize);
     }
 
-    int next_data_size() const { return buffer.nextDataSize(); }
+    int nextDataSize() const { return buffer.nextDataSize(); }
 
     int pop(unsigned char *block, int maxSize)
     {

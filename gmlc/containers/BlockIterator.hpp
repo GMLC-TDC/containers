@@ -40,10 +40,11 @@ class BlockIterator
     // std::enable_if_t<!std::is_const<X>::value, X> *operator->() { return ptr;
     // }
     X *operator->() { return ptr; }
-
+	//
     constref *operator->() const { return ptr; }
-
-    operator bool() const { return (ptr != nullptr); }
+	///explicit bool conversion 
+    explicit operator bool() const { return (ptr != nullptr); }
+	/// Equality operator
     bool operator==(const BlockIterator &it) const
     {
         return ((vec == it.vec) && (offset == it.offset));

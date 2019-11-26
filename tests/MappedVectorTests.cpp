@@ -99,6 +99,12 @@ TEST(mapped_vector_tests, insert_or_assign)
     EXPECT_EQ(V5->size(), 14);
 
     EXPECT_EQ(Mvec.back().size(), 14);
+
+    auto loca3i = Mvec.insert_or_assign("a3", std::vector<double>(16));
+
+    EXPECT_EQ(Mvec.back().size(), 16);
+    EXPECT_EQ(Mvec[loca3i].size(), 16);
+    EXPECT_EQ(loca3i, Mvec.size() - 1);
 }
 
 TEST(mapped_vector_tests, insertion_tests_nomap)
@@ -133,11 +139,21 @@ TEST(mapped_vector_tests, iterator_tests)
 
     EXPECT_EQ(Mvec.size(), 4);
 
+    double sum = 0;
+    auto accum = [&sum](double val) { sum += val; };
+
+    Mvec.apply(accum);
+    EXPECT_DOUBLE_EQ(sum, 3.2 + 4.3 + 9.7 + 11.4);
+    double sum1 = sum;
+    sum = 0.0;
     Mvec.transform([](double val) { return val + 1; });
 
     EXPECT_EQ(Mvec[0], 3.2 + 1.0);
     EXPECT_EQ(Mvec[1], 4.3 + 1.0);
     EXPECT_EQ(Mvec[2], 9.7 + 1.0);
+
+    Mvec.apply(accum);
+    EXPECT_DOUBLE_EQ(sum, sum1 + 4.0);
 }
 
 TEST(mapped_vector_tests, remove_tests)
@@ -154,6 +170,9 @@ TEST(mapped_vector_tests, remove_tests)
     Mvec.removeIndex(1);
 
     EXPECT_EQ(Mvec.size(), 3);
+    // make sure this does nothing
+    Mvec.removeIndex(45);
+    EXPECT_EQ(Mvec.size(), 3);
     EXPECT_TRUE(Mvec.find("s2") == Mvec.end());
     EXPECT_EQ(Mvec[1], 9.7);
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
@@ -162,6 +181,10 @@ TEST(mapped_vector_tests, remove_tests)
     EXPECT_EQ(Mvec.size(), 2);
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
     EXPECT_EQ(Mvec[0], 9.7);
+
+    // this should do nothing
+    Mvec.remove("s1");
+    EXPECT_EQ(Mvec.size(), 2);
 
     auto MV2 = std::move(Mvec);
     EXPECT_EQ(MV2.size(), 2);

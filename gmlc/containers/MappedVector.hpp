@@ -159,7 +159,7 @@ class MappedVector
     /** apply a function to all the values
     @param F must be a function with signature like void fun(const VType &a);*/
     template <class UnaryFunction>
-    void apply(UnaryFunction F)
+    void apply(UnaryFunction F) const
     {
         std::for_each(dataStorage.begin(), dataStorage.end(), F);
     }

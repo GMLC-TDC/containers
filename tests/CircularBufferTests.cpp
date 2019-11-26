@@ -436,7 +436,7 @@ TEST(CircBuff_tests, odd_conditions)
     EXPECT_FALSE(buf.push(nullptr, 10));
 
     EXPECT_TRUE(buf.push(testData.data(), 200));
-    EXPECT_EQ(buf.next_data_size(), 200);
+    EXPECT_EQ(buf.nextDataSize(), 200);
 
     CircularBuffer buf2;
 

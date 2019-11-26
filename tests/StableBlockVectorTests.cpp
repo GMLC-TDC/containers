@@ -568,3 +568,34 @@ TEST(stableBlockVectorTest, shrink_to_fit)
     }
     EXPECT_EQ(open_allocs.load(), 0U);
 }
+
+TEST(stableBlockVectorTest, iterator_tests)
+{
+    StableBlockVector<std::string, 3> sbd(20);
+
+    for (int ii = 0; ii < 20; ++ii)
+    {
+        sbd[ii] = std::string(30, 'a' + static_cast<char>(ii));
+    }
+
+    auto const &sbd2 = sbd;
+    auto it = sbd.begin();
+    it = it + 2;
+    EXPECT_EQ((*it).front(), 'c');
+
+    auto itc = sbd.begin();
+    itc = itc + 2;
+    EXPECT_EQ((*itc).front(), 'c');
+
+    it += 7;
+    itc += 7;
+    EXPECT_EQ(it->front(), 'j');
+    EXPECT_EQ(itc->front(), 'j');
+
+    it = it - 4;
+    itc = itc - 4;
+    EXPECT_EQ(it->front(), 'f');
+    EXPECT_EQ(itc->front(), 'f');
+    EXPECT_TRUE(it);
+    EXPECT_TRUE(itc);
+}

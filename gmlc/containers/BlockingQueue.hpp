@@ -129,11 +129,25 @@ class BlockingQueue
                 if (pullElements.empty())
                 {
                     pullElements.push_back(std::forward<Z>(val));
-                    // pullLock.unlock ();
-                    condition.notify_all();
-                    return;
                 }
-                pushLock.lock();
+                else
+                {
+                    pushLock.lock();
+                    pushElements.push_back(std::forward<Z>(val));
+                }
+                // pullLock.unlock ();
+                condition.notify_all();
+                return;
+            }
+            else
+            {
+                pushElements.push_back(std::forward<Z>(val));
+                expEmpty = true;
+                if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
+                {
+                    condition.notify_all();
+                }
+                return;
             }
         }
         pushElements.push_back(std::forward<Z>(val));
@@ -158,11 +172,26 @@ class BlockingQueue
                 if (pullElements.empty())
                 {
                     pullElements.emplace_back(std::forward<Args>(args)...);
-                    // pullLock.unlock ();
-                    condition.notify_all();
-                    return;
                 }
-                pushLock.lock();
+                else
+                {
+                    pushLock.lock();
+                    pushElements.emplace_back(std::forward<Args>(args)...);
+                }
+
+                // pullLock.unlock ();
+                condition.notify_all();
+                return;
+            }
+            else
+            {
+                pushElements.emplace_back(std::forward<Args>(args)...);
+                expEmpty = true;
+                if (queueEmptyFlag.compare_exchange_strong(expEmpty, false))
+                {
+                    condition.notify_all();
+                }
+                return;
             }
         }
         pushElements.emplace_back(std::forward<Args>(args)...);
