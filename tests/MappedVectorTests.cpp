@@ -122,7 +122,7 @@ TEST(mapped_vector_tests, insertion_tests_nomap)
     auto &V2 = Mvec[1];
     EXPECT_EQ(V2.size(), 45);
 
-    auto loc = Mvec.insert(nullptr, std::vector<double>(22));
+    auto loc = Mvec.insert(no_search, std::vector<double>(22));
     EXPECT_TRUE(loc);
     auto &V4 = Mvec[*loc];
     EXPECT_EQ(V4.size(), 22);

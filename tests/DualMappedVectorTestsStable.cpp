@@ -60,6 +60,64 @@ TEST(dual_mapped_vector_tests_stable, insertion_tests)
     EXPECT_EQ(V5->size(), 3u);
 }
 
+TEST(dual_mapped_vector_tests_stable, insertion_tests2)
+{
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+      Mvec;
+
+    auto res = Mvec.insert("el1", 0, 1.7);
+    EXPECT_TRUE(res);
+    res = Mvec.insert("el2", 1, 3.4);
+    EXPECT_TRUE(res);
+    res = Mvec.insert("el2", 1, 22.22);
+    EXPECT_FALSE(res);
+
+    res = Mvec.insert("el3", no_search, 5.1);
+    EXPECT_TRUE(res);
+
+    res = Mvec.insert("el3", no_search, 9.8);
+    EXPECT_FALSE(res);
+
+    res = Mvec.insert(no_search, 3, 9.9);
+    EXPECT_TRUE(res);
+
+    res = Mvec.insert(no_search, 3, 14.7);
+    EXPECT_FALSE(res);
+
+    res = Mvec.insert(no_search, no_search, 99.9);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(Mvec[*res], 99.9);
+}
+
+TEST(dual_mapped_vector_tests_stable, assign_tests2)
+{
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+      Mvec;
+
+    Mvec.insert_or_assign("el1", 0, 1.7);
+
+    auto loc = Mvec.insert_or_assign("el2", 1, 3.4);
+
+    auto loc2 = Mvec.insert_or_assign("el2", 1, 22.22);
+    EXPECT_EQ(loc2, loc);
+
+    loc2 = Mvec.insert_or_assign("el2", 4, 22.22);
+    EXPECT_EQ(loc2, loc);
+
+    loc2 = Mvec.insert_or_assign("el3", no_search, 5.1);
+
+    auto loc3 = Mvec.insert_or_assign("el3", no_search, 9.8);
+    EXPECT_EQ(loc2, loc3);
+    EXPECT_EQ(Mvec[loc3], 9.8);
+
+    auto loc4 = Mvec.insert_or_assign(no_search, 3, 9.9);
+    EXPECT_GT(loc4, loc3);
+
+    auto loc5 = Mvec.insert_or_assign(no_search, 3, 14.7);
+    EXPECT_EQ(loc5, loc4);
+    EXPECT_EQ(Mvec[loc5], 14.7);
+}
+
 TEST(dual_mapped_vector_tests_stable, additional_searchTerm_tests)
 {
     DualMappedVector<double, std::string, int64_t, reference_stability::stable>
@@ -142,29 +200,27 @@ TEST(dual_mapped_vector_tests_stable, remove_tests)
 
     Mvec.removeIndex(1);
 
-    EXPECT_EQ(Mvec.size(), 3u);
     EXPECT_TRUE(Mvec.find("s2") == Mvec.end());
-    EXPECT_EQ(Mvec[1], 9.7);
+    EXPECT_EQ(Mvec[3], 11.4);
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
     EXPECT_EQ(*Mvec.find("s5"), 3.2);
-    Mvec.remove("s1");
-    EXPECT_EQ(Mvec.size(), 2u);
-    EXPECT_EQ(*Mvec.find("s4"), 11.4);
-    EXPECT_EQ(Mvec[0], 9.7);
-    EXPECT_TRUE(Mvec.find("s5") == Mvec.end());
+    Mvec.remove("s4");
+    EXPECT_EQ(Mvec.size(), 3u);
+    EXPECT_TRUE(Mvec.find("s4") == Mvec.end());
+    EXPECT_EQ(Mvec[2], 9.7);
     EXPECT_EQ(*Mvec.find(107), 9.7);
 
     auto MV2 = std::move(Mvec);
-    EXPECT_EQ(MV2.size(), 2u);
+    EXPECT_EQ(MV2.size(), 3u);
 
     auto MV3 = MV2;
-    EXPECT_EQ(MV2.size(), 2u);
-    EXPECT_EQ(MV3.size(), 2u);
+    EXPECT_EQ(MV2.size(), 3u);
+    EXPECT_EQ(MV3.size(), 3u);
 
-    MV3.remove(92);
-    EXPECT_EQ(MV2.size(), 2u);
-    EXPECT_EQ(MV3.size(), 1u);
+    MV3.remove(47);
+    EXPECT_EQ(MV2.size(), 3u);
+    EXPECT_EQ(MV3.size(), 2u);
     MV3.clear();
-    EXPECT_EQ(MV2.size(), 2u);
+    EXPECT_EQ(MV2.size(), 3u);
     EXPECT_EQ(MV3.size(), 0u);
 }

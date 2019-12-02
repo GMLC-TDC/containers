@@ -7,8 +7,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #pragma once
 #include "MapTraits.hpp"
+#include "StableBlockVector.hpp"
 #include <algorithm>
-#include <deque>
 #include <map>
 #include <string>
 #include <type_traits>
@@ -28,7 +28,8 @@ or by numerical index
 template <class VType,
           class searchType1,
           class searchType2,
-          reference_stability STABILITY = reference_stability::unstable>
+          reference_stability STABILITY = reference_stability::unstable,
+          int BLOCK_ORDER = 5>
 class DualMappedVector
 {
   public:
@@ -71,7 +72,7 @@ class DualMappedVector
     */
     template <typename... Us>
     opt<size_t> insert(const searchType1 &searchValue1,
-                       std::nullptr_t /*searchValue2*/,
+                       no_search_type /*searchValue2*/,
                        Us &&... data)
     {
         auto fnd = lookup1.find(searchValue1);
@@ -92,7 +93,7 @@ class DualMappedVector
     if so contain the index of the insertion
     */
     template <typename... Us>
-    opt<size_t> insert(std::nullptr_t /*searchValue1*/,
+    opt<size_t> insert(no_search_type /*searchValue1*/,
                        const searchType2 &searchValue2,
                        Us &&... data)
     {
@@ -112,8 +113,8 @@ class DualMappedVector
     @return an optional value that indicates if the insertion was successful and
     if so contain the index of the insertion*/
     template <typename... Us>
-    opt<size_t> insert(std::nullptr_t /*searchValue1*/,
-                       std::nullptr_t /*searchValue2*/,
+    opt<size_t> insert(no_search_type /*searchValue1*/,
+                       no_search_type /*searchValue2*/,
                        Us &&... data)
     {
         auto index = dataStorage.size();
@@ -134,13 +135,9 @@ class DualMappedVector
         auto fnd = lookup1.find(searchValue1);
         if (fnd != lookup1.end())
         {
-            auto fnd2 = lookup2.find(searchValue2);
-            if (fnd2 != lookup2.end())
-            {
-                dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
-                lookup2[searchValue2] = fnd->second;
-                return fnd->second;
-            }
+            dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
+            lookup2[searchValue2] = fnd->second;
+            return fnd->second;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(std::forward<Us>(data)...);
@@ -155,7 +152,7 @@ class DualMappedVector
     @return the index of the inserted or assigned value*/
     template <typename... Us>
     size_t insert_or_assign(const searchType1 &searchValue1,
-                            std::nullptr_t /*searchValue2*/,
+                            no_search_type /*searchValue2*/,
                             Us &&... data)
     {
         auto fnd = lookup1.find(searchValue1);
@@ -164,13 +161,10 @@ class DualMappedVector
             dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
             return fnd->second;
         }
-        else
-        {
-            auto index = dataStorage.size();
-            dataStorage.emplace_back(std::forward<Us>(data)...);
-            lookup1.emplace(searchValue1, index);
-            return index;
-        }
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
+        lookup1.emplace(searchValue1, index);
+        return index;
     }
 
     /** insert a new element into the vector
@@ -178,7 +172,7 @@ class DualMappedVector
     @param data the parameters and value necessary to create a new object
     @return the index of the inserted or assigned value*/
     template <typename... Us>
-    size_t insert_or_assign(std::nullptr_t /*searchValue1*/,
+    size_t insert_or_assign(no_search_type /*searchValue1*/,
                             const searchType2 &searchValue2,
                             Us &&... data)
     {
@@ -188,13 +182,10 @@ class DualMappedVector
             dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
             return fnd->second;
         }
-        else
-        {
-            auto index = dataStorage.size();
-            dataStorage.emplace_back(std::forward<Us>(data)...);
-            lookup2.emplace(searchValue2, index);
-            return index;
-        }
+        auto index = dataStorage.size();
+        dataStorage.emplace_back(std::forward<Us>(data)...);
+        lookup2.emplace(searchValue2, index);
+        return index;
     }
     /** add an additional index term for searching
     this function does not override existing values*/
@@ -316,31 +307,33 @@ class DualMappedVector
         {
             return;
         }
-        dataStorage.erase(dataStorage.begin() + index);
-        std::vector<searchType1> ind1(2);
-        std::vector<searchType2> ind2(2);
-        for (auto &el2 : lookup1)
+        auto erased = localErase(dataStorage, index);
+
+        std::vector<searchType1> ind1;
+        for (auto &searchterm : lookup1)
         {
-            if (el2.second > index)
+            if (erased && searchterm.second > index)
             {
-                el2.second -= 1;
+                searchterm.second -= 1;
             }
-            else if (el2.second == index)
+            else if (searchterm.second == index)
             {
-                ind1.push_back(el2.first);
+                ind1.push_back(searchterm.first);
             }
         }
-        for (auto &el2 : lookup2)
+        std::vector<searchType2> ind2;
+        for (auto &searchterm : lookup2)
         {
-            if (el2.second > index)
+            if (erased && searchterm.second > index)
             {
-                el2.second -= 1;
+                searchterm.second -= 1;
             }
-            else if (el2.second == index)
+            else if (searchterm.second == index)
             {
-                ind2.push_back(el2.first);
+                ind2.push_back(searchterm.first);
             }
         }
+
         for (auto &ind : ind1)
         {
             auto fnd1 = lookup1.find(ind);
@@ -419,9 +412,25 @@ class DualMappedVector
     }
 
   private:
+    bool localErase(std::vector<VType> &vect, size_t index)
+    {
+        vect.erase(vect.begin() + index);
+        return true;
+    }
+    bool localErase(StableBlockVector<VType, BLOCK_ORDER> &vect, size_t index)
+    {
+        if (index == vect.size() - 1)
+        {
+            vect.pop_back();
+            return true;
+        }
+        return false;
+    }
+
+  private:
     std::conditional_t<STABILITY == reference_stability::unstable,
                        std::vector<VType>,
-                       std::deque<VType>>
+                       StableBlockVector<VType, BLOCK_ORDER>>
       dataStorage;  //!< primary storage for data
     std::conditional_t<is_easily_hashable<searchType1>::value,
                        std::unordered_map<searchType1, size_t>,

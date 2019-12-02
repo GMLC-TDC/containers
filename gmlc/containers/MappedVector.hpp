@@ -6,8 +6,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 #pragma once
 #include "MapTraits.hpp"
+#include "StableBlockVector.hpp"
 #include <algorithm>
-#include <deque>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -25,7 +25,8 @@ to no removal since removal is a rather expensive operation
 */
 template <class VType,
           class searchType = std::string,
-          reference_stability STABILITY = reference_stability::unstable>
+          reference_stability STABILITY = reference_stability::unstable,
+          int BLOCK_ORDER = 5>
 class MappedVector
 {
   public:
@@ -52,7 +53,7 @@ class MappedVector
     @return an optional with the index of the value placed if it was placed
     */
     template <typename... Us>
-    opt<size_t> insert(std::nullptr_t /*searchValue*/, Us &&... data)
+    opt<size_t> insert(no_search_type /*searchValue*/, Us &&... data)
     {
         auto index = dataStorage.size();
         dataStorage.emplace_back(std::forward<Us>(data)...);
@@ -117,11 +118,11 @@ class MappedVector
         {
             return;
         }
-        dataStorage.erase(dataStorage.begin() + index);
+        auto erased = localErase(dataStorage, index);
         searchType ind;
         for (auto &el2 : lookup)
         {
-            if (el2.second > index)
+            if (erased && el2.second > index)
             {
                 el2.second -= 1;
             }
@@ -145,12 +146,14 @@ class MappedVector
             return;
         }
         auto index = el->second;
-        dataStorage.erase(dataStorage.begin() + index);
-        for (auto &el2 : lookup)
+        if (localErase(dataStorage, index))
         {
-            if (el2.second > index)
+            for (auto &el2 : lookup)
             {
-                el2.second -= 1;
+                if (el2.second > index)
+                {
+                    el2.second -= 1;
+                }
             }
         }
         lookup.erase(el);
@@ -179,9 +182,9 @@ class MappedVector
     someone determined to screw it up could still easily do so*/
 
     /** get a const iterator to the beginning of the data vector*/
-    auto begin() const { return dataStorage.cbegin(); }
+    auto begin() const { return dataStorage.begin(); }
     /** the a constant iterator to the end of the vector*/
-    auto end() const { return dataStorage.cend(); }
+    auto end() const { return dataStorage.end(); }
 
     /** get the size of the vector*/
     auto size() const { return dataStorage.size(); }
@@ -194,9 +197,25 @@ class MappedVector
     }
 
   private:
+    bool localErase(std::vector<VType> &vect, size_t index)
+    {
+        vect.erase(vect.begin() + index);
+        return true;
+    }
+    bool localErase(StableBlockVector<VType, BLOCK_ORDER> &vect, size_t index)
+    {
+        if (index == vect.size() - 1)
+        {
+            vect.pop_back();
+            return true;
+        }
+        return false;
+    }
+
+  private:
     std::conditional_t<STABILITY == reference_stability::unstable,
                        std::vector<VType>,
-                       std::deque<VType>>
+                       StableBlockVector<VType, BLOCK_ORDER>>
       dataStorage;  //!< primary storage for data
     std::conditional_t<is_easily_hashable<searchType>::value,
                        std::unordered_map<searchType, size_t>,

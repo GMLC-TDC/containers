@@ -53,6 +53,59 @@ TEST(dual_mapped_vector_tests, insertion_tests)
     EXPECT_EQ(V5->size(), 3u);
 }
 
+TEST(dual_mapped_vector_tests, insertion_tests2)
+{
+    DualMappedVector<double, std::string, int64_t> Mvec;
+
+    auto res = Mvec.insert("el1", 0, 1.7);
+    EXPECT_TRUE(res);
+    res = Mvec.insert("el2", 1, 3.4);
+    EXPECT_TRUE(res);
+    res = Mvec.insert("el2", 1, 22.22);
+    EXPECT_FALSE(res);
+
+    res = Mvec.insert("el3", no_search, 5.1);
+    EXPECT_TRUE(res);
+
+    res = Mvec.insert("el3", no_search, 9.8);
+    EXPECT_FALSE(res);
+
+    res = Mvec.insert(no_search, 3, 9.9);
+    EXPECT_TRUE(res);
+
+    res = Mvec.insert(no_search, 3, 14.7);
+    EXPECT_FALSE(res);
+
+    res = Mvec.insert(no_search, no_search, 99.9);
+    EXPECT_TRUE(res);
+    EXPECT_EQ(Mvec[*res], 99.9);
+}
+
+TEST(dual_mapped_vector_tests, assign_tests2)
+{
+    DualMappedVector<double, std::string, int64_t> Mvec;
+
+    Mvec.insert("el1", 0, 1.7);
+
+    auto loc = Mvec.insert("el2", 1, 3.4);
+
+    auto loc2 = Mvec.insert_or_assign("el2", 1, 22.22);
+    EXPECT_EQ(loc2, *loc);
+
+    loc2 = Mvec.insert_or_assign("el3", no_search, 5.1);
+
+    auto loc3 = Mvec.insert_or_assign("el3", no_search, 9.8);
+    EXPECT_EQ(loc2, loc3);
+    EXPECT_EQ(Mvec[loc3], 9.8);
+
+    auto loc4 = Mvec.insert_or_assign(no_search, 3, 9.9);
+    EXPECT_GT(loc4, loc3);
+
+    auto loc5 = Mvec.insert_or_assign(no_search, 3, 14.7);
+    EXPECT_EQ(loc5, loc4);
+    EXPECT_EQ(Mvec[loc5], 14.7);
+}
+
 TEST(dual_mapped_vector_tests, additional_searchTerm_tests)
 {
     DualMappedVector<double, std::string, int64_t> Mvec;

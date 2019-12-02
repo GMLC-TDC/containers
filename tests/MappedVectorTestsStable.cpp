@@ -84,24 +84,25 @@ TEST(stable_mapped_vector_tests, remove_tests)
 
     Mvec.removeIndex(1);
 
-    EXPECT_EQ(Mvec.size(), 3);
     EXPECT_TRUE(Mvec.find("s2") == Mvec.end());
-    EXPECT_EQ(Mvec[1], 9.7);
+    EXPECT_EQ(Mvec[1], 4.3);
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
+
+    Mvec.removeIndex(3);
+    EXPECT_TRUE(Mvec.find("s4") == Mvec.end());
 
     Mvec.remove("s1");
-    EXPECT_EQ(Mvec.size(), 2);
-    EXPECT_EQ(*Mvec.find("s4"), 11.4);
-    EXPECT_EQ(Mvec[0], 9.7);
+    EXPECT_EQ(*Mvec.find("s3"), 9.7);
+    EXPECT_EQ(Mvec[0], 3.2);
 
     auto MV2 = std::move(Mvec);
-    EXPECT_EQ(MV2.size(), 2);
+    EXPECT_EQ(MV2.size(), 3);
 
     auto MV3 = MV2;
-    EXPECT_EQ(MV2.size(), 2);
-    EXPECT_EQ(MV3.size(), 2);
+    EXPECT_EQ(MV2.size(), 3);
+    EXPECT_EQ(MV3.size(), 3);
 
     MV3.clear();
-    EXPECT_EQ(MV2.size(), 2);
+    EXPECT_EQ(MV2.size(), 3);
     EXPECT_EQ(MV3.size(), 0);
 }

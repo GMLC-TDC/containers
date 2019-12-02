@@ -40,3 +40,7 @@ struct is_easily_hashable<std::wstring>
 {
     static constexpr bool value = true;
 };
+
+using no_search_type = std::false_type;
+
+constexpr no_search_type no_search = no_search_type{};

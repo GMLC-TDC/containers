@@ -8,6 +8,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 #include <cstddef>
 #include <type_traits>
+#include <iterator>
 
 namespace gmlc
 {
@@ -16,6 +17,11 @@ namespace containers
 template <typename X, int BLOCKSIZE, typename OUTER>
 /** helper class for iterating through a sequence of blocks*/
 class BlockIterator
+    : public std::iterator<std::bidirectional_iterator_tag,
+                           X,
+                           X,
+                           const typename std::remove_const<X>::type *,
+                           const typename std::remove_const<X>::type &>
 {
   private:
     OUTER vec;
@@ -30,28 +36,38 @@ class BlockIterator
     {
         static_assert(
           std::is_same<std::remove_reference_t<decltype(*(*it))>, X>::value,
-          "OUTER *it must be dereferencable to a a type matching X");
+          "OUTER *it must be dereferencable to a type matching X");
     }
 
-    // std::enable_if_t<!std::is_const<X>::value, X> &operator*() { return *ptr;
-    // }
     X &operator*() { return *ptr; }
     constref &operator*() const { return *ptr; }
-    // std::enable_if_t<!std::is_const<X>::value, X> *operator->() { return ptr;
-    // }
     X *operator->() { return ptr; }
-	//
     constref *operator->() const { return ptr; }
-	///explicit bool conversion 
+    /// explicit bool conversion
     explicit operator bool() const { return (ptr != nullptr); }
-	/// Equality operator
+    /// Equality operator
     bool operator==(const BlockIterator &it) const
     {
         return ((vec == it.vec) && (offset == it.offset));
     }
     bool operator!=(const BlockIterator &it) const
     {
-        return ((vec != it.vec) || (offset != it.offset));
+        return ((offset != it.offset) || (vec != it.vec));
+    }
+
+    template <typename X2, typename OUT2>
+    bool operator==(const BlockIterator<X2, BLOCKSIZE, OUT2> &it) const
+    {
+        static_assert(
+          std::is_same<std::remove_const_t<X2>, std::remove_const_t<X>>::value,
+          "iterators must point to the same type");
+        return it.checkEquivalence(vec,offset);
+    }
+
+    template <typename X2, typename OUT2>
+    bool operator!=(const BlockIterator<X2, BLOCKSIZE, OUT2> &it) const
+    {
+        return !operator==(it);
     }
 
     BlockIterator &operator+=(const ptrdiff_t &movement)
@@ -106,8 +122,14 @@ class BlockIterator
         temp -= movement;
         return temp;
     }
-
+	template <typename OUTER2>
+	bool checkEquivalence(OUTER2 testv, int testoffset) const
+    {
+        return (testv == vec && testoffset == offset);
+	}
   private:
+    /// check in the forward direction if the offset needs to increment the
+    /// block or not
     void check()
     {
         if (offset >= BLOCKSIZE)
@@ -118,6 +140,8 @@ class BlockIterator
             ptr = &((*vec)[offset]);
         }
     }
+    /// check in the reverse direction if the offset needs to increment the
+    /// block or not
     void checkNeg()
     {
         if (offset < 0)
