@@ -5,10 +5,10 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
+#include "MappedVector.hpp"
+
 #include "gtest/gtest.h"
 #include <iostream>
-
-#include "MappedVector.hpp"
 using namespace gmlc::containers;
 
 /** test basic operations */
@@ -36,12 +36,12 @@ TEST(mapped_vector_tests, insertion_tests)
     EXPECT_EQ(Mvec.size(), 1u);
     Mvec.insert("a2", std::vector<double>(45));
     EXPECT_EQ(Mvec.size(), 2u);
-    auto &V = Mvec[0];
+    auto& V = Mvec[0];
     EXPECT_EQ(V.size(), 3u);
     EXPECT_EQ(V[0], 1.7);
     EXPECT_EQ(V[2], 1.7);
 
-    auto &V2 = Mvec[1];
+    auto& V2 = Mvec[1];
     EXPECT_EQ(V2.size(), 45);
 
     auto V3 = Mvec.find("el1");
@@ -56,14 +56,14 @@ TEST(mapped_vector_tests, insertion_tests)
     auto V5 = Mvec.find("not_available");
     EXPECT_EQ(V5, Mvec.end());
 
-    const auto &Mvecc = Mvec;
+    const auto& Mvecc = Mvec;
     auto V4c = Mvecc.find("a2");
     EXPECT_EQ(V4c->size(), 45);
 
     auto V5c = Mvecc.find("not_available");
     EXPECT_EQ(V5c, Mvecc.end());
 
-    auto &V2c = Mvecc[1];
+    auto& V2c = Mvecc[1];
     EXPECT_EQ(V2.size(), 45);
     EXPECT_EQ(Mvecc.back().size(), 45);
 }
@@ -76,12 +76,12 @@ TEST(mapped_vector_tests, insert_or_assign)
     auto loca2 = Mvec.insert("a2", std::vector<double>(45));
     EXPECT_TRUE(loca2);
     EXPECT_EQ(Mvec.size(), 2u);
-    auto &V = Mvec[0];
+    auto& V = Mvec[0];
     EXPECT_EQ(V.size(), 3u);
     EXPECT_EQ(V[0], 1.7);
     EXPECT_EQ(V[2], 1.7);
 
-    auto &V2 = Mvec[1];
+    auto& V2 = Mvec[1];
     EXPECT_EQ(V2.size(), 45);
 
     auto V3 = Mvec.find("el1");
@@ -114,21 +114,21 @@ TEST(mapped_vector_tests, insertion_tests_nomap)
     EXPECT_EQ(Mvec.size(), 1u);
     Mvec.insert("a2", std::vector<double>(45));
     EXPECT_EQ(Mvec.size(), 2u);
-    auto &V = Mvec[0];
+    auto& V = Mvec[0];
     EXPECT_EQ(V.size(), 3u);
     EXPECT_EQ(V[0], 1.7);
     EXPECT_EQ(V[2], 1.7);
 
-    auto &V2 = Mvec[1];
+    auto& V2 = Mvec[1];
     EXPECT_EQ(V2.size(), 45);
 
     auto loc = Mvec.insert(no_search, std::vector<double>(22));
     EXPECT_TRUE(loc);
-    auto &V4 = Mvec[*loc];
+    auto& V4 = Mvec[*loc];
     EXPECT_EQ(V4.size(), 22);
 }
 
-TEST(mapped_vector_tests, iterator_tests)
+TEST(mapped_vector_tests, apply_tests)
 {
     MappedVector<double> Mvec;
 
@@ -196,4 +196,11 @@ TEST(mapped_vector_tests, remove_tests)
     MV3.clear();
     EXPECT_EQ(MV2.size(), 2);
     EXPECT_EQ(MV3.size(), 0);
+}
+
+TEST(mapped_vector_tests, empty_find)
+{
+	MappedVector<double> Mvec;
+	auto res = Mvec.find("string1");
+	EXPECT_EQ(res, Mvec.end());
 }

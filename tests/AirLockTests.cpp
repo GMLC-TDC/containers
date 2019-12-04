@@ -13,10 +13,10 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 /** these test cases test data_block and data_view objects
  */
 
+#include "AirLock.hpp"
+
 #include "gtest/gtest.h"
 #include <iostream>
-
-#include "AirLock.hpp"
 
 using namespace gmlc::containers;
 
@@ -81,19 +81,15 @@ TEST(airlock_tests, move_mthread_tests)
 
     EXPECT_TRUE(alock.isLoaded());
 
-    auto fut =
-      std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
-    auto fut2 =
-      std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
+    auto fut = std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
+    auto fut2 = std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
     std::this_thread::yield();
     auto b = alock.try_unload();
     EXPECT_EQ(*b, "load 1");
     int chk = 0;
-    while (!alock.isLoaded())
-    {
+    while (!alock.isLoaded()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
-        if (chk++ > 10)
-        {
+        if (chk++ > 10) {
             break;
         }
     }

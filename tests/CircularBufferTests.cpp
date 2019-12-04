@@ -6,6 +6,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "CircularBuffer.hpp"
+
 #include "gtest/gtest.h"
 #include <iostream>
 
@@ -13,7 +14,7 @@ using namespace gmlc::containers;
 
 TEST(CircBuff_tests, test_circularbuffraw_simple)
 {
-    unsigned char *block = new unsigned char[1024];
+    unsigned char* block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
 
     EXPECT_TRUE(buf.isSpaceAvailable(256));
@@ -43,7 +44,7 @@ TEST(CircBuff_tests, test_circularbuffraw_simple)
 
 TEST(CircBuff_tests, test_circularbuffraw_loop_around)
 {
-    unsigned char *block = new unsigned char[1024];
+    unsigned char* block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
 
     std::vector<unsigned char> testData(256, 'a');
@@ -71,15 +72,13 @@ TEST(CircBuff_tests, test_circularbuffraw_loop_around)
 
 TEST(CircBuff_tests, test_circularbuffraw_loop_around_repeat)
 {
-    unsigned char *block =
-      new unsigned char[1520];  // 3x504+4  otherwise there is a potential
-                                // scenario in which 2 500byte messages cannot
-                                // fit
+    unsigned char* block = new unsigned char[1520]; // 3x504+4  otherwise there is a potential
+        // scenario in which 2 500byte messages cannot
+        // fit
     CircularBufferRaw buf(block, 1520);
 
     std::vector<unsigned char> testData(500, 'a');
-    for (int ii = 1; ii <= 500; ++ii)
-    {
+    for (int ii = 1; ii <= 500; ++ii) {
         bool pushed = buf.push(testData.data(), ii);
         EXPECT_TRUE(pushed);
         pushed = buf.push(testData.data(), ii);
@@ -150,8 +149,7 @@ TEST(CircBuff_tests, test_circularbuff_loop_around_repeat)
     CircularBuffer buf(1520);
 
     std::vector<unsigned char> testData(500, 'a');
-    for (int ii = 1; ii <= 500; ++ii)
-    {
+    for (int ii = 1; ii <= 500; ++ii) {
         bool pushed = buf.push(testData.data(), ii);
         EXPECT_TRUE(pushed);
         pushed = buf.push(testData.data(), ii);
@@ -371,7 +369,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_smaller_wrap)
     buf.push(testData.data(), 204);
     buf.pop(testData.data(), 256);
     EXPECT_TRUE(buf.isSpaceAvailable(205));
-    buf.resize(620);  // a size that can work
+    buf.resize(620); // a size that can work
     EXPECT_TRUE(!buf.isSpaceAvailable(205));
     auto pushed = buf.push(testData.data(), 205);
     EXPECT_TRUE(!pushed);
@@ -406,8 +404,7 @@ TEST(CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
     CircularBuffer buf(45);
 
     std::vector<unsigned char> testData(10000, 'a');
-    for (int ii = 1; ii <= 10000; ++ii)
-    {
+    for (int ii = 1; ii <= 10000; ++ii) {
         buf.resize(3 * (ii + 8));
         int res = buf.pop(testData.data(), 10000);
         EXPECT_EQ(res, ii - 1);

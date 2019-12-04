@@ -13,42 +13,39 @@
 #pragma once
 
 #include "optionalDefinition.hpp"
+
 #include <map>
 #include <unordered_map>
 
-template <class X1, class X2>
-inline X2 mapFind(const std::map<X1, X2> &mapS, const X1 &val, const X2 &defVal)
+template<class X1, class X2>
+inline X2 mapFind(const std::map<X1, X2>& mapS, const X1& val, const X2& defVal)
 {
     auto map_it = mapS.find(val);
     return (map_it != mapS.end()) ? map_it->second : defVal;
 }
 
-template <class X1, class X2>
-opt<X2> mapFind(const std::map<X1, X2> &mapS, const X1 &val)
+template<class X1, class X2>
+opt<X2> mapFind(const std::map<X1, X2>& mapS, const X1& val)
 {
     auto map_it = mapS.find(val);
-    if (map_it != mapS.end())
-    {
+    if (map_it != mapS.end()) {
         return map_it->second;
     }
     return {};
 }
 
-template <class X1, class X2>
-inline X2 mapFind(const std::unordered_map<X1, X2> &mapS,
-                  const X1 &val,
-                  const X2 &defVal)
+template<class X1, class X2>
+inline X2 mapFind(const std::unordered_map<X1, X2>& mapS, const X1& val, const X2& defVal)
 {
     auto map_it = mapS.find(val);
     return (map_it != mapS.end()) ? map_it->second : defVal;
 }
 
-template <class X1, class X2>
-opt<X2> mapFind(const std::unordered_map<X1, X2> &mapS, const X1 &val)
+template<class X1, class X2>
+opt<X2> mapFind(const std::unordered_map<X1, X2>& mapS, const X1& val)
 {
     auto map_it = mapS.find(val);
-    if (map_it != mapS.end())
-    {
+    if (map_it != mapS.end()) {
         return map_it->second;
     }
     return {};

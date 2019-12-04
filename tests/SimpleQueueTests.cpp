@@ -5,9 +5,8 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 #include "gtest/gtest.h"
-#include <iostream>
-
 #include <future>
+#include <iostream>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -67,24 +66,20 @@ TEST(simple_queue_tests, ordering_tests)
 {
     SimpleQueue<int> sq;
 
-    for (int ii = 1; ii < 10; ++ii)
-    {
+    for (int ii = 1; ii < 10; ++ii) {
         sq.push(ii);
     }
 
     auto b = sq.pop();
     EXPECT_EQ(*b, 1);
-    for (int ii = 2; ii < 7; ++ii)
-    {
+    for (int ii = 2; ii < 7; ++ii) {
         b = sq.pop();
         EXPECT_EQ(*b, ii);
     }
-    for (int ii = 10; ii < 20; ++ii)
-    {
+    for (int ii = 10; ii < 20; ++ii) {
         sq.push(ii);
     }
-    for (int ii = 7; ii < 20; ++ii)
-    {
+    for (int ii = 7; ii < 20; ++ii) {
         b = sq.pop();
         EXPECT_EQ(*b, ii);
     }
@@ -114,13 +109,11 @@ TEST(simple_queue_tests, multithreaded_tests)
 {
     SimpleQueue<int64_t> sq(1010000);
 
-    for (int64_t ii = 0; ii < 10'000; ++ii)
-    {
+    for (int64_t ii = 0; ii < 10'000; ++ii) {
         sq.push(ii);
     }
     auto prod1 = [&]() {
-        for (int64_t ii = 10'000; ii < 1'010'000; ++ii)
-        {
+        for (int64_t ii = 10'000; ii < 1'010'000; ++ii) {
             sq.push(ii);
         }
     };
@@ -128,26 +121,19 @@ TEST(simple_queue_tests, multithreaded_tests)
     auto cons = [&]() {
         auto res = sq.pop();
         int64_t cnt = 1;
-        while ((res))
-        {
+        while ((res)) {
             auto nres = sq.pop();
-            if (!nres)
-            {  // make an additional sleep period so the producer can catch up
+            if (!nres) { // make an additional sleep period so the producer can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 nres = sq.pop();
             }
-            if (nres)
-            {
-                if (*nres > *res)
-                {
+            if (nres) {
+                if (*nres > *res) {
                     ++cnt;
-                }
-                else
-                {
-                    if (*nres > 0)
-                    {
-                        printf("%d came before %d\n", static_cast<int>(*nres),
-                               static_cast<int>(*res));
+                } else {
+                    if (*nres > 0) {
+                        printf(
+                            "%d came before %d\n", static_cast<int>(*nres), static_cast<int>(*res));
                     }
                 }
             }
@@ -170,13 +156,11 @@ TEST(simple_queue_tests, multithreaded_tests2)
 {
     SimpleQueue<int64_t> sq(1010000);
 
-    for (int64_t ii = 0; ii < 10'000; ++ii)
-    {
+    for (int64_t ii = 0; ii < 10'000; ++ii) {
         sq.push(ii);
     }
     auto prod1 = [&]() {
-        for (int64_t ii = 10'000; ii < 2'010'000; ++ii)
-        {
+        for (int64_t ii = 10'000; ii < 2'010'000; ++ii) {
             sq.push(ii);
         }
     };
@@ -184,12 +168,10 @@ TEST(simple_queue_tests, multithreaded_tests2)
     auto cons = [&]() {
         auto res = sq.pop();
         int64_t cnt = 0;
-        while ((res))
-        {
+        while ((res)) {
             ++cnt;
             res = sq.pop();
-            if (!res)
-            {  // make an additional sleep period so the producer can catch up
+            if (!res) { // make an additional sleep period so the producer can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.pop();
             }
@@ -215,13 +197,11 @@ TEST(simple_queue_tests, multithreaded_tests3)
 {
     SimpleQueue<int64_t> sq;
     sq.reserve(3'010'000);
-    for (int64_t ii = 0; ii < 10'000; ++ii)
-    {
+    for (int64_t ii = 0; ii < 10'000; ++ii) {
         sq.push(ii);
     }
     auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii)
-        {
+        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
     };
@@ -229,12 +209,10 @@ TEST(simple_queue_tests, multithreaded_tests3)
     auto cons = [&]() {
         auto res = sq.pop();
         int64_t cnt = 0;
-        while ((res))
-        {
+        while ((res)) {
             ++cnt;
             res = sq.pop();
-            if (!res)
-            {  // make an additional sleep period so the producer can catch up
+            if (!res) { // make an additional sleep period so the producer can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.pop();
             }

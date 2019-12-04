@@ -6,9 +6,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "gtest/gtest.h"
-#include <iostream>
-
 #include <future>
+#include <iostream>
 #include <memory>
 #include <random>
 #include <thread>
@@ -82,27 +81,23 @@ TEST(blocking_priority_queue_tests, ordering_tests)
 {
     BlockingPriorityQueue<int> sq;
 
-    for (int ii = 1; ii < 10; ++ii)
-    {
+    for (int ii = 1; ii < 10; ++ii) {
         sq.push(ii);
     }
 
     auto b = sq.try_pop();
     EXPECT_EQ(*b, 1);
-    for (int ii = 2; ii < 7; ++ii)
-    {
+    for (int ii = 2; ii < 7; ++ii) {
         b = sq.try_pop();
         EXPECT_EQ(*b, ii);
     }
-    for (int ii = 10; ii < 20; ++ii)
-    {
+    for (int ii = 10; ii < 20; ++ii) {
         sq.push(ii);
     }
     sq.pushPriority(99);
     b = sq.try_pop();
     EXPECT_EQ(*b, 99);
-    for (int ii = 7; ii < 20; ++ii)
-    {
+    for (int ii = 7; ii < 20; ++ii) {
         b = sq.try_pop();
         EXPECT_EQ(*b, ii);
     }
@@ -156,27 +151,24 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist(1, 10);
         std::pair<int64_t, int64_t> el{10, 10};
-        while (ii < 500)
-        {
+        while (ii < 500) {
             ++ii;
             auto res = sq.pop(std::chrono::milliseconds(10));
 
-            switch (dist(rng))
-            {
-            case 1:
+            switch (dist(rng)) {
+                case 1:
 
-                break;
-            case 2:
-                sq.pushPriority(el);
-                break;
-            case 3:
-                if (res)
-                {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                }
-            default:
-                sq.push(el);
-                break;
+                    break;
+                case 2:
+                    sq.pushPriority(el);
+                    break;
+                case 3:
+                    if (res) {
+                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                    }
+                default:
+                    sq.push(el);
+                    break;
             }
         }
     };
@@ -185,24 +177,22 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
         std::random_device dev;
         std::mt19937 rng(dev());
         std::uniform_int_distribution<std::mt19937::result_type> dist(1, 10);
-        while (ii < 500)
-        {
+        while (ii < 500) {
             ++ii;
             auto res = sq.pop();
             (void)(res);
-            switch (dist(rng))
-            {
-            case 1:
+            switch (dist(rng)) {
+                case 1:
 
-                break;
-            case 2:
-                sq.emplacePriority(20, 20);
-                break;
-            case 3:
-                std::this_thread::sleep_for(std::chrono::milliseconds(30));
-            default:
-                sq.emplace(30, 30);
-                break;
+                    break;
+                case 2:
+                    sq.emplacePriority(20, 20);
+                    break;
+                case 3:
+                    std::this_thread::sleep_for(std::chrono::milliseconds(30));
+                default:
+                    sq.emplace(30, 30);
+                    break;
             }
         }
     };
@@ -210,8 +200,7 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
     auto t3 = [&sq]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1200));
         int ii = 0;
-        while (ii++ < 500)
-        {
+        while (ii++ < 500) {
             sq.emplace(80, 80);
         }
     };
@@ -229,13 +218,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests)
 {
     BlockingPriorityQueue<int64_t> sq(1010000);
 
-    for (int64_t ii = 0; ii < 10'000; ++ii)
-    {
+    for (int64_t ii = 0; ii < 10'000; ++ii) {
         sq.push(ii);
     }
     auto prod1 = [&]() {
-        for (int64_t ii = 10'000; ii < 1'010'000; ++ii)
-        {
+        for (int64_t ii = 10'000; ii < 1'010'000; ++ii) {
             sq.push(ii);
         }
     };
@@ -243,13 +230,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests)
     auto cons = [&]() {
         auto res = sq.try_pop();
         int64_t cnt = 0;
-        while ((res))
-        {
+        while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res)
-            {  // make an additional sleep period so the producer can catch
-               // up
+            if (!res) { // make an additional sleep period so the producer can catch
+                // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -270,8 +255,7 @@ TEST(blocking_priority_queue_tests, pop_tests)
     BlockingPriorityQueue<int64_t> sq(1010000);
 
     auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii)
-        {
+        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
         sq.push(-1);
@@ -280,19 +264,13 @@ TEST(blocking_priority_queue_tests, pop_tests)
     auto cons = [&]() {
         auto res = sq.pop();
         int64_t cnt = 1;
-        while (res >= 0)
-        {
+        while (res >= 0) {
             auto nres = sq.pop();
-            if (nres > res)
-            {
+            if (nres > res) {
                 ++cnt;
-            }
-            else
-            {
-                if (nres > 0)
-                {
-                    printf("%d came before %d\n", static_cast<int>(nres),
-                           static_cast<int>(res));
+            } else {
+                if (nres > 0) {
+                    printf("%d came before %d\n", static_cast<int>(nres), static_cast<int>(res));
                 }
             }
             res = nres;
@@ -311,13 +289,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests2)
 {
     BlockingPriorityQueue<int64_t> sq(1010000);
 
-    for (int64_t ii = 0; ii < 10'000; ++ii)
-    {
+    for (int64_t ii = 0; ii < 10'000; ++ii) {
         sq.push(ii);
     }
     auto prod1 = [&]() {
-        for (int64_t ii = 10'000; ii < 1'010'000; ++ii)
-        {
+        for (int64_t ii = 10'000; ii < 1'010'000; ++ii) {
             sq.push(ii);
         }
     };
@@ -325,13 +301,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests2)
     auto cons = [&]() {
         auto res = sq.try_pop();
         int64_t cnt = 0;
-        while ((res))
-        {
+        while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res)
-            {  // make an additional sleep period so the producer can catch
-               // up
+            if (!res) { // make an additional sleep period so the producer can catch
+                // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -361,13 +335,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3)
 {
     BlockingPriorityQueue<int64_t> sq;
     sq.reserve(3'010'000);
-    for (int64_t ii = 0; ii < 10'000; ++ii)
-    {
+    for (int64_t ii = 0; ii < 10'000; ++ii) {
         sq.push(ii);
     }
     auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii)
-        {
+        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
     };
@@ -375,13 +347,11 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3)
     auto cons = [&]() {
         auto res = sq.try_pop();
         int64_t cnt = 0;
-        while ((res))
-        {
+        while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res)
-            {  // make an additional sleep period so the producer can catch
-               // up
+            if (!res) { // make an additional sleep period so the producer can catch
+                // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -419,8 +389,7 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3_pop)
     sq.reserve(3'010'000);
 
     auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii)
-        {
+        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
         sq.push(-1);
@@ -429,8 +398,7 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3_pop)
     auto cons = [&]() {
         auto res = sq.pop();
         int64_t cnt = 0;
-        while (res >= 0)
-        {
+        while (res >= 0) {
             ++cnt;
             res = sq.pop();
         }
@@ -470,8 +438,7 @@ TEST(blocking_priority_queue_tests, pop_callback_tests)
     };
 
     auto cons = [&](int cnt) {
-        for (int ii = 0; ii < cnt; ii++)
-        {
+        for (int ii = 0; ii < cnt; ii++) {
             sq.popOrCall(prod1);
         }
         return cnt;

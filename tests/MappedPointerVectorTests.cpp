@@ -5,10 +5,10 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
+#include "MappedPointerVector.hpp"
+
 #include "gtest/gtest.h"
 #include <iostream>
-
-#include "MappedPointerVector.hpp"
 using namespace gmlc::containers;
 
 /** test basic operations */
@@ -60,7 +60,7 @@ TEST(mapped_vector_tests, iterator_tests)
 
     EXPECT_EQ(Mvec.size(), 4);
 
-    Mvec.apply([](double *val) { *val = *val + 1; });
+    Mvec.apply([](double* val) { *val = *val + 1; });
 
     EXPECT_EQ(*Mvec[0], 3.2 + 1.0);
     EXPECT_EQ(*Mvec[1], 4.3 + 1.0);
