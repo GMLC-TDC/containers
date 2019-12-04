@@ -128,7 +128,7 @@ TEST(mapped_vector_tests, insertion_tests_nomap)
     EXPECT_EQ(V4.size(), 22);
 }
 
-TEST(mapped_vector_tests, iterator_tests)
+TEST(mapped_vector_tests, apply_tests)
 {
     MappedVector<double> Mvec;
 

@@ -350,6 +350,10 @@ class StableBlockVector
         return {ptr, bsize};
     }
 
+    const_iterator cend() const { return end(); }
+
+    const_iterator cbegin() const { return begin(); }
+
   private:
     void freeAll()
     {

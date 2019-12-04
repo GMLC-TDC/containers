@@ -138,6 +138,12 @@ TEST(dual_mapped_vector_tests, additional_searchTerm_tests)
     EXPECT_EQ(*(Mvec.find(99)), 9.7);
     EXPECT_TRUE(res);
 
+    res = Mvec.addSearchTermForIndex(99, 99);
+    EXPECT_FALSE(res);
+
+    res = Mvec.addSearchTermForIndex("bob", 127);
+    EXPECT_FALSE(res);
+
     // check for appropriate return values
     EXPECT_TRUE(!Mvec.addSearchTerm("missing", "none"));
     EXPECT_TRUE(!Mvec.addSearchTerm(1241, 98));
@@ -183,15 +189,26 @@ TEST(dual_mapped_vector_tests, remove_tests)
     Mvec.addSearchTermForIndex(107, 2);
     EXPECT_EQ(Mvec.size(), 4u);
 
+    EXPECT_FALSE(Mvec.addSearchTermForIndex("test", 207));
+
+    EXPECT_FALSE(Mvec.addSearchTermForIndex(99, 207));
     Mvec.removeIndex(1);
 
     EXPECT_EQ(Mvec.size(), 3u);
+    // this next one should do nothing
+    Mvec.removeIndex(99);
+    EXPECT_EQ(Mvec.size(), 3u);
+
     EXPECT_TRUE(Mvec.find("s2") == Mvec.end());
     EXPECT_EQ(Mvec[1], 9.7);
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
     EXPECT_EQ(*Mvec.find("s5"), 3.2);
     Mvec.remove("s1");
     EXPECT_EQ(Mvec.size(), 2u);
+
+    Mvec.remove("s1");
+    EXPECT_EQ(Mvec.size(), 2u);
+
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
     EXPECT_EQ(Mvec[0], 9.7);
     EXPECT_TRUE(Mvec.find("s5") == Mvec.end());
@@ -206,8 +223,95 @@ TEST(dual_mapped_vector_tests, remove_tests)
 
     MV3.remove(92);
     EXPECT_EQ(MV2.size(), 2u);
+    MV3.remove(92);
+    EXPECT_EQ(MV2.size(), 2u);
     EXPECT_EQ(MV3.size(), 1u);
     MV3.clear();
     EXPECT_EQ(MV2.size(), 2u);
     EXPECT_EQ(MV3.size(), 0u);
+}
+
+TEST(dual_mapped_vector_tests, const_find_tests)
+{
+    DualMappedVector<double, std::string, int64_t> Mvec;
+
+    Mvec.insert("s1", 64, 3.2);
+    Mvec.insert("s2", 63, 4.3);
+    Mvec.insert("s3", 47, 9.7);
+    Mvec.insert("s4", 92, 11.4);
+
+    const auto &mv2 = Mvec;
+    auto res1 = Mvec.find("s1");
+    auto res2 = mv2.find("s1");
+    EXPECT_EQ(res1, res2);
+    EXPECT_NE(res1, Mvec.end());
+    EXPECT_EQ(*res1, 3.2);
+    EXPECT_EQ(*res2, 3.2);
+
+    auto r1 = Mvec.find("s7");
+    auto r2 = mv2.find("s7");
+    EXPECT_EQ(r1, r2);
+    EXPECT_EQ(r1, Mvec.end());
+    EXPECT_EQ(r2, Mvec.end());
+    EXPECT_TRUE(r1 == mv2.end());
+    EXPECT_TRUE(r2 == mv2.end());
+    EXPECT_TRUE(mv2.end() == r1);
+    EXPECT_TRUE(mv2.end() == r2);
+
+    res1 = Mvec.find(63);
+    res2 = mv2.find(63);
+    EXPECT_EQ(res1, res2);
+    EXPECT_NE(res1, Mvec.end());
+    EXPECT_EQ(*res1, 4.3);
+    EXPECT_EQ(*res2, 4.3);
+
+    r1 = Mvec.find(99);
+    r2 = mv2.find(99);
+    EXPECT_EQ(r1, r2);
+    EXPECT_EQ(r1, Mvec.end());
+    EXPECT_EQ(r2, Mvec.end());
+    EXPECT_TRUE(r1 == mv2.end());
+    EXPECT_TRUE(r2 == mv2.end());
+    EXPECT_TRUE(mv2.end() == r1);
+    EXPECT_TRUE(mv2.end() == r2);
+}
+
+TEST(mapped_vector_tests, apply_tests)
+{
+    DualMappedVector<double, std::string, int64_t> Mvec;
+
+    Mvec.insert("s1", 1, 3.2);
+    Mvec.insert("s2", 2, 4.3);
+    Mvec.insert("s3", 3, 9.7);
+    Mvec.insert("s4", 4, 11.4);
+
+    EXPECT_EQ(Mvec.back(), 11.4);
+
+    EXPECT_EQ(Mvec.size(), 4);
+
+    const auto &mvc = Mvec;
+
+    EXPECT_EQ(mvc.back(), 11.4);
+
+    EXPECT_EQ(mvc.size(), 4);
+
+    double sum = 0;
+    auto accum = [&sum](double val) { sum += val; };
+
+    Mvec.apply(accum);
+    EXPECT_DOUBLE_EQ(sum, 3.2 + 4.3 + 9.7 + 11.4);
+    double sum1 = sum;
+    sum = 0.0;
+    Mvec.transform([](double val) { return val + 1; });
+
+    EXPECT_EQ(Mvec[0], 3.2 + 1.0);
+    EXPECT_EQ(Mvec[1], 4.3 + 1.0);
+    EXPECT_EQ(Mvec[2], 9.7 + 1.0);
+
+    EXPECT_EQ(mvc[0], 3.2 + 1.0);
+    EXPECT_EQ(mvc[1], 4.3 + 1.0);
+    EXPECT_EQ(mvc[2], 9.7 + 1.0);
+
+    Mvec.apply(accum);
+    EXPECT_DOUBLE_EQ(sum, sum1 + 4.0);
 }

@@ -182,9 +182,9 @@ class MappedVector
     someone determined to screw it up could still easily do so*/
 
     /** get a const iterator to the beginning of the data vector*/
-    auto begin() const { return dataStorage.begin(); }
+    auto begin() const { return dataStorage.cbegin(); }
     /** the a constant iterator to the end of the vector*/
-    auto end() const { return dataStorage.end(); }
+    auto end() const { return dataStorage.cend(); }
 
     /** get the size of the vector*/
     auto size() const { return dataStorage.size(); }

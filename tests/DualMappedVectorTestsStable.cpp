@@ -224,3 +224,49 @@ TEST(dual_mapped_vector_tests_stable, remove_tests)
     EXPECT_EQ(MV2.size(), 3u);
     EXPECT_EQ(MV3.size(), 0u);
 }
+
+TEST(dual_mapped_vector_tests_stable, const_find_tests)
+{
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+      Mvec;
+
+    Mvec.insert("s1", 64, 3.2);
+    Mvec.insert("s2", 63, 4.3);
+    Mvec.insert("s3", 47, 9.7);
+    Mvec.insert("s4", 92, 11.4);
+
+    const auto &mv2 = Mvec;
+    auto res1 = Mvec.find("s1");
+    auto res2 = mv2.find("s1");
+    EXPECT_EQ(res1, res2);
+    EXPECT_NE(res1, Mvec.end());
+    EXPECT_EQ(*res1, 3.2);
+    EXPECT_EQ(*res2, 3.2);
+
+    auto r1 = Mvec.find("s7");
+    auto r2 = mv2.find("s7");
+    EXPECT_EQ(r1, r2);
+    EXPECT_EQ(r1, Mvec.end());
+    EXPECT_EQ(r2, Mvec.end());
+    EXPECT_TRUE(r1 == mv2.end());
+    EXPECT_TRUE(r2 == mv2.end());
+    EXPECT_TRUE(mv2.end() == r1);
+    EXPECT_TRUE(mv2.end() == r2);
+
+    res1 = Mvec.find(63);
+    res2 = mv2.find(63);
+    EXPECT_EQ(res1, res2);
+    EXPECT_NE(res1, Mvec.end());
+    EXPECT_EQ(*res1, 4.3);
+    EXPECT_EQ(*res2, 4.3);
+
+    r1 = Mvec.find(99);
+    r2 = mv2.find(99);
+    EXPECT_EQ(r1, r2);
+    EXPECT_EQ(r1, Mvec.end());
+    EXPECT_EQ(r2, Mvec.end());
+    EXPECT_TRUE(r1 == mv2.end());
+    EXPECT_TRUE(r2 == mv2.end());
+    EXPECT_TRUE(mv2.end() == r1);
+    EXPECT_TRUE(mv2.end() == r2);
+}
