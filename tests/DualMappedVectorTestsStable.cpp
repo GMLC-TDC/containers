@@ -259,7 +259,7 @@ TEST(dual_mapped_vector_tests_stable, const_find_tests)
 
 TEST(dual_mapped_vector_tests_stable, empty_find)
 {
-	DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
-	auto res = Mvec.find("string1");
-	EXPECT_EQ(res, Mvec.end());
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    auto res = Mvec.find("string1");
+    EXPECT_EQ(res, Mvec.end());
 }

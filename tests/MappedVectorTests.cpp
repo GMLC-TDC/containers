@@ -200,7 +200,7 @@ TEST(mapped_vector_tests, remove_tests)
 
 TEST(mapped_vector_tests, empty_find)
 {
-	MappedVector<double> Mvec;
-	auto res = Mvec.find("string1");
-	EXPECT_EQ(res, Mvec.end());
+    MappedVector<double> Mvec;
+    auto res = Mvec.find("string1");
+    EXPECT_EQ(res, Mvec.end());
 }
