@@ -68,7 +68,6 @@ jobs:
     - template: .ci/azure-test.yml
 
 - job: Docker
-  variables:
   pool:
     vmImage: 'ubuntu-latest'
   strategy:
