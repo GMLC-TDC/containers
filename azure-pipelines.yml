@@ -22,7 +22,7 @@ jobs:
   variables:
     CXX_FLAGS: "-Werror -Wcast-align -Wfloat-equal -Wimplicit-atomic-properties -Wmissing-declarations -Woverlength-strings -Wshadow -Wstrict-selector-match -Wundeclared-selector -Wunreachable-code -std=c++11"
     containers.options: -DCONTAINERS_CLANG_TIDY=ON -DCONTAINERS_CLANG_TIDY_OPTIONS="-fix"
-    containers.std: 11
+    containers.std: 14
     CMAKE_BUILD_PARALLEL_LEVEL: 1
   pool:
     vmImage: 'ubuntu-latest'
@@ -75,8 +75,8 @@ jobs:
       gcc8:
         containerImage: gcc:8
         containers.std: 17
-      clang3.5:
-        containerImage: silkeh/clang:3.5
+      clang3.6:
+        containerImage: silkeh/clang:3.6
       clang8:
         containerImage: silkeh/clang:8
   container: $[ variables['containerImage'] ]
