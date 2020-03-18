@@ -81,8 +81,10 @@ TEST(airlock_tests, move_mthread_tests)
 
     EXPECT_TRUE(alock.isLoaded());
 
-    auto fut = std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
-    auto fut2 = std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
+    auto fut =
+        std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
+    auto fut2 =
+        std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
     std::this_thread::yield();
     auto b = alock.try_unload();
     EXPECT_EQ(*b, "load 1");

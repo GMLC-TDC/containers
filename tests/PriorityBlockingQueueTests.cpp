@@ -164,7 +164,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
                     break;
                 case 3:
                     if (res) {
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        std::this_thread::sleep_for(
+                            std::chrono::milliseconds(10));
                     }
                 default:
                     sq.push(el);
@@ -233,7 +234,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests)
         while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res) { // make an additional sleep period so the producer can catch
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch
                 // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
@@ -270,7 +272,10 @@ TEST(blocking_priority_queue_tests, pop_tests)
                 ++cnt;
             } else {
                 if (nres > 0) {
-                    printf("%d came before %d\n", static_cast<int>(nres), static_cast<int>(res));
+                    printf(
+                        "%d came before %d\n",
+                        static_cast<int>(nres),
+                        static_cast<int>(res));
                 }
             }
             res = nres;
@@ -304,7 +309,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests2)
         while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res) { // make an additional sleep period so the producer can catch
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch
                 // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
@@ -350,7 +356,8 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3)
         while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res) { // make an additional sleep period so the producer can catch
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch
                 // up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();

@@ -14,11 +14,22 @@ using namespace gmlc::containers;
 /** test basic operations */
 TEST(dual_mapped_vector_tests_stable, definition_tests)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> M;
-    DualMappedVector<std::string, std::string, double, reference_stability::stable> S2;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        M;
+    DualMappedVector<
+        std::string,
+        std::string,
+        double,
+        reference_stability::stable>
+        S2;
     EXPECT_EQ(M.size(), 0u);
     EXPECT_EQ(S2.size(), 0u);
-    DualMappedVector<std::vector<std::string>, double, std::string, reference_stability::stable> V2;
+    DualMappedVector<
+        std::vector<std::string>,
+        double,
+        std::string,
+        reference_stability::stable>
+        V2;
 
     // test move and assignment operators
     decltype(M) TV2;
@@ -30,7 +41,12 @@ TEST(dual_mapped_vector_tests_stable, definition_tests)
 
 TEST(dual_mapped_vector_tests_stable, insertion_tests)
 {
-    DualMappedVector<std::vector<double>, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<
+        std::vector<double>,
+        std::string,
+        int64_t,
+        reference_stability::stable>
+        Mvec;
     Mvec.insert("el1", 41, 3, 1.7);
     EXPECT_EQ(Mvec.size(), 1u);
     Mvec.insert("a2", 27, std::vector<double>(45));
@@ -55,7 +71,8 @@ TEST(dual_mapped_vector_tests_stable, insertion_tests)
 
 TEST(dual_mapped_vector_tests_stable, insertion_tests2)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
 
     auto res = Mvec.insert("el1", 0, 1.7);
     EXPECT_TRUE(res);
@@ -83,7 +100,8 @@ TEST(dual_mapped_vector_tests_stable, insertion_tests2)
 
 TEST(dual_mapped_vector_tests_stable, assign_tests2)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
 
     Mvec.insert_or_assign("el1", 0, 1.7);
 
@@ -111,7 +129,8 @@ TEST(dual_mapped_vector_tests_stable, assign_tests2)
 
 TEST(dual_mapped_vector_tests_stable, additional_searchTerm_tests)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
 
     Mvec.insert("s1", 64, 3.2);
     Mvec.insert("s2", 63, 4.3);
@@ -150,7 +169,8 @@ TEST(dual_mapped_vector_tests_stable, additional_searchTerm_tests)
 
 TEST(dual_mapped_vector_tests_stable, iterator_tests)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
 
     Mvec.insert("s1", 64, 3.2);
     Mvec.insert("s2", 63, 4.3);
@@ -174,7 +194,8 @@ TEST(dual_mapped_vector_tests_stable, iterator_tests)
 
 TEST(dual_mapped_vector_tests_stable, remove_tests)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
 
     Mvec.insert("s1", 64, 3.2);
     Mvec.insert("s2", 63, 4.3);
@@ -214,7 +235,8 @@ TEST(dual_mapped_vector_tests_stable, remove_tests)
 
 TEST(dual_mapped_vector_tests_stable, const_find_tests)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
 
     Mvec.insert("s1", 64, 3.2);
     Mvec.insert("s2", 63, 4.3);
@@ -259,7 +281,8 @@ TEST(dual_mapped_vector_tests_stable, const_find_tests)
 
 TEST(dual_mapped_vector_tests_stable, empty_find)
 {
-    DualMappedVector<double, std::string, int64_t, reference_stability::stable> Mvec;
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
     auto res = Mvec.find("string1");
     EXPECT_EQ(res, Mvec.end());
 }

@@ -123,7 +123,8 @@ TEST(simple_queue_tests, multithreaded_tests)
         int64_t cnt = 1;
         while ((res)) {
             auto nres = sq.pop();
-            if (!nres) { // make an additional sleep period so the producer can catch up
+            if (!nres) {  // make an additional sleep period so the producer can
+                          // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 nres = sq.pop();
             }
@@ -133,7 +134,9 @@ TEST(simple_queue_tests, multithreaded_tests)
                 } else {
                     if (*nres > 0) {
                         printf(
-                            "%d came before %d\n", static_cast<int>(*nres), static_cast<int>(*res));
+                            "%d came before %d\n",
+                            static_cast<int>(*nres),
+                            static_cast<int>(*res));
                     }
                 }
             }
@@ -171,7 +174,8 @@ TEST(simple_queue_tests, multithreaded_tests2)
         while ((res)) {
             ++cnt;
             res = sq.pop();
-            if (!res) { // make an additional sleep period so the producer can catch up
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.pop();
             }
@@ -212,7 +216,8 @@ TEST(simple_queue_tests, multithreaded_tests3)
         while ((res)) {
             ++cnt;
             res = sq.pop();
-            if (!res) { // make an additional sleep period so the producer can catch up
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.pop();
             }

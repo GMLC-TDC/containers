@@ -72,9 +72,10 @@ TEST(CircBuff_tests, test_circularbuffraw_loop_around)
 
 TEST(CircBuff_tests, test_circularbuffraw_loop_around_repeat)
 {
-    unsigned char* block = new unsigned char[1520]; // 3x504+4  otherwise there is a potential
-        // scenario in which 2 500byte messages cannot
-        // fit
+    unsigned char* block =
+        new unsigned char[1520];  // 3x504+4  otherwise there is a potential
+                                  // scenario in which 2 500byte messages cannot
+                                  // fit
     CircularBufferRaw buf(block, 1520);
 
     std::vector<unsigned char> testData(500, 'a');
@@ -369,7 +370,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_smaller_wrap)
     buf.push(testData.data(), 204);
     buf.pop(testData.data(), 256);
     EXPECT_TRUE(buf.isSpaceAvailable(205));
-    buf.resize(620); // a size that can work
+    buf.resize(620);  // a size that can work
     EXPECT_TRUE(!buf.isSpaceAvailable(205));
     auto pushed = buf.push(testData.data(), 205);
     EXPECT_TRUE(!pushed);

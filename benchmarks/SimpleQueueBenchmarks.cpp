@@ -13,7 +13,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 using namespace gmlc::containers;
 
 template<class X>
-class sqFixture: public benchmark::Fixture {
+class sqFixture : public benchmark::Fixture {
   public:
     SimpleQueue<X> sq;
 };
@@ -36,7 +36,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = sq.pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -66,7 +66,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)
             int cnt = 0;
             while (cnt < state.threads - 1) {
                 auto res = sq.pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -91,7 +91,7 @@ BENCHMARK_REGISTER_F(sqFixture, MProdSCons)
 #include <mutex>
 #include <queue>
 template<class X>
-class stdqFixture: public benchmark::Fixture {
+class stdqFixture : public benchmark::Fixture {
   public:
     std::queue<X> q;
     std::mutex prot;
@@ -132,7 +132,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -162,7 +162,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)
             int cnt = 0;
             while (cnt < 3) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -185,9 +185,9 @@ BENCHMARK_REGISTER_F(stdqFixture, MProdSCons_std)
     ->Unit(benchmark::kMillisecond);
 
 #ifdef ENABLE_BOOST_TYPES
-#    include <boost/lockfree/queue.hpp>
+#include <boost/lockfree/queue.hpp>
 template<class X>
-class blfFixture: public benchmark::Fixture {
+class blfFixture : public benchmark::Fixture {
   public:
     boost::lockfree::queue<X> q;
 
@@ -225,7 +225,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -255,7 +255,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)
             int cnt = 0;
             while (cnt < state.threads - 1) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -277,9 +277,9 @@ BENCHMARK_REGISTER_F(blfFixture, MProdSCons_blf)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-#    include <boost/lockfree/spsc_queue.hpp>
+#include <boost/lockfree/spsc_queue.hpp>
 template<class X>
-class bspscFixture: public benchmark::Fixture {
+class bspscFixture : public benchmark::Fixture {
   public:
     boost::lockfree::spsc_queue<X, boost::lockfree::capacity<4048>> q;
 
@@ -318,7 +318,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -339,7 +339,7 @@ BENCHMARK_REGISTER_F(bspscFixture, SProdSCons_bspsc)
 
 #include <moodycamel/concurrentqueue.h>
 template<class X>
-class mcFixture: public benchmark::Fixture {
+class mcFixture : public benchmark::Fixture {
   public:
     moodycamel::ConcurrentQueue<X> q;
 
@@ -373,7 +373,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }
@@ -408,7 +408,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)
             int cnt = 0;
             while (cnt < state.threads - 1) {
                 auto res = pop();
-                if (!res) { // yield so the producers can catch up
+                if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
                     continue;
                 }

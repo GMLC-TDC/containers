@@ -67,7 +67,9 @@ TEST(work_queue, WorkQueue_test2)
 {
     // Test a zero worker count
     WorkQueue wq(0);
-    std::function<void()> fk = [] { std::this_thread::sleep_for(std::chrono::milliseconds(110)); };
+    std::function<void()> fk = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(110));
+    };
 
     auto b1 = make_shared_workBlock(fk);
     auto start_t = std::chrono::high_resolution_clock::now();
@@ -112,7 +114,9 @@ TEST(work_queue, WorkQueue_test3)
 
     WorkQueue wq(1);
     // a sleeper work block to give us time to set up the rest
-    auto fk = [] { std::this_thread::sleep_for(std::chrono::milliseconds(300)); };
+    auto fk = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    };
 
     auto b1 = make_workBlock(fk);
     // only 1 worker thread so don't worry about locking
@@ -161,7 +165,9 @@ TEST(work_queue, WorkQueue_test3_vector)
 
     WorkQueue wq(1);
     // a sleeper work block to give us time to set up the rest
-    auto fk = [] { std::this_thread::sleep_for(std::chrono::milliseconds(300)); };
+    auto fk = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    };
 
     auto b1 = make_workBlock(fk);
     // only 1 worker thread so don't worry about locking

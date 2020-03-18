@@ -106,7 +106,7 @@ TEST(stackQueueTest, test_stackqueueraw_push_full)
     EXPECT_EQ(res, 180);
     EXPECT_EQ(testData[0], 'c');
     EXPECT_EQ(testData[179], 'c');
-    EXPECT_EQ(testData[180], 'd'); // this is one past the copy
+    EXPECT_EQ(testData[180], 'd');  // this is one past the copy
 
     res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 249);
@@ -299,7 +299,7 @@ TEST(stackQueueTest, test_stackqueue_push_full)
     EXPECT_EQ(res, 180);
     EXPECT_EQ(testData[0], 'c');
     EXPECT_EQ(testData[179], 'c');
-    EXPECT_EQ(testData[180], 'd'); // this is one past the copy
+    EXPECT_EQ(testData[180], 'd');  // this is one past the copy
 
     res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 249);
@@ -557,7 +557,7 @@ TEST(stackQueueTest, test_stackqueue_resize)
     EXPECT_EQ(stack.capacity(), 2048);
     EXPECT_EQ(stack.rawBlockCapacity(), 4096);
 
-    EXPECT_FALSE(stack.resize(-262354)); // this should do nothing
+    EXPECT_FALSE(stack.resize(-262354));  // this should do nothing
 }
 
 TEST(stackQueueTest, odd_conditions)

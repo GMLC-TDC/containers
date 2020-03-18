@@ -18,7 +18,8 @@ TEST(stable_mapped_vector_tests, definition_tests)
     MappedVector<std::string, std::string, reference_stability::stable> S2;
     EXPECT_EQ(M.size(), 0u);
     EXPECT_EQ(S2.size(), 0u);
-    MappedVector<std::vector<std::string>, double, reference_stability::stable> V2;
+    MappedVector<std::vector<std::string>, double, reference_stability::stable>
+        V2;
 
     // test move and assignment operators
     auto V3 = V2;
@@ -31,7 +32,8 @@ TEST(stable_mapped_vector_tests, definition_tests)
 
 TEST(stable_mapped_vector_tests, insertion_tests)
 {
-    MappedVector<std::vector<double>, std::string, reference_stability::stable> Mvec;
+    MappedVector<std::vector<double>, std::string, reference_stability::stable>
+        Mvec;
     Mvec.insert("el1", 3, 1.7);
     EXPECT_EQ(Mvec.size(), 1u);
     Mvec.insert("a2", std::vector<double>(45));

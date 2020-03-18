@@ -274,7 +274,8 @@ TEST(stableBlockVectorTest, test_back)
 
 TEST(stableBlockVectorTest, constructor1)
 {
-    StableBlockVector<std::string, 7> sbv{15, "this is an exciting long string"};
+    StableBlockVector<std::string, 7> sbv{15,
+                                          "this is an exciting long string"};
     EXPECT_EQ(sbv.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii) {
         EXPECT_EQ(sbv[ii], "this is an exciting long string");
@@ -290,7 +291,8 @@ TEST(stableBlockVectorTest, constructor0)
 
 TEST(stableBlockVectorTest, copy_constructor)
 {
-    StableBlockVector<std::string, 7> sbv{15, "this is an exciting long string"};
+    StableBlockVector<std::string, 7> sbv{15,
+                                          "this is an exciting long string"};
     auto sbv2 = sbv;
     EXPECT_EQ(sbv2.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii) {
@@ -306,7 +308,7 @@ TEST(stableBlockVectorTest, copy_construct_empty)
 {
     StableBlockVector<size_t, 4> sbd;
     EXPECT_TRUE(sbd.empty());
-    sbd.clear(); // just test this doesn't blow up or something
+    sbd.clear();  // just test this doesn't blow up or something
     EXPECT_TRUE(sbd.empty());
     StableBlockVector<size_t, 4> sbd2(sbd);
 
@@ -319,7 +321,8 @@ TEST(stableBlockVectorTest, copy_construct_empty)
 
 TEST(stableBlockVectorTest, move_constructor)
 {
-    StableBlockVector<std::string, 7> sbv{15, "this is an exciting long string"};
+    StableBlockVector<std::string, 7> sbv{15,
+                                          "this is an exciting long string"};
     auto sbv2 = std::move(sbv);
     EXPECT_EQ(sbv2.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii) {
