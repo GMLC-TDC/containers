@@ -1,8 +1,10 @@
 /*
-Copyright © 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. SPDX-License-Identifier: BSD-3-Clause
+All rights reserved.
+
+SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "CircularBuffer.hpp"
@@ -72,9 +74,10 @@ TEST(CircBuff_tests, test_circularbuffraw_loop_around)
 
 TEST(CircBuff_tests, test_circularbuffraw_loop_around_repeat)
 {
-    unsigned char* block = new unsigned char[1520]; // 3x504+4  otherwise there is a potential
-        // scenario in which 2 500byte messages cannot
-        // fit
+    unsigned char* block =
+        new unsigned char[1520];  // 3x504+4  otherwise there is a potential
+                                  // scenario in which 2 500byte messages cannot
+                                  // fit
     CircularBufferRaw buf(block, 1520);
 
     std::vector<unsigned char> testData(500, 'a');
@@ -369,7 +372,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_smaller_wrap)
     buf.push(testData.data(), 204);
     buf.pop(testData.data(), 256);
     EXPECT_TRUE(buf.isSpaceAvailable(205));
-    buf.resize(620); // a size that can work
+    buf.resize(620);  // a size that can work
     EXPECT_TRUE(!buf.isSpaceAvailable(205));
     auto pushed = buf.push(testData.data(), 205);
     EXPECT_TRUE(!pushed);

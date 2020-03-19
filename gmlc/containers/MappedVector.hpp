@@ -1,8 +1,10 @@
 /*
-Copyright (c) 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. SPDX-License-Identifier: BSD-3-Clause
+All rights reserved.
+
+SPDX-License-Identifier: BSD-3-Clause
 */
 #pragma once
 #include "MapTraits.hpp"
@@ -13,13 +15,14 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace gmlc {
 namespace containers {
-    /** class combining a vector of objects with a map to search them by a separate
-index term the main use case is a bunch of inserts then searching with limited
-to no removal since removal is a rather expensive operation
+    /** class combining a vector of objects with a map to search them by a
+separate index term the main use case is a bunch of inserts then searching with
+limited to no removal since removal is a rather expensive operation
 */
     template<
         class VType,
@@ -98,7 +101,10 @@ to no removal since removal is a rather expensive operation
 
         VType& operator[](size_t index) { return dataStorage[index]; }
 
-        const VType& operator[](size_t index) const { return dataStorage[index]; }
+        const VType& operator[](size_t index) const
+        {
+            return dataStorage[index];
+        }
 
         /** get the last element of the vector*/
         VType& back() { return dataStorage.back(); }
@@ -156,7 +162,8 @@ to no removal since removal is a rather expensive operation
         template<class UnaryFunction>
         void transform(UnaryFunction F)
         {
-            std::transform(dataStorage.begin(), dataStorage.end(), dataStorage.begin(), F);
+            std::transform(
+                dataStorage.begin(), dataStorage.end(), dataStorage.begin(), F);
         }
         /*NOTE:: only constant iterators allowed since this would introduce the
     possibility of using iterators for various algorithms which could cause the
@@ -185,7 +192,9 @@ to no removal since removal is a rather expensive operation
             vect.erase(vect.begin() + index);
             return true;
         }
-        bool localErase(StableBlockVector<VType, BLOCK_ORDER>& vect, size_t index)
+        bool localErase(
+            StableBlockVector<VType, BLOCK_ORDER>& vect,
+            size_t index)
         {
             if (index == vect.size() - 1) {
                 vect.pop_back();
@@ -199,13 +208,13 @@ to no removal since removal is a rather expensive operation
             STABILITY == reference_stability::unstable,
             std::vector<VType>,
             StableBlockVector<VType, BLOCK_ORDER>>
-            dataStorage; //!< primary storage for data
+            dataStorage;  //!< primary storage for data
         std::conditional_t<
             is_easily_hashable<searchType>::value,
             std::unordered_map<searchType, size_t>,
             std::map<searchType, size_t>>
-            lookup; //!< map to lookup the index
+            lookup;  //!< map to lookup the index
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc

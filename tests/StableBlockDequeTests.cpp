@@ -1,5 +1,5 @@
 /*
-Copyright © 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
@@ -309,7 +309,7 @@ TEST(stableBlockDequeTest, move_construct)
         val = ii++;
     }
     StableBlockDeque<size_t, 4> sbd2(std::move(sbd));
-    sbd.~StableBlockDeque(); // call the destructor
+    sbd.~StableBlockDeque();  // call the destructor
     EXPECT_EQ(sbd2.size(), 200);
     for (ii = 0; ii < 100; ++ii) {
         EXPECT_EQ(sbd2.front(), ii);
@@ -343,7 +343,7 @@ TEST(stableBlockDequeTest, copy_construct_empty)
 {
     StableBlockDeque<size_t, 4> sbd;
     EXPECT_TRUE(sbd.empty());
-    sbd.clear(); // just test this doesn't blow up or something
+    sbd.clear();  // just test this doesn't blow up or something
     EXPECT_TRUE(sbd.empty());
     StableBlockDeque<size_t, 4> sbd2(sbd);
 

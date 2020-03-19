@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
@@ -124,7 +124,8 @@ TEST(blocking_queue_tests, multithreaded_tests)
         while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res) { // make an additional sleep period so the producer can catch up
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -162,7 +163,10 @@ TEST(blocking_queue_tests, pop_tests)
                 ++cnt;
             } else {
                 if (nres > 0) {
-                    printf("%d came before %d\n", static_cast<int>(nres), static_cast<int>(res));
+                    printf(
+                        "%d came before %d\n",
+                        static_cast<int>(nres),
+                        static_cast<int>(res));
                 }
             }
             res = nres;
@@ -199,7 +203,8 @@ TEST(blocking_queue_tests, multithreaded_tests2)
         while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res) { // make an additional sleep period so the producer can catch up
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }
@@ -240,7 +245,8 @@ TEST(blocking_queue_tests, multithreaded_tests3)
         while ((res)) {
             ++cnt;
             res = sq.try_pop();
-            if (!res) { // make an additional sleep period so the producer can catch up
+            if (!res) {  // make an additional sleep period so the producer can
+                         // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 res = sq.try_pop();
             }

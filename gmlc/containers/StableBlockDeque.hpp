@@ -1,8 +1,10 @@
 /*
-Copyright © 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. SPDX-License-Identifier: BSD-3-Clause
+All rights reserved.
+
+SPDX-License-Identifier: BSD-3-Clause
 */
 #pragma once
 
@@ -11,6 +13,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 namespace gmlc {
 namespace containers {
@@ -23,7 +26,9 @@ no erase or insert
 and deallocate methods)*/
     template<typename X, unsigned int N, class Allocator = std::allocator<X>>
     class StableBlockDeque {
-        static_assert(N < 32, "N should be between 0 and 31 data will allocated in block 2^N");
+        static_assert(
+            N < 32,
+            "N should be between 0 and 31 data will allocated in block 2^N");
         static_assert(
             std::is_default_constructible<X>::value,
             " used type must be default constructible");
@@ -31,7 +36,8 @@ and deallocate methods)*/
       public:
         static constexpr unsigned int blockSize{1u << N};
         using iterator = BlockIterator<X, (1u << N), X**>;
-        using const_iterator = BlockIterator<const X, (1u << N), const X* const*>;
+        using const_iterator =
+            BlockIterator<const X, (1u << N), const X* const*>;
 
       private:
         static constexpr unsigned int cntmask{blockSize - 1};
@@ -41,9 +47,11 @@ and deallocate methods)*/
         StableBlockDeque() noexcept {};
 
         /** construct with a specified size*/
-        StableBlockDeque(size_t startSize, const X& init = X{}):
-            csize(startSize), dataptr(new X*[std::max((startSize >> N) + 2, size_t{64})]),
-            dataSlotsAvailable(std::max(static_cast<int>(startSize >> N) + 2, 64))
+        StableBlockDeque(size_t startSize, const X& init = X{}) :
+            csize(startSize),
+            dataptr(new X*[std::max((startSize >> N) + 2, size_t{64})]),
+            dataSlotsAvailable(
+                std::max(static_cast<int>(startSize >> N) + 2, 64))
         {
             Allocator a;
             if (startSize == 0) {
@@ -100,8 +108,10 @@ and deallocate methods)*/
             }
         }
 
-        StableBlockDeque(const StableBlockDeque& sbd):
-            dataptr(new X*[std::max(static_cast<size_t>(sbd.dataSlotsAvailable), size_t{64})]),
+        StableBlockDeque(const StableBlockDeque& sbd) :
+            dataptr(new X*[std::max(
+                static_cast<size_t>(sbd.dataSlotsAvailable),
+                size_t{64})]),
             dataSlotsAvailable(std::max(sbd.dataSlotsAvailable, 64))
         {
             if (sbd.dataptr != nullptr) {
@@ -118,11 +128,13 @@ and deallocate methods)*/
                 bsize = fsize = blockSize / 2;
             }
         }
-        StableBlockDeque(StableBlockDeque&& sbd) noexcept:
-            csize(sbd.csize), dataptr(sbd.dataptr), dataSlotsAvailable(sbd.dataSlotsAvailable),
-            dataSlotBack(sbd.dataSlotBack), dataSlotFront(sbd.dataSlotFront), bsize(sbd.bsize),
-            fsize(sbd.fsize), freeSlotsAvailable(sbd.freeSlotsAvailable), freeIndex(sbd.freeIndex),
-            freeblocks(sbd.freeblocks)
+        StableBlockDeque(StableBlockDeque&& sbd) noexcept :
+            csize(sbd.csize), dataptr(sbd.dataptr),
+            dataSlotsAvailable(sbd.dataSlotsAvailable),
+            dataSlotBack(sbd.dataSlotBack), dataSlotFront(sbd.dataSlotFront),
+            bsize(sbd.bsize), fsize(sbd.fsize),
+            freeSlotsAvailable(sbd.freeSlotsAvailable),
+            freeIndex(sbd.freeIndex), freeblocks(sbd.freeblocks)
         {
             sbd.freeblocks = nullptr;
             sbd.freeSlotsAvailable = 0;
@@ -166,7 +178,8 @@ and deallocate methods)*/
         void emplace_back(Args&&... args)
         {
             blockCheck();
-            new (&(dataptr[dataSlotBack][bsize++])) X(std::forward<Args>(args)...);
+            new (&(dataptr[dataSlotBack][bsize++]))
+                X(std::forward<Args>(args)...);
             ++csize;
         }
 
@@ -202,7 +215,8 @@ and deallocate methods)*/
         void emplace_front(Args&&... args)
         {
             blockCheckFront();
-            new (&(dataptr[dataSlotFront][fsize--])) X(std::forward<Args>(args)...);
+            new (&(dataptr[dataSlotFront][fsize--]))
+                X(std::forward<Args>(args)...);
             ++csize;
         }
 
@@ -305,13 +319,14 @@ and deallocate methods)*/
             if (dataSlotsAvailable == 0 || csize == 0) {
                 return;
             }
-            for (int jj = bsize - 1; jj >= 0; --jj) { // call destructors on the last block
+            for (int jj = bsize - 1; jj >= 0;
+                 --jj) {  // call destructors on the last block
                 dataptr[dataSlotBack][jj].~X();
             }
             // don't go into the front slot yet
             for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii) {
                 for (int jj = blockSize - 1; jj >= 0;
-                     --jj) { // call destructors on the middle blocks
+                     --jj) {  // call destructors on the middle blocks
                     dataptr[ii][jj].~X();
                 }
                 moveBlocktoAvailable(dataptr[ii]);
@@ -320,7 +335,7 @@ and deallocate methods)*/
                 moveBlocktoAvailable(dataptr[dataSlotBack]);
 
                 for (int jj = blockSize - 1; jj > fsize;
-                     --jj) { // call destructors on the first block
+                     --jj) {  // call destructors on the first block
                     dataptr[dataSlotFront][jj].~X();
                 }
             }
@@ -369,12 +384,14 @@ and deallocate methods)*/
 
         X& operator[](size_t n)
         {
-            return dataptr[dataSlotFront + ((fsize + n + 1) >> N)][(fsize + n + 1) & cntmask];
+            return dataptr[dataSlotFront + ((fsize + n + 1) >> N)]
+                          [(fsize + n + 1) & cntmask];
         }
 
         const X& operator[](size_t n) const
         {
-            return dataptr[dataSlotFront + ((fsize + n + 1) >> N)][(fsize + n + 1) & cntmask];
+            return dataptr[dataSlotFront + ((fsize + n + 1) >> N)]
+                          [(fsize + n + 1) & cntmask];
         }
 
         size_t size() const { return csize; }
@@ -398,7 +415,8 @@ and deallocate methods)*/
         {
             static X* emptyValue{nullptr};
             if (bsize == blockSize) {
-                X** ptr = (dataptr != nullptr) ? &(dataptr[dataSlotBack + 1]) : &emptyValue;
+                X** ptr = (dataptr != nullptr) ? &(dataptr[dataSlotBack + 1]) :
+                                                 &emptyValue;
                 return {ptr, 0};
             }
             X** ptr = &(dataptr[dataSlotBack]);
@@ -422,8 +440,9 @@ and deallocate methods)*/
         {
             static const X* const emptyValue{nullptr};
             if (bsize == blockSize) {
-                const X* const* ptr =
-                    (dataptr != nullptr) ? &(dataptr[dataSlotBack + 1]) : &emptyValue;
+                const X* const* ptr = (dataptr != nullptr) ?
+                    &(dataptr[dataSlotBack + 1]) :
+                    &emptyValue;
                 return {ptr, 0};
             }
             const X* const* ptr = &(dataptr[dataSlotBack]);
@@ -448,7 +467,7 @@ and deallocate methods)*/
                     return;
                 }
                 if (dataSlotBack >= dataSlotsAvailable - 1) {
-                    if (dataSlotFront > 5) { // shift the pointers
+                    if (dataSlotFront > 5) {  // shift the pointers
                         std::copy(
                             dataptr + dataSlotFront,
                             dataptr + dataSlotBack + 1,
@@ -457,7 +476,8 @@ and deallocate methods)*/
                         dataSlotFront = dataSlotFront / 2;
                         dataSlotBack = dataSlotFront + diff;
                     } else {
-                        auto mem = new X*[static_cast<size_t>(dataSlotsAvailable) * 2];
+                        auto mem =
+                            new X*[static_cast<size_t>(dataSlotsAvailable) * 2];
                         std::copy(dataptr, dataptr + dataSlotsAvailable, mem);
                         delete[] dataptr;
                         dataptr = mem;
@@ -493,7 +513,10 @@ and deallocate methods)*/
                         dataSlotFront = (dataSlotsAvailable - dataSlotBack) / 2;
                     } else {
                         auto mem = new X*[dataSlotsAvailable * 2];
-                        std::copy(dataptr, dataptr + dataSlotBack + 1, mem + dataSlotsAvailable);
+                        std::copy(
+                            dataptr,
+                            dataptr + dataSlotBack + 1,
+                            mem + dataSlotsAvailable);
                         delete[] dataptr;
                         dataptr = mem;
                         dataSlotFront = dataSlotsAvailable;
@@ -513,7 +536,8 @@ and deallocate methods)*/
                     freeblocks = new X*[64];
                     freeSlotsAvailable = 64;
                 } else {
-                    auto mem = new X*[static_cast<size_t>(freeSlotsAvailable) * 2];
+                    auto mem =
+                        new X*[static_cast<size_t>(freeSlotsAvailable) * 2];
                     std::copy(freeblocks, freeblocks + freeSlotsAvailable, mem);
                     delete[] freeblocks;
                     freeblocks = mem;
@@ -538,25 +562,27 @@ and deallocate methods)*/
                 Allocator a;
                 if (dataSlotBack == dataSlotFront) {
                     for (int jj = bsize - 1; jj > fsize;
-                         --jj) { // call destructors on the last block
+                         --jj) {  // call destructors on the last block
                         dataptr[dataSlotBack][jj].~X();
                     }
                     a.deallocate(dataptr[dataSlotFront], blockSize);
                 } else {
-                    for (int jj = bsize - 1; jj >= 0; --jj) { // call destructors on the last block
+                    for (int jj = bsize - 1; jj >= 0;
+                         --jj) {  // call destructors on the last block
                         dataptr[dataSlotBack][jj].~X();
                     }
                     a.deallocate(dataptr[dataSlotBack], blockSize);
                     // don't go into the front slot yet
-                    for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii) {
+                    for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1;
+                         --ii) {
                         for (int jj = blockSize - 1; jj >= 0;
-                             --jj) { // call destructors on the middle blocks
+                             --jj) {  // call destructors on the middle blocks
                             dataptr[ii][jj].~X();
                         }
                         a.deallocate(dataptr[ii], blockSize);
                     }
                     for (int jj = blockSize - 1; jj > fsize;
-                         --jj) { // call destructors on the first block
+                         --jj) {  // call destructors on the first block
                         dataptr[dataSlotFront][jj].~X();
                     }
                     a.deallocate(dataptr[dataSlotFront], blockSize);
@@ -570,17 +596,17 @@ and deallocate methods)*/
         }
 
       private:
-        size_t csize{0}; // 8
-        X** dataptr{nullptr}; // 16
-        int dataSlotsAvailable{0}; // 20
-        int dataSlotBack{0}; // 24
-        int dataSlotFront{0}; // 28
-        int bsize{blockSize}; // 32
-        int fsize{-1}; // 36
-        int freeSlotsAvailable{0}; // 40
-        int freeIndex{0}; // 48 +4 byte gap
-        X** freeblocks{nullptr}; // 56
-    }; // namespace containers
+        size_t csize{0};  // 8
+        X** dataptr{nullptr};  // 16
+        int dataSlotsAvailable{0};  // 20
+        int dataSlotBack{0};  // 24
+        int dataSlotFront{0};  // 28
+        int bsize{blockSize};  // 32
+        int fsize{-1};  // 36
+        int freeSlotsAvailable{0};  // 40
+        int freeIndex{0};  // 48 +4 byte gap
+        X** freeblocks{nullptr};  // 56
+    };  // namespace containers
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc

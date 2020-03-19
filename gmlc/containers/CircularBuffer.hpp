@@ -1,8 +1,10 @@
 /*
-Copyright (c) 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. SPDX-License-Identifier: BSD-3-Clause
+All rights reserved.
+
+SPDX-License-Identifier: BSD-3-Clause
 */
 
 #pragma once
@@ -11,14 +13,16 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
+#include <utility>
 
 namespace gmlc {
 namespace containers {
     /** A circular buffer for raw data chunks */
     class CircularBufferRaw {
       public:
-        CircularBufferRaw(unsigned char* dataBlock, int blockSize):
-            origin(dataBlock), next_write(origin), next_read(origin), capacity_(blockSize)
+        CircularBufferRaw(unsigned char* dataBlock, int blockSize) :
+            origin(dataBlock), next_write(origin), next_read(origin),
+            capacity_(blockSize)
         {
         }
 
@@ -26,7 +30,8 @@ namespace containers {
         bool isSpaceAvailable(int sz) const
         {
             if (next_write >= next_read) {
-                if ((capacity_ - (next_write - origin)) >= static_cast<ptrdiff_t>(sz) + 4) {
+                if ((capacity_ - (next_write - origin)) >=
+                    static_cast<ptrdiff_t>(sz) + 4) {
                     return true;
                 }
                 if ((next_read - origin) >= static_cast<ptrdiff_t>(sz) + 4) {
@@ -46,18 +51,22 @@ namespace containers {
                 return false;
             }
             if (next_write >= next_read) {
-                if ((capacity_ - (next_write - origin)) >= static_cast<ptrdiff_t>(blockSize) + 4) {
+                if ((capacity_ - (next_write - origin)) >=
+                    static_cast<ptrdiff_t>(blockSize) + 4) {
                     memcpy(next_write, &blockSize, sizeof(int));
                     // *(reinterpret_cast<int *>(next_write)) = blockSize;
                     memcpy(next_write + 4, data, blockSize);
                     next_write += static_cast<ptrdiff_t>(blockSize) + 4;
-                    // loop around if there isn't really space for another block of
-                    // at least 4 bytes and the next_read>origin
-                    if (((capacity_ - (next_write - origin)) < 8) && (next_read > origin)) {
+                    // loop around if there isn't really space for another block
+                    // of at least 4 bytes and the next_read>origin
+                    if (((capacity_ - (next_write - origin)) < 8) &&
+                        (next_read > origin)) {
                         next_write = origin;
                     }
                     return true;
-                } else if ((next_read - origin) >= static_cast<ptrdiff_t>(blockSize) + 4) {
+                } else if (
+                    (next_read - origin) >=
+                    static_cast<ptrdiff_t>(blockSize) + 4) {
                     int loc = -1;
                     memcpy(next_write, &loc, sizeof(int));
                     memcpy(origin, &blockSize, sizeof(int));
@@ -65,7 +74,9 @@ namespace containers {
                     next_write = origin + blockSize + 4;
                     return true;
                 }
-            } else if ((next_read - next_write) >= static_cast<ptrdiff_t>(blockSize) + 4) {
+            } else if (
+                (next_read - next_write) >=
+                static_cast<ptrdiff_t>(blockSize) + 4) {
                 memcpy(next_write, &blockSize, sizeof(int));
                 memcpy(next_write + 4, data, blockSize);
                 next_write += static_cast<ptrdiff_t>(blockSize) + 4;
@@ -122,13 +133,13 @@ namespace containers {
         friend class CircularBuffer;
     };
     /** class implementing a circular buffer with raw memory
- */
+     */
     class CircularBuffer {
       public:
-        CircularBuffer() noexcept: buffer(nullptr, 0) {}
-        explicit CircularBuffer(int size):
-            data(reinterpret_cast<unsigned char*>(std::malloc(size))), actualSize{size},
-            actualCapacity{size}, buffer(data, size)
+        CircularBuffer() noexcept : buffer(nullptr, 0) {}
+        explicit CircularBuffer(int size) :
+            data(reinterpret_cast<unsigned char*>(std::malloc(size))),
+            actualSize{size}, actualCapacity{size}, buffer(data, size)
         {
         }
         ~CircularBuffer()
@@ -137,9 +148,9 @@ namespace containers {
                 free(data);
             }
         }
-        CircularBuffer(CircularBuffer&& cb) noexcept:
-            data{cb.data}, actualSize(cb.actualSize), actualCapacity(cb.actualCapacity),
-            buffer(std::move(cb.buffer))
+        CircularBuffer(CircularBuffer&& cb) noexcept :
+            data{cb.data}, actualSize(cb.actualSize),
+            actualCapacity(cb.actualCapacity), buffer(std::move(cb.buffer))
         {
             cb.data = nullptr;
             cb.actualSize = 0;
@@ -149,9 +160,10 @@ namespace containers {
             cb.buffer.next_read = nullptr;
             cb.buffer.next_write = nullptr;
         }
-        CircularBuffer(const CircularBuffer& cb):
+        CircularBuffer(const CircularBuffer& cb) :
             data{reinterpret_cast<unsigned char*>(std::malloc(cb.actualSize))},
-            actualSize{cb.actualSize}, actualCapacity{cb.actualSize}, buffer(cb.buffer)
+            actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
+            buffer(cb.buffer)
         {
             if (data != nullptr && cb.data != nullptr) {
                 memcpy(data, cb.data, actualSize);
@@ -211,8 +223,10 @@ namespace containers {
                 buffer = CircularBufferRaw(data, newsize);
             } else if (newsize > actualSize) {
                 resizeMemory(newsize);
-                int read_offset = static_cast<int>(buffer.next_read - buffer.origin);
-                int write_offset = static_cast<int>(buffer.next_write - buffer.origin);
+                int read_offset =
+                    static_cast<int>(buffer.next_read - buffer.origin);
+                int write_offset =
+                    static_cast<int>(buffer.next_write - buffer.origin);
                 if (buffer.next_read < buffer.next_write) {
                     buffer.capacity_ = newsize;
                     buffer.origin = data;
@@ -229,17 +243,22 @@ namespace containers {
                     buffer.next_read = buffer.origin + newsize - readDiff;
                     buffer.capacity_ = newsize;
                 }
-            } else // smaller size
-            {
-                int read_offset = static_cast<int>(buffer.next_read - buffer.origin);
+            } else {  // smaller size
+                int read_offset =
+                    static_cast<int>(buffer.next_read - buffer.origin);
                 if (buffer.next_read < buffer.next_write) {
-                    int write_offset = static_cast<int>(buffer.next_write - buffer.origin);
+                    int write_offset =
+                        static_cast<int>(buffer.next_write - buffer.origin);
                     if (write_offset <= newsize) {
                         buffer.capacity_ = newsize;
                     } else if (write_offset - read_offset < newsize) {
-                        memmove(buffer.origin, buffer.next_read, write_offset - read_offset);
+                        memmove(
+                            buffer.origin,
+                            buffer.next_read,
+                            write_offset - read_offset);
                         buffer.next_read = buffer.origin;
-                        buffer.next_write = buffer.origin + write_offset - read_offset;
+                        buffer.next_write =
+                            buffer.origin + write_offset - read_offset;
                         buffer.capacity_ = newsize;
                     } else {
                         throw(std::runtime_error(
@@ -247,13 +266,15 @@ namespace containers {
                             "empty buffer before resizing"));
                     }
                 } else {
-                    int write_offset = static_cast<int>(buffer.next_write - buffer.origin);
+                    int write_offset =
+                        static_cast<int>(buffer.next_write - buffer.origin);
                     int readDiff = buffer.capacity_ - read_offset;
                     if (readDiff + write_offset < newsize) {
                         memmove(
                             data + newsize - readDiff,
                             data + read_offset,
-                            static_cast<size_t>(buffer.capacity_) - read_offset);
+                            static_cast<size_t>(buffer.capacity_) -
+                                read_offset);
                         buffer.origin = data;
                         buffer.next_write = buffer.origin + write_offset;
                         buffer.next_read = buffer.origin + newsize - readDiff;
@@ -268,7 +289,10 @@ namespace containers {
             }
         }
         int capacity() const { return buffer.capacity(); }
-        bool isSpaceAvailable(int sz) const { return buffer.isSpaceAvailable(sz); }
+        bool isSpaceAvailable(int sz) const
+        {
+            return buffer.isSpaceAvailable(sz);
+        }
         bool empty() const { return buffer.empty(); }
 
         bool push(const unsigned char* block, int blockSize)
@@ -278,7 +302,10 @@ namespace containers {
 
         int nextDataSize() const { return buffer.nextDataSize(); }
 
-        int pop(unsigned char* block, int maxSize) { return buffer.pop(block, maxSize); }
+        int pop(unsigned char* block, int maxSize)
+        {
+            return buffer.pop(block, maxSize);
+        }
 
         void clear() { buffer.clear(); }
 
@@ -307,5 +334,5 @@ namespace containers {
         CircularBufferRaw buffer;
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc

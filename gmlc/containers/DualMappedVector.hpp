@@ -1,8 +1,10 @@
 /*
-Copyright (c) 2017-2019,
+Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. SPDX-License-Identifier: BSD-3-Clause
+All rights reserved.
+
+SPDX-License-Identifier: BSD-3-Clause
 */
 
 #pragma once
@@ -15,6 +17,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace gmlc {
@@ -43,8 +46,10 @@ or by numerical index
     if so contain the index of the insertion
     */
         template<typename... Us>
-        opt<size_t>
-            insert(const searchType1& searchValue1, const searchType2& searchValue2, Us&&... data)
+        opt<size_t> insert(
+            const searchType1& searchValue1,
+            const searchType2& searchValue2,
+            Us&&... data)
         {
             auto fnd = lookup1.find(searchValue1);
             if (fnd != lookup1.end()) {
@@ -67,8 +72,10 @@ or by numerical index
    if so contain the index of the insertion
     */
         template<typename... Us>
-        opt<size_t>
-            insert(const searchType1& searchValue1, no_search_type /*searchValue2*/, Us&&... data)
+        opt<size_t> insert(
+            const searchType1& searchValue1,
+            no_search_type /*searchValue2*/,
+            Us&&... data)
         {
             auto fnd = lookup1.find(searchValue1);
             if (fnd != lookup1.end()) {
@@ -87,8 +94,10 @@ or by numerical index
     if so contain the index of the insertion
     */
         template<typename... Us>
-        opt<size_t>
-            insert(no_search_type /*searchValue1*/, const searchType2& searchValue2, Us&&... data)
+        opt<size_t> insert(
+            no_search_type /*searchValue1*/,
+            const searchType2& searchValue2,
+            Us&&... data)
         {
             auto fnd = lookup2.find(searchValue2);
             if (fnd != lookup2.end()) {
@@ -105,8 +114,10 @@ or by numerical index
     @return an optional value that indicates if the insertion was successful and
     if so contain the index of the insertion*/
         template<typename... Us>
-        opt<size_t>
-            insert(no_search_type /*searchValue1*/, no_search_type /*searchValue2*/, Us&&... data)
+        opt<size_t> insert(
+            no_search_type /*searchValue1*/,
+            no_search_type /*searchValue2*/,
+            Us&&... data)
         {
             auto index = dataStorage.size();
             dataStorage.emplace_back(std::forward<Us>(data)...);
@@ -190,7 +201,9 @@ or by numerical index
         }
 
         /** add an additional index term for searching*/
-        auto addSearchTerm(const searchType1& searchValue, const searchType1& existingValue)
+        auto addSearchTerm(
+            const searchType1& searchValue,
+            const searchType1& existingValue)
         {
             auto fnd = lookup1.find(existingValue);
             if (fnd != lookup1.end()) {
@@ -211,7 +224,9 @@ or by numerical index
         }
 
         /** add an additional index term for searching*/
-        auto addSearchTerm(const searchType2& searchValue, const searchType2& existingValue)
+        auto addSearchTerm(
+            const searchType2& searchValue,
+            const searchType2& existingValue)
         {
             auto fnd = lookup2.find(existingValue);
             if (fnd != lookup2.end()) {
@@ -222,7 +237,9 @@ or by numerical index
         }
 
         /** add an additional index term for searching*/
-        auto addSearchTerm(const searchType2& searchValue, const searchType1& existingValue)
+        auto addSearchTerm(
+            const searchType2& searchValue,
+            const searchType1& existingValue)
         {
             auto fnd = lookup1.find(existingValue);
             if (fnd != lookup1.end()) {
@@ -233,7 +250,9 @@ or by numerical index
         }
 
         /** add an additional index term for searching*/
-        auto addSearchTerm(const searchType1& searchValue, const searchType2& existingValue)
+        auto addSearchTerm(
+            const searchType1& searchValue,
+            const searchType2& existingValue)
         {
             auto fnd = lookup2.find(existingValue);
             if (fnd != lookup2.end()) {
@@ -338,7 +357,10 @@ or by numerical index
         }
         VType& operator[](size_t index) { return dataStorage[index]; }
 
-        const VType& operator[](size_t index) const { return dataStorage[index]; }
+        const VType& operator[](size_t index) const
+        {
+            return dataStorage[index];
+        }
 
         VType& back() { return dataStorage.back(); }
 
@@ -356,7 +378,8 @@ or by numerical index
         template<class UnaryFunction>
         void transform(UnaryFunction F)
         {
-            std::transform(dataStorage.begin(), dataStorage.end(), dataStorage.begin(), F);
+            std::transform(
+                dataStorage.begin(), dataStorage.end(), dataStorage.begin(), F);
         }
 
         auto begin() const { return dataStorage.cbegin(); }
@@ -377,7 +400,9 @@ or by numerical index
             vect.erase(vect.begin() + index);
             return true;
         }
-        bool localErase(StableBlockVector<VType, BLOCK_ORDER>& vect, size_t index)
+        bool localErase(
+            StableBlockVector<VType, BLOCK_ORDER>& vect,
+            size_t index)
         {
             if (index == vect.size() - 1) {
                 vect.pop_back();
@@ -391,18 +416,18 @@ or by numerical index
             STABILITY == reference_stability::unstable,
             std::vector<VType>,
             StableBlockVector<VType, BLOCK_ORDER>>
-            dataStorage; //!< primary storage for data
+            dataStorage;  //!< primary storage for data
         std::conditional_t<
             is_easily_hashable<searchType1>::value,
             std::unordered_map<searchType1, size_t>,
             std::map<searchType1, size_t>>
-            lookup1; //!< map to lookup the index
+            lookup1;  //!< map to lookup the index
         std::conditional_t<
             is_easily_hashable<searchType2>::value,
             std::unordered_map<searchType2, size_t>,
             std::map<searchType2, size_t>>
-            lookup2; //!< map to lookup the index
+            lookup2;  //!< map to lookup the index
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc
