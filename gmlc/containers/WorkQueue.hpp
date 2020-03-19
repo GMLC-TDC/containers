@@ -137,7 +137,7 @@ that can be executed
     template<>
     class workBlock<void> : public basicWorkBlock {
       public:
-        workBlock() { reset(); };
+        workBlock() { reset(); }
         workBlock(std::packaged_task<void()>&& newTask) :
             task(std::move(newTask)), loaded(true)
         {
@@ -186,7 +186,7 @@ that can be executed
             loaded = true;
         }
         bool isFinished() const override { return finished; };
-        void wait() const { future_ret.wait(); };
+        void wait() const { future_ret.wait(); }
         void reset()
         {
             if (loaded) {
@@ -210,8 +210,7 @@ anything else that could be called with operator()
 @return a unique pointer to a work block function
 */
     template<typename X>
-    auto make_workBlock(
-        X&& fptr)  //->std::unique_ptr<workBlock<decltype(fptr())>>
+    auto make_workBlock(X&& fptr)
     {
         return std::make_unique<workBlock<decltype(fptr())>>(
             std::forward<X>(fptr));
@@ -222,8 +221,7 @@ anything else that could be called with operator()
 @return a shared pointer to a work block function
 */
     template<typename X>
-    auto make_shared_workBlock(
-        X&& fptr)  //->std::shared_ptr<workBlock<decltype(fptr())>>
+    auto make_shared_workBlock(X&& fptr)
     {
         return std::make_shared<workBlock<decltype(fptr())>>(
             std::forward<X>(fptr));
@@ -461,7 +459,7 @@ value)
                                      // and also sync the size if needed
                 if ((wb) && (!wb->isFinished())) {
                     wb->execute();
-                    //	std::cout << std::this_thread::get_id << " executing\n";
+                    //  std::cout << std::this_thread::get_id << " executing\n";
                 }
             }
             // std::cout << std::this_thread::get_id << " halting\n";

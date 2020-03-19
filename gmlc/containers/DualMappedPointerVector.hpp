@@ -18,6 +18,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <string>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace gmlc {
