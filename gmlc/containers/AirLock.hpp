@@ -16,6 +16,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <condition_variable>
 #include <mutex>
 #include <type_traits>
+#include <utility>
 
 namespace gmlc {
 namespace containers {

@@ -51,7 +51,7 @@ that can be executed, functionoid, or something that implements operator()
     template<typename retType>
     class workBlock : public basicWorkBlock {
       public:
-        workBlock() { reset(); };
+        workBlock() { reset(); }
         // copy constructor intentionally omitted*/
         /** move constructor*/
         workBlock(workBlock&& wb) = default;
@@ -108,9 +108,9 @@ that can be executed, functionoid, or something that implements operator()
             loaded = true;
         }
         /** check if the task is finished*/
-        bool isFinished() const override { return finished; };
+        bool isFinished() const override { return finished; }
         /** wait until the work is done*/
-        void wait() { future_ret.wait(); };
+        void wait() { future_ret.wait(); }
         /** reset the work so it can run again*/
         void reset()
         {
