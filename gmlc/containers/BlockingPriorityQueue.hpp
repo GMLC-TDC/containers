@@ -156,9 +156,8 @@ the two locks will reduce contention in most cases.
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
                 std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
-                queueEmptyFlag =
-                    false;  // need to set the flag again just in case
-                            // after we get the lock
+                queueEmptyFlag = false;  // need to set the flag again just in
+                                         // case after we get the lock
                 priorityQueue.push(std::forward<Z>(val));
                 // pullLock.unlock ();
                 condition.notify_all();
@@ -219,9 +218,8 @@ the two locks will reduce contention in most cases.
             bool expEmpty = true;
             if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
                 std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
-                queueEmptyFlag =
-                    false;  // need to set the flag again just in case
-                            // after we get the lock
+                queueEmptyFlag = false;  // need to set the flag again just in
+                                         // case after we get the lock
                 priorityQueue.emplace(std::forward<Args>(args)...);
                 // pullLock.unlock ();
                 condition.notify_all();
@@ -362,11 +360,9 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     return actval;
                 }
-                if (!pullElements.empty())
-
-                {  // the callback may fill the queue or it may have been filled
-                   // in
-                    // the meantime
+                if (!pullElements.empty()) {
+                    // the callback may fill the queue or it may have been
+                    // filled in the meantime
                     auto actval = std::move(pullElements.back());
                     pullElements.pop_back();
                     return actval;
