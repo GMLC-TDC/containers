@@ -51,9 +51,10 @@ a single thread so it can be accessed without locks
             }
             return false;
         }
+
         /** load the airlock,
-    @details the call will block until the airlock is ready to be loaded
-    */
+        @details the call will block until the airlock is ready to be loaded
+        */
         template<class Z>
         void load(Z&& val)
         {

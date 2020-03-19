@@ -2,7 +2,7 @@
 Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. 
+All rights reserved.
 
 SPDX-License-Identifier: BSD-3-Clause
 */
@@ -28,36 +28,39 @@ atomic flag indicating the queue is empty
     template<class X, class MUTEX = std::mutex>
     class SimpleQueue {
       private:
-        mutable MUTEX m_pushLock; //!< lock for operations on the pushElements vector
-        mutable MUTEX m_pullLock; //!< lock for elements on the pullLock vector
-        std::vector<X> pushElements; //!< vector of elements being added
-        std::vector<X> pullElements; //!< vector of elements waiting extraction
-        std::atomic<bool> queueEmptyFlag{true}; //!< flag indicating the queue is Empty
+        mutable MUTEX m_pushLock;  //!< lock for operations on the pushElements
+                                   //!< vector
+        mutable MUTEX m_pullLock;  //!< lock for elements on the pullLock vector
+        std::vector<X> pushElements;  //!< vector of elements being added
+        std::vector<X> pullElements;  //!< vector of elements waiting extraction
+        std::atomic<bool> queueEmptyFlag{
+            true};  //!< flag indicating the queue is Empty
       public:
         /** default constructor */
         SimpleQueue() = default;
         /** destructor*/
         ~SimpleQueue()
         {
-            // these locks are primarily for memory synchronization multiple access
-            // in the destructor would be a bad thing
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock); // second pushLock
-            /** clear the elements as part of the destruction while the locks are
-         * engaged*/
+            // these locks are primarily for memory synchronization multiple
+            // access in the destructor would be a bad thing
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+            /** clear the elements as part of the destruction while the locks
+             * are engaged*/
             pushElements.clear();
             pullElements.clear();
         }
         /** constructor with a reservation size
     @param capacity  the initial storage capacity of the queue*/
         explicit SimpleQueue(size_t capacity)
-        { // don't need to lock since we aren't out of the constructor yet
+        {  // don't need to lock since we aren't out of the constructor yet
             pushElements.reserve(capacity);
             pullElements.reserve(capacity);
         }
         /** enable the move constructor not the copy constructor*/
-        SimpleQueue(SimpleQueue&& sq) noexcept:
-            pushElements(std::move(sq.pushElements)), pullElements(std::move(sq.pullElements))
+        SimpleQueue(SimpleQueue&& sq) noexcept :
+            pushElements(std::move(sq.pushElements)),
+            pullElements(std::move(sq.pullElements))
         {
             queueEmptyFlag = pullElements.empty();
         }
@@ -65,8 +68,8 @@ atomic flag indicating the queue is empty
         /** enable the move assignment not the copy assignment*/
         SimpleQueue& operator=(SimpleQueue&& sq) noexcept
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock); // second pushLock
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
             pushElements = std::move(sq.pushElements);
             pullElements = std::move(sq.pullElements);
             queueEmptyFlag = pullElements.empty();
@@ -82,21 +85,21 @@ atomic flag indicating the queue is empty
     */
         bool empty() const
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
             return pullElements.empty();
         }
         /** get the current size of the queue*/
         size_t size() const
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock); // second pushLock
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
             return pullElements.size() + pushElements.size();
         }
         /** clear the queue*/
         void clear()
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock); // second pushLock
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
             pullElements.clear();
             pushElements.clear();
             queueEmptyFlag = true;
@@ -108,8 +111,8 @@ atomic flag indicating the queue is empty
     */
         void reserve(size_t capacity)
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock); // second pushLock
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
             pullElements.reserve(capacity);
             pushElements.reserve(capacity);
         }
@@ -118,16 +121,19 @@ atomic flag indicating the queue is empty
     val the value to push on the queue
     */
         template<class Z>
-        void push(Z&& val) // forwarding reference
+        void push(Z&& val)  // forwarding reference
         {
-            std::unique_lock<MUTEX> pushLock(m_pushLock); // only one lock on this branch
+            std::unique_lock<MUTEX> pushLock(
+                m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
                 bool expEmpty = true;
                 if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
                     // release the push lock
                     pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(m_pullLock); // first pullLock
-                    queueEmptyFlag = false; // set the flag to false again just in case
+                    std::unique_lock<MUTEX> pullLock(
+                        m_pullLock);  // first pullLock
+                    queueEmptyFlag =
+                        false;  // set the flag to false again just in case
                     if (pullElements.empty()) {
                         pullElements.push_back(std::forward<Z>(val));
                         return;
@@ -144,18 +150,22 @@ atomic flag indicating the queue is empty
         /** push a vector onto the queue
         val the vector of values to push on the queue
         */
-        void pushVector(const std::vector<X>& val) // universal reference
+        void pushVector(const std::vector<X>& val)  // universal reference
         {
-            std::unique_lock<MUTEX> pushLock(m_pushLock); // only one lock on this branch
+            std::unique_lock<MUTEX> pushLock(
+                m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
                 bool expEmpty = true;
                 if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
                     // release the push lock
                     pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(m_pullLock); // first pullLock
-                    queueEmptyFlag = false; // set the flag to false again just in case
+                    std::unique_lock<MUTEX> pullLock(
+                        m_pullLock);  // first pullLock
+                    queueEmptyFlag =
+                        false;  // set the flag to false again just in case
                     if (pullElements.empty()) {
-                        pullElements.insert(pullElements.end(), val.rbegin(), val.rend());
+                        pullElements.insert(
+                            pullElements.end(), val.rbegin(), val.rend());
                         return;
                     }
                     // reengage the push lock so we can push next
@@ -173,13 +183,15 @@ atomic flag indicating the queue is empty
         template<class... Args>
         void emplace(Args&&... args)
         {
-            std::unique_lock<MUTEX> pushLock(m_pushLock); // only one lock on this branch
+            std::unique_lock<MUTEX> pushLock(
+                m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
                 bool expEmpty = true;
                 if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
                     // release the push lock
                     pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(m_pullLock); // first pullLock
+                    std::unique_lock<MUTEX> pullLock(
+                        m_pullLock);  // first pullLock
                     queueEmptyFlag = false;
                     if (pullElements.empty()) {
                         pullElements.emplace_back(std::forward<Args>(args)...);
@@ -204,13 +216,14 @@ atomic flag indicating the queue is empty
     */
         opt<X> pop()
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock); // first pullLock
+            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
             checkPullandSwap();
             if (pullElements.empty()) {
                 return {};
             }
-            opt<X> val(
-                std::move(pullElements.back())); // do it this way to allow moveable only types
+            opt<X> val(std::move(pullElements.back()));  // do it this way to
+                                                         // allow moveable only
+                                                         // types
             pullElements.pop_back();
             checkPullandSwap();
             return val;
@@ -240,11 +253,13 @@ atomic flag indicating the queue is empty
         void checkPullandSwap()
         {
             if (pullElements.empty()) {
-                std::unique_lock<MUTEX> pushLock(m_pushLock); // second pushLock
-                if (!pushElements.empty()) { // this is the potential for slow operations
+                std::unique_lock<MUTEX> pushLock(
+                    m_pushLock);  // second pushLock
+                if (!pushElements.empty()) {  // this is the potential for slow
+                                              // operations
                     std::swap(pushElements, pullElements);
-                    // we can free the push function to accept more elements after
-                    // the swap call;
+                    // we can free the push function to accept more elements
+                    // after the swap call;
                     pushLock.unlock();
                     std::reverse(pullElements.begin(), pullElements.end());
                 } else {
@@ -254,5 +269,5 @@ atomic flag indicating the queue is empty
         }
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc
