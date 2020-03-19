@@ -2,7 +2,7 @@
 Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. 
+All rights reserved.
 
 SPDX-License-Identifier: BSD-3-Clause
 */
@@ -16,13 +16,12 @@ namespace gmlc {
 namespace containers {
     template<typename X, int BLOCKSIZE, typename OUTER>
     /** helper class for iterating through a sequence of blocks*/
-    class BlockIterator:
-        public std::iterator<
-            std::bidirectional_iterator_tag,
-            X,
-            X,
-            const typename std::remove_const<X>::type*,
-            const typename std::remove_const<X>::type&> {
+    class BlockIterator : public std::iterator<
+                              std::bidirectional_iterator_tag,
+                              X,
+                              X,
+                              const typename std::remove_const<X>::type*,
+                              const typename std::remove_const<X>::type&> {
       private:
         OUTER vec;
         X* ptr;
@@ -31,11 +30,12 @@ namespace containers {
       public:
         using constref = const typename std::remove_const<X>::type;
 
-        BlockIterator(OUTER& it, int startoffset):
+        BlockIterator(OUTER& it, int startoffset) :
             vec{it}, ptr{&((*it)[startoffset])}, offset{startoffset}
         {
             static_assert(
-                std::is_same<std::remove_reference_t<decltype(*(*it))>, X>::value,
+                std::is_same<std::remove_reference_t<decltype(*(*it))>, X>::
+                    value,
                 "OUTER *it must be dereferencable to a type matching X");
         }
 
@@ -59,7 +59,8 @@ namespace containers {
         bool operator==(const BlockIterator<X2, BLOCKSIZE, OUT2>& it) const
         {
             static_assert(
-                std::is_same<std::remove_const_t<X2>, std::remove_const_t<X>>::value,
+                std::is_same<std::remove_const_t<X2>, std::remove_const_t<X>>::
+                    value,
                 "iterators must point to the same type");
             return it.checkEquivalence(vec, offset);
         }
@@ -157,5 +158,5 @@ namespace containers {
         }
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc

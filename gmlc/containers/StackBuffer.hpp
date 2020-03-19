@@ -57,7 +57,7 @@ blocks of raw data
             std::swap(dataCount, other.dataCount);
         }
 
-        int capacity() const { return dataSize; };
+        int capacity() const { return dataSize; }
         int getCurrentCount() const { return dataCount; }
         bool isSpaceAvailable(int sz) const
         {
@@ -241,8 +241,8 @@ blocks of raw data
                 stack.nextIndex = reinterpret_cast<dataIndex*>(
                     stack.origin + stack.dataSize - diSize);
                 stack.nextIndex -= stack.dataCount;
-            } else  // smaller size
-            {
+            } else {
+                // smaller size
                 int indexOffset = stack.dataSize - diSize * stack.dataCount;
                 int newOffset = newsize - diSize * stack.dataCount;
                 int dataOffset = static_cast<int>(stack.next - stack.origin);

@@ -17,6 +17,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <queue>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 namespace gmlc {
@@ -352,8 +353,8 @@ the two locks will reduce contention in most cases.
         T popOrCall(Functor callOnWaitFunction)
         {
             auto val = try_pop();
-            while (!val)  // may be spurious so make sure actually have a value
-            {
+            while (!val) {
+                // may be spurious so make sure actually have a value
                 callOnWaitFunction();
                 std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
                 if (!priorityQueue.empty()) {

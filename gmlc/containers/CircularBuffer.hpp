@@ -13,6 +13,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <cstddef>
 #include <cstring>
 #include <stdexcept>
+#include <utility>
 
 namespace gmlc {
 namespace containers {
@@ -242,8 +243,7 @@ namespace containers {
                     buffer.next_read = buffer.origin + newsize - readDiff;
                     buffer.capacity_ = newsize;
                 }
-            } else  // smaller size
-            {
+            } else {  // smaller size
                 int read_offset =
                     static_cast<int>(buffer.next_read - buffer.origin);
                 if (buffer.next_read < buffer.next_write) {

@@ -27,13 +27,14 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <memory>
 #include <thread>
 #include <utility>
+#include <vector>
 
 namespace gmlc {
 namespace containers {
     /** basic work block abstract class*/
     class basicWorkBlock {
       public:
-        basicWorkBlock(){};
+        basicWorkBlock() noexcept {}
         virtual ~basicWorkBlock() = default;
         /** run the work block*/
         virtual void execute() = 0;
