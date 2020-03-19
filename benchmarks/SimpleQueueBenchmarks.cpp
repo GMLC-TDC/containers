@@ -193,8 +193,8 @@ class blfFixture : public benchmark::Fixture {
 
     void push(const X& val)
     {
-        while (!q.push(val))
-            ;
+        while (!q.push(val)) {
+        }
     }
 
     opt<X> pop()
@@ -285,8 +285,8 @@ class bspscFixture : public benchmark::Fixture {
 
     void push(const X& val)
     {
-        while (!q.push(val))
-            ;
+        while (!q.push(val)) {
+        }
     }
 
     opt<X> pop()

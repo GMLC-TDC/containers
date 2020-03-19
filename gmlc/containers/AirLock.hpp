@@ -2,7 +2,7 @@
 Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. 
+All rights reserved.
 
 SPDX-License-Identifier: BSD-3-Clause
 */
@@ -27,7 +27,10 @@ will check performance at a later time
 @details this class is used to transfer an object from a thread safe context to
 a single thread so it can be accessed without locks
 */
-    template<typename T, class MUTEX = std::mutex, class COND = std::condition_variable>
+    template<
+        typename T,
+        class MUTEX = std::mutex,
+        class COND = std::condition_variable>
     class AirLock {
       public:
         /** default constructor */
@@ -36,11 +39,10 @@ a single thread so it can be accessed without locks
     @return true if successful, false if not*/
         template<class Z>
         bool try_load(Z&& val)
-        { // all modifications to loaded should be inside the mutex otherwise this
-            // will contain race conditions
+        {  // all modifications to loaded should be inside the mutex otherwise
+           // this will contain race conditions
             if (!loaded.load(std::memory_order_acquire)) {
                 std::lock_guard<MUTEX> lock(door);
-                // We can use relaxed here since we are behind the mutex
                 if (!loaded.load(std::memory_order_acquire)) {
                     data = std::forward<Z>(val);
                     loaded.store(true, std::memory_order_release);
@@ -93,11 +95,12 @@ a single thread so it can be accessed without locks
         bool isLoaded() const { return loaded.load(std::memory_order_acquire); }
 
       private:
-        std::atomic_bool loaded{false}; //!< flag if the airlock is loaded with cargo
-        MUTEX door; //!< check if one of the doors to the airlock is open
-        T data; //!< the data to be stored in the airlock
-        COND condition; //!< condition variable for notification of new data
+        std::atomic_bool loaded{
+            false};  //!< flag if the airlock is loaded with cargo
+        MUTEX door;  //!< check if one of the doors to the airlock is open
+        T data;  //!< the data to be stored in the airlock
+        COND condition;  //!< condition variable for notification of new data
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc

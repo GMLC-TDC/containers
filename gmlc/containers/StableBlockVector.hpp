@@ -2,7 +2,7 @@
 Copyright (c) 2017-2020,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
-All rights reserved. 
+All rights reserved.
 
 SPDX-License-Identifier: BSD-3-Clause
 */
@@ -13,6 +13,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <algorithm>
 #include <memory>
 #include <type_traits>
+#include <utility>
 
 namespace gmlc {
 namespace containers {
@@ -24,7 +25,9 @@ no erase or insert
 @tparam Allocator and allocator object to get the blocks*/
     template<typename X, unsigned int N, class Allocator = std::allocator<X>>
     class StableBlockVector {
-        static_assert(N < 32, "N should be between 0 and 31 data will allocated in block 2^N");
+        static_assert(
+            N < 32,
+            "N should be between 0 and 31 data will allocated in block 2^N");
         static_assert(
             std::is_default_constructible<X>::value,
             " used type must be default constructible");
@@ -32,7 +35,8 @@ no erase or insert
       public:
         static constexpr unsigned int blockSize{1u << N};
         using iterator = BlockIterator<X, (1u << N), X**>;
-        using const_iterator = BlockIterator<const X, (1u << N), const X* const*>;
+        using const_iterator =
+            BlockIterator<const X, (1u << N), const X* const*>;
 
       private:
         static constexpr unsigned int cntmask{blockSize - 1};
@@ -42,11 +46,14 @@ no erase or insert
         StableBlockVector() noexcept {}
 
         /** construct with a specified size*/
-        explicit StableBlockVector(size_t startSize, const X& init = X{}) noexcept(
-            std::is_nothrow_copy_constructible<X>::value):
+        explicit StableBlockVector(
+            size_t startSize,
+            const X& init =
+                X{}) noexcept(std::is_nothrow_copy_constructible<X>::value) :
             csize(startSize),
             dataptr(new X*[std::max((startSize >> N) + 1, size_t{64})]),
-            dataSlotsAvailable(std::max(static_cast<int>(startSize >> N) + 1, 64)),
+            dataSlotsAvailable(
+                std::max(static_cast<int>(startSize >> N) + 1, 64)),
             dataSlotIndex(static_cast<int>(startSize >> N)),
             bsize(static_cast<int>(startSize & cntmask))
         {
@@ -79,11 +86,12 @@ no erase or insert
             }
         }
 
-        StableBlockVector(StableBlockVector&& sbv) noexcept:
-            csize(sbv.csize), dataptr(sbv.dataptr), dataSlotsAvailable(sbv.dataSlotsAvailable),
+        StableBlockVector(StableBlockVector&& sbv) noexcept :
+            csize(sbv.csize), dataptr(sbv.dataptr),
+            dataSlotsAvailable(sbv.dataSlotsAvailable),
             dataSlotIndex(sbv.dataSlotIndex), bsize(sbv.bsize),
-            freeSlotsAvailable(sbv.freeSlotsAvailable), freeIndex(sbv.freeIndex),
-            freeblocks(sbv.freeblocks)
+            freeSlotsAvailable(sbv.freeSlotsAvailable),
+            freeIndex(sbv.freeIndex), freeblocks(sbv.freeblocks)
         {
             sbv.freeblocks = nullptr;
             sbv.freeSlotsAvailable = 0;
@@ -125,17 +133,20 @@ no erase or insert
         void emplace_back(Args&&... args)
         {
             blockCheck();
-            new (&(dataptr[dataSlotIndex][bsize++])) X(std::forward<Args>(args)...);
+            new (&(dataptr[dataSlotIndex][bsize++]))
+                X(std::forward<Args>(args)...);
             ++csize;
         }
 
-        void push_back(const X& val) noexcept(std::is_nothrow_copy_constructible<X>::value)
+        void push_back(const X& val) noexcept(
+            std::is_nothrow_copy_constructible<X>::value)
         {
             blockCheck();
             new (&(dataptr[dataSlotIndex][bsize++])) X{val};
             ++csize;
         }
-        void push_back(X&& val) noexcept(std::is_nothrow_move_constructible<X>::value)
+        void push_back(X&& val) noexcept(
+            std::is_nothrow_move_constructible<X>::value)
         {
             blockCheck();
             new (&(dataptr[dataSlotIndex][bsize++])) X{std::move(val)};
@@ -204,7 +215,8 @@ no erase or insert
             if (dataSlotsAvailable <= 0) {
                 return;
             }
-            for (int jj = bsize - 1; jj >= 0; --jj) { // call destructors on the last block
+            for (int jj = bsize - 1; jj >= 0;
+                 --jj) {  // call destructors on the last block
                 dataptr[dataSlotIndex][jj].~X();
             }
             if (dataSlotIndex > 0) {
@@ -214,13 +226,14 @@ no erase or insert
             // go in reverse order
             for (int ii = dataSlotIndex - 1; ii >= 1; --ii) {
                 for (int jj = blockSize - 1; jj >= 0;
-                     --jj) { // call destructors on the middle blocks
+                     --jj) {  // call destructors on the middle blocks
                     dataptr[ii][jj].~X();
                 }
                 moveBlocktoAvailable(dataptr[ii]);
             }
             if (dataSlotIndex > 0) {
-                for (int jj = blockSize - 1; jj >= 0; --jj) { // call destructors on the first block
+                for (int jj = blockSize - 1; jj >= 0;
+                     --jj) {  // call destructors on the first block
                     dataptr[0][jj].~X();
                 }
                 dataSlotIndex = 0;
@@ -256,7 +269,10 @@ no erase or insert
 
         X& operator[](size_t n) { return dataptr[n >> N][n & cntmask]; }
 
-        const X& operator[](size_t n) const { return dataptr[n >> N][n & cntmask]; }
+        const X& operator[](size_t n) const
+        {
+            return dataptr[n >> N][n & cntmask];
+        }
 
         size_t size() const { return csize; }
 
@@ -275,7 +291,8 @@ no erase or insert
         {
             static X* emptyValue{nullptr};
             if (bsize == blockSize) {
-                X** ptr = (dataptr != nullptr) ? &(dataptr[dataSlotIndex + 1]) : &emptyValue;
+                X** ptr = (dataptr != nullptr) ? &(dataptr[dataSlotIndex + 1]) :
+                                                 &emptyValue;
                 return {ptr, 0};
             }
             X** ptr = &(dataptr[dataSlotIndex]);
@@ -295,8 +312,9 @@ no erase or insert
         {
             static const X* const emptyValue{nullptr};
             if (bsize == blockSize) {
-                const X* const* ptr =
-                    (dataptr != nullptr) ? &(dataptr[dataSlotIndex + 1]) : &emptyValue;
+                const X* const* ptr = (dataptr != nullptr) ?
+                    &(dataptr[dataSlotIndex + 1]) :
+                    &emptyValue;
                 return {ptr, 0};
             }
             const X* const* ptr = &(dataptr[dataSlotIndex]);
@@ -312,7 +330,8 @@ no erase or insert
         {
             if (dataptr != nullptr) {
                 Allocator a;
-                for (int jj = bsize - 1; jj >= 0; --jj) { // call destructors on the last block
+                for (int jj = bsize - 1; jj >= 0;
+                     --jj) {  // call destructors on the last block
                     dataptr[dataSlotIndex][jj].~X();
                 }
                 if (dataSlotIndex > 0) {
@@ -321,7 +340,7 @@ no erase or insert
                 // go in reverse order
                 for (int ii = dataSlotIndex - 1; ii >= 0; --ii) {
                     for (int jj = blockSize - 1; jj >= 0;
-                         --jj) { // call destructors on the middle blocks
+                         --jj) {  // call destructors on the middle blocks
                         dataptr[ii][jj].~X();
                     }
                     a.deallocate(dataptr[ii], blockSize);
@@ -346,7 +365,8 @@ no erase or insert
                     dataSlotsAvailable = 64;
                     dataSlotIndex = -1;
                 } else if (dataSlotIndex >= dataSlotsAvailable - 1) {
-                    auto mem = new X*[static_cast<size_t>(dataSlotsAvailable) * 2];
+                    auto mem =
+                        new X*[static_cast<size_t>(dataSlotsAvailable) * 2];
                     std::copy(dataptr, dataptr + dataSlotsAvailable, mem);
                     delete[] dataptr;
                     dataptr = mem;
@@ -364,7 +384,8 @@ no erase or insert
                     freeblocks = new X*[64];
                     freeSlotsAvailable = 64;
                 } else {
-                    auto mem = new X*[static_cast<size_t>(freeSlotsAvailable) * 2];
+                    auto mem =
+                        new X*[static_cast<size_t>(freeSlotsAvailable) * 2];
                     std::copy(freeblocks, freeblocks + freeSlotsAvailable, mem);
                     delete[] freeblocks;
                     freeblocks = mem;
@@ -384,15 +405,15 @@ no erase or insert
         }
 
       private:
-        size_t csize{0}; // 8
-        X** dataptr{nullptr}; // 16
-        int dataSlotsAvailable{0}; // 20
-        int dataSlotIndex{0}; // 24
-        int bsize{blockSize}; // 28
-        int freeSlotsAvailable{0}; // 32
-        int freeIndex{0}; // 36 +4 byte gap
-        X** freeblocks{nullptr}; // 48
+        size_t csize{0};  // 8
+        X** dataptr{nullptr};  // 16
+        int dataSlotsAvailable{0};  // 20
+        int dataSlotIndex{0};  // 24
+        int bsize{blockSize};  // 28
+        int freeSlotsAvailable{0};  // 32
+        int freeIndex{0};  // 36 +4 byte gap
+        X** freeblocks{nullptr};  // 48
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc

@@ -173,13 +173,13 @@ namespace containers {
         }
 
       private:
-        std::vector<std::unique_ptr<VType>> dataStorage; //!< storage for the pointers
+        std::vector<std::unique_ptr<VType>> dataStorage;  //!< storage for the pointers
         std::conditional_t<
             is_easily_hashable<searchType>::value,
             std::unordered_map<searchType, size_t>,
             std::map<searchType, size_t>>
-            lookup; //!< map to lookup the index lookup;
+            lookup;  //!< map to lookup the index lookup;
     };
 
-} // namespace containers
-} // namespace gmlc
+}  // namespace containers
+}  // namespace gmlc
