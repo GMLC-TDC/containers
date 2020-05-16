@@ -77,7 +77,6 @@ jobs:
         containers.std: 17
       clang3.6:
         containerImage: helics/buildenv:clang-3.6_boost-1.58.0
-        containers.options: -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
       clang8:
         containerImage: helics/buildenv:clang8-builder
   container: $[ variables['containerImage'] ]
