@@ -26,7 +26,7 @@ jobs:
     CMAKE_BUILD_PARALLEL_LEVEL: 1
   pool:
     vmImage: 'ubuntu-latest'
-  container: silkeh/clang:8
+  container: helics/buildenv:clang9-builder
   steps:
     - template: .ci/azure-cmake.yml
     - template: .ci/azure-build.yml
@@ -38,7 +38,7 @@ jobs:
     containers.options:
   pool:
     vmImage: 'ubuntu-latest'
-  container: sharaku/cpplint:latest
+  container: helics/buildenv:cpplint
   steps:
     - bash: cpplint --counting=detailed --recursive gmlc tests benchmarks --exclude optional.hpp
       displayName: Checking against google style guide
