@@ -16,18 +16,18 @@ namespace gmlc {
 namespace containers {
     template<typename X, int BLOCKSIZE, typename OUTER>
     /** helper class for iterating through a sequence of blocks*/
-    class BlockIterator : public std::iterator<
-                              std::bidirectional_iterator_tag,
-                              X,
-                              X,
-                              const typename std::remove_const<X>::type*,
-                              const typename std::remove_const<X>::type&> {
+    class BlockIterator {
       private:
         OUTER vec;
         X* ptr;
         int offset;
 
       public:
+        using iterator_category =  std::bidirectional_iterator_tag;
+        using value_type        = X;
+        using difference_type   = X;
+        using pointer           = const typename std::remove_const<X>::type*;
+        using reference         = const typename std::remove_const<X>::type&;
         using constref = const typename std::remove_const<X>::type;
 
         BlockIterator(OUTER& it, int startoffset) :
