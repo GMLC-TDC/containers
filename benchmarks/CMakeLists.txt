@@ -21,7 +21,7 @@ foreach(T ${CONTAINERS_BENCHMARKS})
 
     add_executable(${T} ${T}.cpp )
     target_link_libraries(${T} PUBLIC containers)
-    add_benchmark(${T})
+    add_benchmark_with_main(${T})
 	set_target_properties(${T} PROPERTIES FOLDER benchmarks)
    
 endforeach()
