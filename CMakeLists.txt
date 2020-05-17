@@ -32,7 +32,7 @@ endif()
 # -----------------------------------------------------------------------------
 # set the module path and include some common macros
 # -----------------------------------------------------------------------------
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/" "${PROJECT_SOURCE_DIR}/ThirdParty/cmake/")
 include(extraMacros)
 include(CMakeDependentOption)
 
