@@ -1,33 +1,33 @@
 #
-# Copyright (c) 2017-2020, Battelle Memorial Institute; Lawrence Livermore National
+# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore National
 # Security, LLC; Alliance for Sustainable Energy, LLC All rights reserved. See LICENSE
 # file and DISCLAIMER for more details.
 #
 
-cmake_minimum_required(VERSION 3.4)
-cmake_policy(VERSION 3.4)
+cmake_minimum_required(VERSION 3.11)
+cmake_policy(VERSION 3.11)
 
-project (GMLC_CONTAINERS VERSION 0.3.1)
+project (GMLC_CONTAINERS VERSION 0.5)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 #-----------------------------------------------------------------------------
 set (GMLC_CONTAINERS_VERSION_BUILD )
-set (GMLC_CONTAINERS_DATE "01-16-20")
+set (GMLC_CONTAINERS_DATE "2022-05-08")
 
 set(GMLC_CONTAINERS_VERSION_STRING "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})")
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # User settable
-    set(CONTAINERS_CXX_STD "14"  CACHE STRING "The CMake standard to require")
+    set(GMLC_CONTAINERS_CXX_STD "17"  CACHE STRING "The CMake standard to require")
 
-    set(CMAKE_CXX_STANDARD ${CONTAINER_CXX_STD})
+    set(CMAKE_CXX_STANDARD ${GMLC_CONTAINERS_CXX_STD})
     set(CMAKE_CXX_EXTENSIONS OFF)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
 endif()
 
 if (NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 14)
+    set(CMAKE_CXX_STANDARD 17)
 endif()
 # -----------------------------------------------------------------------------
 # set the module path and include some common macros
@@ -49,17 +49,7 @@ endif()
 add_library(containers_base INTERFACE)
 
 include(compiler_flags)
-message(STATUS "setting version build options to \"${CXX_STANDARD_FLAG}\"")
-if(${CXX_STANDARD_FLAG})
-  if(MSVC)
-		target_compile_options(containers_base INTERFACE ${CXX_STANDARD_FLAG})
-	else()
-    target_compile_options(
-      containers_base
-      INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${CXX_STANDARD_FLAG}}>
-    )
-  endif(MSVC)
-endif(${CXX_STANDARD_FLAG})
+target_link_libraries(containers_base INTERFACE compile_flags_target)
 
 
 # -------------------------------------------------------------

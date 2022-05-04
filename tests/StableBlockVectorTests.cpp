@@ -406,7 +406,7 @@ TEST(stableBlockVectorTest, copy_assign)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
+    for (ii = 0; ii < 200; ++ii) {
         EXPECT_EQ(sbd2.front(), 0U);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -426,7 +426,7 @@ TEST(stableBlockVectorTest, copy_assign_from_empty)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
+    for (ii = 0; ii < 200; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[0]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -446,7 +446,7 @@ TEST(stableBlockVectorTest, copy_assign_to_bigger)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
+    for (ii = 0; ii < 200; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[0]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -491,11 +491,13 @@ TEST(stableBlockVectorTest, iterators)
         size_t cnt = 0;
         for (auto& el : sbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
         cnt = 0;
         for (const auto& el : csbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
     }
