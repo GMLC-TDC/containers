@@ -11,7 +11,7 @@ aliases:
       ctest --verbose
 
 jobs:
-  helicsgccTSan:
+  containersgccTSan:
     docker:
       - image: helics/buildenv:builder
     environment:
@@ -62,3 +62,5 @@ workflows:
       - containersMSan
       - containersASan
       - containersTSan
+      - containersgccTSan
+
