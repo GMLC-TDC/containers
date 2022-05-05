@@ -64,7 +64,7 @@ TEST(mapped_vector_tests, insertion_tests)
     EXPECT_EQ(V5c, Mvecc.end());
 
     auto& V2c = Mvecc[1];
-    EXPECT_EQ(V2.size(), 45);
+    EXPECT_EQ(V2c.size(), 45);
     EXPECT_EQ(Mvecc.back().size(), 45);
 }
 

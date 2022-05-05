@@ -538,11 +538,13 @@ TEST(stableBlockDequeTest, iterators)
         size_t cnt = 0;
         for (auto& el : sbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
         cnt = 0;
         for (const auto& el : csbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
     }
