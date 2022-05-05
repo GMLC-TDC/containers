@@ -25,7 +25,7 @@ inline X2 mapFind(const std::map<X1, X2>& mapS, const X1& val, const X2& defVal)
 }
 
 template<class X1, class X2>
-opt<X2> mapFind(const std::map<X1, X2>& mapS, const X1& val)
+std::optional<X2> mapFind(const std::map<X1, X2>& mapS, const X1& val)
 {
     auto map_it = mapS.find(val);
     if (map_it != mapS.end()) {
@@ -45,7 +45,7 @@ inline X2 mapFind(
 }
 
 template<class X1, class X2>
-opt<X2> mapFind(const std::unordered_map<X1, X2>& mapS, const X1& val)
+std::optional<X2> mapFind(const std::unordered_map<X1, X2>& mapS, const X1& val)
 {
     auto map_it = mapS.find(val);
     if (map_it != mapS.end()) {

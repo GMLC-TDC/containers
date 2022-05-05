@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #pragma once
 #include "MapTraits.hpp"
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <map>
@@ -31,7 +31,7 @@ namespace containers {
         MappedPointerVector(MappedPointerVector&& mp) = default;
         MappedPointerVector& operator=(MappedPointerVector&& mp) = default;
 
-        opt<size_t>
+        std::optional<size_t>
             insert(const searchType& searchValue, std::unique_ptr<VType>&& ptr)
         {
             auto fnd = lookup.find(searchValue);
@@ -45,7 +45,7 @@ namespace containers {
         }
         /** insert a new element into the vector*/
         template<typename... Us>
-        opt<size_t> insert(const searchType& searchValue, Us&&... data)
+        std::optional<size_t> insert(const searchType& searchValue, Us&&... data)
         {
             auto fnd = lookup.find(searchValue);
             if (fnd != lookup.end()) {

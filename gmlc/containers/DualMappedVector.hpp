@@ -10,7 +10,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 #include "MapTraits.hpp"
 #include "StableBlockVector.hpp"
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <map>
@@ -46,7 +46,7 @@ or by numerical index
     if so contain the index of the insertion
     */
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             const searchType1& searchValue1,
             const searchType2& searchValue2,
             Us&&... data)
@@ -72,7 +72,7 @@ or by numerical index
    if so contain the index of the insertion
     */
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             const searchType1& searchValue1,
             no_search_type /*searchValue2*/,
             Us&&... data)
@@ -94,7 +94,7 @@ or by numerical index
     if so contain the index of the insertion
     */
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             no_search_type /*searchValue1*/,
             const searchType2& searchValue2,
             Us&&... data)
@@ -114,7 +114,7 @@ or by numerical index
     @return an optional value that indicates if the insertion was successful and
     if so contain the index of the insertion*/
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             no_search_type /*searchValue1*/,
             no_search_type /*searchValue2*/,
             Us&&... data)

@@ -15,4 +15,3 @@ exclude_paths:
   - ThirdParty/*
   - scripts/**/*
   - scripts/*
-  - */extra/*

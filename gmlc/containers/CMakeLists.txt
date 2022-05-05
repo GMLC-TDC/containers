@@ -24,7 +24,6 @@ set(container_headers
     StableBlockVector.hpp
     StableBlockDeque.hpp
     BlockIterator.hpp
-    optionalDefinition.hpp
     mapOps.hpp
     WorkQueue.hpp
 )

@@ -102,13 +102,13 @@ class stdqFixture : public benchmark::Fixture {
         q.push(val);
     }
 
-    opt<X> pop()
+    std::optional<X> pop()
     {
         std::lock_guard<std::mutex> lk(prot);
         if (q.empty()) {
             return {};
         }
-        opt<X> v = q.front();
+        std::optional<X> v = q.front();
         q.pop();
         return v;
     }
@@ -197,7 +197,7 @@ class blfFixture : public benchmark::Fixture {
         }
     }
 
-    opt<X> pop()
+    std::optional<X> pop()
     {
         X val;
         if (q.pop(val)) {
@@ -289,10 +289,10 @@ class bspscFixture : public benchmark::Fixture {
         }
     }
 
-    opt<X> pop()
+    std::optional<X> pop()
     {
         if (q.read_available()) {
-            opt<X> ret = q.front();
+            std::optional<X> ret = q.front();
             q.pop();
             return ret;
         }
@@ -345,7 +345,7 @@ class mcFixture : public benchmark::Fixture {
 
     void push(const X& val) { q.enqueue(val); }
 
-    opt<X> pop()
+    std::optional<X> pop()
     {
         X v;
         if (q.try_dequeue(v)) {

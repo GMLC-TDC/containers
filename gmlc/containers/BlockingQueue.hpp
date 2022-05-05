@@ -7,7 +7,7 @@ All rights reserved.
 SPDX-License-Identifier: BSD-3-Clause
 */
 #pragma once
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <atomic>
@@ -191,7 +191,7 @@ contention the two locks will reduce contention in most cases.
     @return an optional object with an object of type T if available
     */
         template<typename = std::enable_if<std::is_copy_assignable<T>::value>>
-        opt<T> try_peek() const
+        std::optional<T> try_peek() const
         {
             std::lock_guard<MUTEX> lock(m_pullLock);
 
@@ -207,7 +207,7 @@ contention the two locks will reduce contention in most cases.
     @return an optional containing the value if successful the optional will be
     empty if there is no element in the queue
     */
-        opt<T> try_pop();
+        std::optional<T> try_pop();
 
         /** blocking call to wait on an object from the stack*/
         T pop()
@@ -238,7 +238,7 @@ contention the two locks will reduce contention in most cases.
 
         /** blocking call to wait on an object from the stack with timeout*/
         template<typename TIME>
-        opt<T> pop(TIME timeout)
+        std::optional<T> pop(TIME timeout)
         {
             auto val = try_pop();
             while (!val) {
@@ -337,14 +337,14 @@ any meaning depending on the number of consumers
     };
 
     template<typename T, class MUTEX, class COND>
-    opt<T> BlockingQueue<T, MUTEX, COND>::try_pop()
+    std::optional<T> BlockingQueue<T, MUTEX, COND>::try_pop()
     {
         std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
         checkPullAndSwap();
         if (pullElements.empty()) {
             return {};
         }
-        opt<T> val(std::move(pullElements.back()));  // do it this way to allow
+        std::optional<T> val(std::move(pullElements.back()));  // do it this way to allow
                                                      // movable only types
         pullElements.pop_back();
         checkPullAndSwap();

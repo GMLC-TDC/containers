@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #pragma once
 #include "MapTraits.hpp"
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <functional>
@@ -43,7 +43,7 @@ namespace containers {
         ~DualMappedPointerVector() = default;
         /** insert a new element into the vector directly from an existing
          * unique ptr*/
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             const searchType1& searchValue1,
             const searchType2& searchValue2,
             std::unique_ptr<VType>&& ptr)
@@ -63,7 +63,7 @@ namespace containers {
         }
         /** insert a new element into the vector*/
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             const searchType1& searchValue1,
             const searchType2& searchValue2,
             Us&&... data)
@@ -85,7 +85,7 @@ namespace containers {
 
         /** insert a new element into the vector*/
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             const searchType1& searchValue1,
             std::nullptr_t /*unused*/,
             Us&&... data)
@@ -103,7 +103,7 @@ namespace containers {
 
         /** insert a new element into the vector*/
         template<typename... Us>
-        opt<size_t> insert(
+        std::optional<size_t> insert(
             std::nullptr_t /*unused*/,
             const searchType2& searchValue2,
             Us&&... data)

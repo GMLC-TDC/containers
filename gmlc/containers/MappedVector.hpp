@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #pragma once
 #include "MapTraits.hpp"
 #include "StableBlockVector.hpp"
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <map>
@@ -38,7 +38,7 @@ limited to no removal since removal is a rather expensive operation
     @return an optional with the index of the value placed if it was placed
     */
         template<typename... Us>
-        opt<size_t> insert(const searchType& searchValue, Us&&... data)
+        std::optional<size_t> insert(const searchType& searchValue, Us&&... data)
         {
             auto fnd = lookup.find(searchValue);
             if (fnd != lookup.end()) {
@@ -53,7 +53,7 @@ limited to no removal since removal is a rather expensive operation
     @return an optional with the index of the value placed if it was placed
     */
         template<typename... Us>
-        opt<size_t> insert(no_search_type /*searchValue*/, Us&&... data)
+        std::optional<size_t> insert(no_search_type /*searchValue*/, Us&&... data)
         {
             auto index = dataStorage.size();
             dataStorage.emplace_back(std::forward<Us>(data)...);
