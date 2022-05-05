@@ -85,7 +85,7 @@ and deallocate methods)*/
 
                 dataptr[dataSlotFront] = a.allocate(blockSize);
                 if (dataSlotBack > dataSlotFront) {
-                    for (int jj = fsize + 1; jj < blockSize; ++jj) {
+                    for (int jj = fsize + 1; jj < static_cast<int>(blockSize); ++jj) {
                         new (&dataptr[dataSlotFront][jj]) X{init};
                     }
                 } else {
@@ -95,7 +95,7 @@ and deallocate methods)*/
                 }
                 for (int ii = dataSlotFront + 1; ii <= dataSlotBack - 1; ++ii) {
                     dataptr[ii] = a.allocate(blockSize);
-                    for (int jj = 0; jj < blockSize; ++jj) {
+                    for (int jj = 0; jj < static_cast<int>(blockSize); ++jj) {
                         new (&dataptr[ii][jj]) X{init};
                     }
                 }

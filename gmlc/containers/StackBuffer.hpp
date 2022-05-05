@@ -41,7 +41,8 @@ blocks of raw data
         int dataCount = 0;
 
       public:
-        StackBufferRaw(unsigned char* newBlock, int blockSize) :
+        StackBufferRaw() noexcept {};
+        StackBufferRaw(unsigned char* newBlock, int blockSize) noexcept:
             origin(newBlock), next(newBlock), dataSize(blockSize)
         {
             nextIndex =
@@ -135,7 +136,7 @@ blocks of raw data
      * convenience functions */
     class StackBuffer {
       public:
-        StackBuffer() noexcept : stack(nullptr, 0) {}
+        StackBuffer() noexcept : stack() {}
         explicit StackBuffer(int size) :
             data(reinterpret_cast<unsigned char*>(std::malloc(size))),
             statedSize{size}, actualCapacity{size}, stack(data, size)
