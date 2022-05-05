@@ -222,9 +222,10 @@ atomic flag indicating the queue is empty
             if (pullElements.empty()) {
                 return {};
             }
-            std::optional<X> val(std::move(pullElements.back()));  // do it this way to
-                                                         // allow moveable only
-                                                         // types
+            std::optional<X> val(
+                std::move(pullElements.back()));  // do it this way to
+                                                  // allow moveable only
+                                                  // types
             pullElements.pop_back();
             checkPullandSwap();
             return val;

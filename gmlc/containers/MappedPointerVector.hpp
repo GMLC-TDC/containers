@@ -45,7 +45,8 @@ namespace containers {
         }
         /** insert a new element into the vector*/
         template<typename... Us>
-        std::optional<size_t> insert(const searchType& searchValue, Us&&... data)
+        std::optional<size_t>
+            insert(const searchType& searchValue, Us&&... data)
         {
             auto fnd = lookup.find(searchValue);
             if (fnd != lookup.end()) {

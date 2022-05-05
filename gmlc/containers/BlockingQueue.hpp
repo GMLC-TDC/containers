@@ -344,8 +344,9 @@ any meaning depending on the number of consumers
         if (pullElements.empty()) {
             return {};
         }
-        std::optional<T> val(std::move(pullElements.back()));  // do it this way to allow
-                                                     // movable only types
+        std::optional<T> val(
+            std::move(pullElements.back()));  // do it this way to allow
+                                              // movable only types
         pullElements.pop_back();
         checkPullAndSwap();
         return val;

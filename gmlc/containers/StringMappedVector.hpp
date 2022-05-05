@@ -50,7 +50,8 @@ with limited to no removal since removal is a rather expensive operation
     @return an optional with the index of the value placed if it was placed
     */
         template<typename... Us>
-        std::optional<size_t> insert(no_search_type /*searchValue*/, Us&&... data)
+        std::optional<size_t>
+            insert(no_search_type /*searchValue*/, Us&&... data)
         {
             auto index = dataStorage.size();
             dataStorage.emplace_back(std::forward<Us>(data)...);
