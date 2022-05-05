@@ -75,11 +75,11 @@ jobs:
           containerImage: helics/buildenv:gcc8-builder
           containers.std: 17
         gcc9:
-          containerImage: gcc:9
+          containerImage: helics/buildenv:gcc9-builder
           units.std: 17
           units.options: -DCMAKE_CXX_FLAGS="-Wstrict-overflow=5"
         gcc11:
-          containerImage: gcc:11
+          containerImage: helics/buildenv:gcc11-builder
           units.std: 20
         clang8:
           containerImage: helics/buildenv:clang8-builder
