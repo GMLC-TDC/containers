@@ -79,7 +79,7 @@ or by numerical index
         {
             auto fnd = lookup1.find(searchValue1);
             if (fnd != lookup1.end()) {
-                return {};
+                return std::nullopt;
             }
             auto index = dataStorage.size();
             dataStorage.emplace_back(std::forward<Us>(data)...);
@@ -101,7 +101,7 @@ or by numerical index
         {
             auto fnd = lookup2.find(searchValue2);
             if (fnd != lookup2.end()) {
-                return {};
+                return std::nullopt;
             }
             auto index = dataStorage.size();
             dataStorage.emplace_back(std::forward<Us>(data)...);

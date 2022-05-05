@@ -220,7 +220,7 @@ atomic flag indicating the queue is empty
             std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
             checkPullandSwap();
             if (pullElements.empty()) {
-                return {};
+                return std::nullopt;
             }
             std::optional<X> val(
                 std::move(pullElements.back()));  // do it this way to
@@ -241,7 +241,7 @@ atomic flag indicating the queue is empty
             std::lock_guard<MUTEX> lock(m_pullLock);
 
             if (pullElements.empty()) {
-                return {};
+                return std::nullopt;
             }
 
             auto t = pullElements.back();
