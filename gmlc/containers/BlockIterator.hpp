@@ -36,7 +36,7 @@ namespace containers {
             static_assert(
                 std::is_same<std::remove_reference_t<decltype(*(*it))>, X>::
                     value,
-                "OUTER *it must be dereferencable to a type matching X");
+                "OUTER *it must be dereferenceable to a type matching X");
         }
 
         X& operator*() { return *ptr; }
