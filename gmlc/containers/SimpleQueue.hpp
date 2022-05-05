@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #pragma once
 
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <atomic>
@@ -215,16 +215,17 @@ atomic flag indicating the queue is empty
     @return an empty optional if there is no element otherwise the optional will
     contain a value
     */
-        opt<X> pop()
+        std::optional<X> pop()
         {
             std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
             checkPullandSwap();
             if (pullElements.empty()) {
                 return {};
             }
-            opt<X> val(std::move(pullElements.back()));  // do it this way to
-                                                         // allow moveable only
-                                                         // types
+            std::optional<X> val(
+                std::move(pullElements.back()));  // do it this way to
+                                                  // allow moveable only
+                                                  // types
             pullElements.pop_back();
             checkPullandSwap();
             return val;
@@ -235,7 +236,7 @@ atomic flag indicating the queue is empty
     @return an optional object with an object of type T if available
     */
         template<typename = std::enable_if<std::is_copy_assignable<X>::value>>
-        opt<X> peek() const
+        std::optional<X> peek() const
         {
             std::lock_guard<MUTEX> lock(m_pullLock);
 

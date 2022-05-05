@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #pragma once
 
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <algorithm>
 #include <atomic>
@@ -76,13 +76,13 @@ a single thread so it can be accessed without locks
     @return the value is returned in an optional which needs to be checked if it
     contains a value
     */
-        opt<T> try_unload()
+        std::optional<T> try_unload()
         {
             if (loaded.load(std::memory_order_acquire)) {
                 std::lock_guard<MUTEX> lock(door);
                 // can use relaxed since we are behind a mutex
                 if (loaded.load(std::memory_order_acquire)) {
-                    opt<T> val{std::move(data)};
+                    std::optional<T> val{std::move(data)};
                     loaded.store(false, std::memory_order_release);
                     condition.notify_one();
                     return val;
