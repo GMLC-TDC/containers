@@ -171,8 +171,8 @@ no erase or insert
         template<class InputIt>
         void assign(InputIt first, InputIt last)
         {
-            int ii = 0;
-            InputIt cur = first;
+            size_t ii{0};
+            InputIt cur{first};
             while (ii < csize && cur != last) {
                 operator[](ii++) = *cur;
                 ++cur;
@@ -192,8 +192,8 @@ no erase or insert
         template<class InputIt>
         void move_assign(InputIt first, InputIt last)
         {
-            int ii = 0;
-            InputIt cur = first;
+            size_t ii{0};
+            InputIt cur{first};
             while (ii < csize && cur != last) {
                 operator[](ii++) = std::move(*cur);
                 ++cur;

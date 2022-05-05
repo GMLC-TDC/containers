@@ -552,7 +552,7 @@ TEST(stableBlockVectorTest, iterator_tests)
     it = it + 2;
     EXPECT_EQ((*it).front(), 'c');
 
-    auto itc = sbd.begin();
+    auto itc = sbd2.begin();
     itc = itc + 2;
     EXPECT_EQ((*itc).front(), 'c');
 

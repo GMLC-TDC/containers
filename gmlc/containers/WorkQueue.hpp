@@ -11,7 +11,7 @@
  */
 
 /*
-Copyright (c) 2017-2020,
+Copyright (c) 2017-2022,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved.
@@ -86,7 +86,7 @@ that can be executed, functionoid, or something that implements operator()
         /** get the return value,  will block until the task is finished*/
         retType getReturnVal() const { return future_ret.get(); }
         /** update the work function
-    @param[in] the work to do*/
+    @param[in] newWork the work to do*/
         template<typename Func>
         void updateWorkFunction(Func&& newWork)  // forwarding reference
         {

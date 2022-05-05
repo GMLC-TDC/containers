@@ -307,7 +307,7 @@ or by numerical index
             }
             auto erased = localErase(dataStorage, index);
 
-            std::vector<std::string_view> ind1;
+            StableBlockVector<std::string_view, BLOCK_ORDER> ind1;
             for (auto& searchterm : lookup1) {
                 if (erased && searchterm.second > index) {
                     searchterm.second -= 1;
@@ -315,7 +315,7 @@ or by numerical index
                     ind1.push_back(searchterm.first);
                 }
             }
-            std::vector<searchType2> ind2;
+            StableBlockVector<searchType2, BLOCK_ORDER> ind2;
             for (auto& searchterm : lookup2) {
                 if (erased && searchterm.second > index) {
                     searchterm.second -= 1;
@@ -398,11 +398,6 @@ or by numerical index
         }
 
       private:
-        bool localErase(std::vector<VType>& vect, size_t index)
-        {
-            vect.erase(vect.begin() + index);
-            return true;
-        }
         bool localErase(
             StableBlockVector<VType, BLOCK_ORDER>& vect,
             size_t index)
