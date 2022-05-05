@@ -1,24 +1,24 @@
 /*
-Copyright (c) 2017-2020,
+Copyright (c) 2017-2022,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
-#include "MappedVector.hpp"
+#include "StringMappedVector.hpp"
 
 #include "gtest/gtest.h"
 #include <iostream>
 using namespace gmlc::containers;
 
 /** test basic operations */
-TEST(mapped_vector_tests, definition_tests)
+TEST(string_mapped_vector, definition_tests)
 {
-    MappedVector<double> M;
-    MappedVector<std::string> S2;
+    StringMappedVector<double> M;
+    StringMappedVector<std::string> S2;
     EXPECT_EQ(M.size(), 0u);
     EXPECT_EQ(S2.size(), 0u);
-    MappedVector<std::vector<std::string>, double> V2;
+    StringMappedVector<std::vector<std::string>> V2;
 
     // test move and assignment operators
     auto V3 = V2;
@@ -29,9 +29,9 @@ TEST(mapped_vector_tests, definition_tests)
     TV3 = TV2;
 }
 
-TEST(mapped_vector_tests, insertion_tests)
+TEST(string_mapped_vector, insertion_tests)
 {
-    MappedVector<std::vector<double>> Mvec;
+    StringMappedVector<std::vector<double>> Mvec;
     Mvec.insert("el1", 3, 1.7);
     EXPECT_EQ(Mvec.size(), 1u);
     Mvec.insert("a2", std::vector<double>(45));
@@ -68,9 +68,9 @@ TEST(mapped_vector_tests, insertion_tests)
     EXPECT_EQ(Mvecc.back().size(), 45);
 }
 
-TEST(mapped_vector_tests, insert_or_assign)
+TEST(string_mapped_vector, insert_or_assign)
 {
-    MappedVector<std::vector<double>> Mvec;
+    StringMappedVector<std::vector<double>> Mvec;
     Mvec.insert("el1", 3, 1.7);
     EXPECT_EQ(Mvec.size(), 1u);
     auto loca2 = Mvec.insert("a2", std::vector<double>(45));
@@ -107,9 +107,9 @@ TEST(mapped_vector_tests, insert_or_assign)
     EXPECT_EQ(loca3i, Mvec.size() - 1);
 }
 
-TEST(mapped_vector_tests, insertion_tests_nomap)
+TEST(string_mapped_vector, insertion_tests_nomap)
 {
-    MappedVector<std::vector<double>> Mvec;
+    StringMappedVector<std::vector<double>> Mvec;
     Mvec.insert("el1", 3, 1.7);
     EXPECT_EQ(Mvec.size(), 1u);
     Mvec.insert("a2", std::vector<double>(45));
@@ -128,9 +128,9 @@ TEST(mapped_vector_tests, insertion_tests_nomap)
     EXPECT_EQ(V4.size(), 22);
 }
 
-TEST(mapped_vector_tests, apply_tests)
+TEST(string_mapped_vector, apply_tests)
 {
-    MappedVector<double> Mvec;
+    StringMappedVector<double> Mvec;
 
     Mvec.insert("s1", 3.2);
     Mvec.insert("s2", 4.3);
@@ -156,9 +156,9 @@ TEST(mapped_vector_tests, apply_tests)
     EXPECT_DOUBLE_EQ(sum, sum1 + 4.0);
 }
 
-TEST(mapped_vector_tests, remove_tests)
+TEST(string_mapped_vector, remove_tests)
 {
-    MappedVector<double> Mvec;
+    StringMappedVector<double> Mvec;
 
     Mvec.insert("s1", 3.2);
     Mvec.insert("s2", 4.3);
@@ -169,38 +169,32 @@ TEST(mapped_vector_tests, remove_tests)
 
     Mvec.removeIndex(1);
 
-    EXPECT_EQ(Mvec.size(), 3);
-    // make sure this does nothing
-    Mvec.removeIndex(45);
-    EXPECT_EQ(Mvec.size(), 3);
     EXPECT_TRUE(Mvec.find("s2") == Mvec.end());
-    EXPECT_EQ(Mvec[1], 9.7);
+    EXPECT_EQ(Mvec[1], 4.3);
     EXPECT_EQ(*Mvec.find("s4"), 11.4);
 
-    Mvec.remove("s1");
-    EXPECT_EQ(Mvec.size(), 2);
-    EXPECT_EQ(*Mvec.find("s4"), 11.4);
-    EXPECT_EQ(Mvec[0], 9.7);
+    Mvec.removeIndex(3);
+    EXPECT_TRUE(Mvec.find("s4") == Mvec.end());
 
-    // this should do nothing
     Mvec.remove("s1");
-    EXPECT_EQ(Mvec.size(), 2);
+    EXPECT_EQ(*Mvec.find("s3"), 9.7);
+    EXPECT_EQ(Mvec[0], 3.2);
 
     auto MV2 = std::move(Mvec);
-    EXPECT_EQ(MV2.size(), 2);
+    EXPECT_EQ(MV2.size(), 3);
 
     auto MV3 = MV2;
-    EXPECT_EQ(MV2.size(), 2);
-    EXPECT_EQ(MV3.size(), 2);
+    EXPECT_EQ(MV2.size(), 3);
+    EXPECT_EQ(MV3.size(), 3);
 
     MV3.clear();
-    EXPECT_EQ(MV2.size(), 2);
+    EXPECT_EQ(MV2.size(), 3);
     EXPECT_EQ(MV3.size(), 0);
 }
 
-TEST(mapped_vector_tests, empty_find)
+TEST(string_mapped_vector, empty_find)
 {
-    MappedVector<double> Mvec;
+    StringMappedVector<double> Mvec;
     auto res = Mvec.find("string1");
     EXPECT_EQ(res, Mvec.end());
 }

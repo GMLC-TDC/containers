@@ -435,7 +435,7 @@ TEST(stableBlockDequeTest, copy_assign)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 100; ++ii) {
+    for (ii = 0; ii < 100; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[ii]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -456,7 +456,7 @@ TEST(stableBlockDequeTest, copy_assign_from_empty)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 100; ++ii) {
+    for (ii = 0; ii < 100; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[ii]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -477,7 +477,7 @@ TEST(stableBlockDequeTest, copy_assign_to_bigger)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 100; ++ii) {
+    for (ii = 0; ii < 100; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[ii]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -502,12 +502,12 @@ TEST(stableBlockDequeTest, clear_and_fill)
 TEST(stableBlockDequeTest, fill_large_back)
 {
     StableBlockDeque<size_t, 4> sbd(200, 999999999UL);
-    for (int ii = 0; ii < 10000; ++ii) {
+    for (size_t ii = 0; ii < 10000; ++ii) {
         sbd.push_back(ii);
     }
 
     EXPECT_EQ(sbd.size(), 10200);
-    for (int ii = 0; ii < 10000; ++ii) {
+    for (size_t ii = 0; ii < 10000; ++ii) {
         sbd.pop_back();
     }
     EXPECT_EQ(sbd.size(), 200);
@@ -516,12 +516,12 @@ TEST(stableBlockDequeTest, fill_large_back)
 TEST(stableBlockDequeTest, fill_large_front)
 {
     StableBlockDeque<size_t, 4> sbd(200, 999999999UL);
-    for (int ii = 0; ii < 10000; ++ii) {
+    for (size_t ii = 0; ii < 10000; ++ii) {
         sbd.push_front(ii);
     }
 
     EXPECT_EQ(sbd.size(), 10200);
-    for (int ii = 0; ii < 10000; ++ii) {
+    for (size_t ii = 0; ii < 10000; ++ii) {
         sbd.pop_front();
     }
     EXPECT_EQ(sbd.size(), 200);
@@ -538,11 +538,13 @@ TEST(stableBlockDequeTest, iterators)
         size_t cnt = 0;
         for (auto& el : sbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
         cnt = 0;
         for (const auto& el : csbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
     }

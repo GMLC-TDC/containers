@@ -274,8 +274,8 @@ TEST(stableBlockVectorTest, test_back)
 
 TEST(stableBlockVectorTest, constructor1)
 {
-    StableBlockVector<std::string, 7> sbv{15,
-                                          "this is an exciting long string"};
+    StableBlockVector<std::string, 7> sbv{
+        15, "this is an exciting long string"};
     EXPECT_EQ(sbv.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii) {
         EXPECT_EQ(sbv[ii], "this is an exciting long string");
@@ -291,8 +291,8 @@ TEST(stableBlockVectorTest, constructor0)
 
 TEST(stableBlockVectorTest, copy_constructor)
 {
-    StableBlockVector<std::string, 7> sbv{15,
-                                          "this is an exciting long string"};
+    StableBlockVector<std::string, 7> sbv{
+        15, "this is an exciting long string"};
     auto sbv2 = sbv;
     EXPECT_EQ(sbv2.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii) {
@@ -321,8 +321,8 @@ TEST(stableBlockVectorTest, copy_construct_empty)
 
 TEST(stableBlockVectorTest, move_constructor)
 {
-    StableBlockVector<std::string, 7> sbv{15,
-                                          "this is an exciting long string"};
+    StableBlockVector<std::string, 7> sbv{
+        15, "this is an exciting long string"};
     auto sbv2 = std::move(sbv);
     EXPECT_EQ(sbv2.size(), 15);
     for (size_t ii = 0; ii < 15; ++ii) {
@@ -406,7 +406,7 @@ TEST(stableBlockVectorTest, copy_assign)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
+    for (ii = 0; ii < 200; ++ii) {
         EXPECT_EQ(sbd2.front(), 0U);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -426,7 +426,7 @@ TEST(stableBlockVectorTest, copy_assign_from_empty)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
+    for (ii = 0; ii < 200; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[0]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -446,7 +446,7 @@ TEST(stableBlockVectorTest, copy_assign_to_bigger)
     sbd2 = sbd;
 
     EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
+    for (ii = 0; ii < 200; ++ii) {
         EXPECT_EQ(sbd2.front(), sbd[0]);
         EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
 
@@ -491,11 +491,13 @@ TEST(stableBlockVectorTest, iterators)
         size_t cnt = 0;
         for (auto& el : sbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
         cnt = 0;
         for (const auto& el : csbd) {
             ++cnt;
+            (void)(el);
         }
         EXPECT_EQ(cnt, ii + 1);
     }
@@ -550,7 +552,7 @@ TEST(stableBlockVectorTest, iterator_tests)
     it = it + 2;
     EXPECT_EQ((*it).front(), 'c');
 
-    auto itc = sbd.begin();
+    auto itc = sbd2.begin();
     itc = itc + 2;
     EXPECT_EQ((*itc).front(), 'c');
 
