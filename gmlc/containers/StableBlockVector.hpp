@@ -64,7 +64,8 @@ no erase or insert
                 for (int ii = 0; ii <= dataSlotIndex; ++ii) {
                     dataptr[ii] = a.allocate(blockSize);
                     if (ii < dataSlotIndex) {
-                        for (int jj = 0; jj < static_cast<int>(blockSize); ++jj) {
+                        for (int jj = 0; jj < static_cast<int>(blockSize);
+                             ++jj) {
                             new (&dataptr[ii][jj]) X{init};
                         }
                     } else {
