@@ -42,7 +42,7 @@ blocks of raw data
 
       public:
         StackBufferRaw() noexcept {};
-        StackBufferRaw(unsigned char* newBlock, int blockSize) noexcept:
+        StackBufferRaw(unsigned char* newBlock, int blockSize) noexcept :
             origin(newBlock), next(newBlock), dataSize(blockSize)
         {
             nextIndex =
