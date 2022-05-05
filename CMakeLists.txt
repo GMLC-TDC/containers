@@ -1,11 +1,13 @@
+# ~~~
+# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore
+# National Security, LLC; Alliance for Sustainable Energy, LLC.
+# See the top-level NOTICE for additional details.
+# All rights reserved.
 #
-# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore National
-# Security, LLC; Alliance for Sustainable Energy, LLC All rights reserved. See LICENSE
-# file and DISCLAIMER for more details.
-#
+# SPDX-License-Identifier: BSD-3-Clause
+# ~~~
 
-cmake_minimum_required(VERSION 3.11)
-cmake_policy(VERSION 3.11)
+cmake_minimum_required(VERSION 3.10...3.22)
 
 project(GMLC_CONTAINERS VERSION 0.5)
 

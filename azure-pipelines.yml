@@ -11,7 +11,7 @@ pr:
   - master
 
 variables:
-  containers.std: 14
+  containers.std: 17
   containers.build_type: Debug
   containers.options: -DCONTAINERS_ENABLE_TESTS=ON -DCONTAINERS_ENABLE_ERROR_ON_WARNINGS=ON
   CMAKE_BUILD_PARALLEL_LEVEL: 4
@@ -19,9 +19,9 @@ variables:
 jobs:
   - job: ClangTidy
     variables:
-      CXX_FLAGS: "-Werror -Wcast-align -Wfloat-equal -Wimplicit-atomic-properties -Wmissing-declarations -Woverlength-strings -Wshadow -Wstrict-selector-match -Wundeclared-selector -Wunreachable-code -std=c++11"
+      CXX_FLAGS: "-Werror -Wcast-align -Wfloat-equal -Wimplicit-atomic-properties -Wmissing-declarations -Woverlength-strings -Wshadow -Wstrict-selector-match -Wundeclared-selector -Wunreachable-code -std=c++17"
       containers.options: -DCONTAINERS_CLANG_TIDY=ON -DCONTAINERS_CLANG_TIDY_OPTIONS="-fix"
-      containers.std: 14
+      containers.std: 17
       CMAKE_BUILD_PARALLEL_LEVEL: 1
     pool:
       vmImage: "ubuntu-latest"
@@ -53,12 +53,12 @@ jobs:
         macOS11:
           vmImage: "macOS-latest"
         Windows17:
-          vmImage: "vs2017-win2016"
-          containers.std: 17
+          vmImage: 'windows-2019'
+          containers.std: 20
         Windows11:
-          vmImage: "vs2017-win2016"
+          vmImage: 'windows-2019'
         Windowslatest:
-          vmImage: "windows-2019"
+          vmImage: 'windows-2022'
           containers.std: 17
     pool:
       vmImage: $(vmImage)
@@ -74,8 +74,13 @@ jobs:
         gcc8:
           containerImage: helics/buildenv:gcc8-builder
           containers.std: 17
-        clang3.6:
-          containerImage: helics/buildenv:clang-3.6_boost-1.58.0
+        gcc9:
+          containerImage: gcc:9
+          units.std: 17
+          units.options: -DCMAKE_CXX_FLAGS="-Wstrict-overflow=5"
+        gcc11:
+          containerImage: gcc:11
+          units.std: 20
         clang8:
           containerImage: helics/buildenv:clang8-builder
     container: $[ variables['containerImage'] ]
