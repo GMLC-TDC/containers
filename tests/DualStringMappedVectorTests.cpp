@@ -108,7 +108,7 @@ TEST(dual_string_mapped_vector, assign_tests2)
 
 TEST(dual_string_mapped_vector, additional_searchTerm_tests)
 {
-    DualStringMappedVector<double,  int64_t> Mvec;
+    DualStringMappedVector<double, int64_t> Mvec;
 
     Mvec.insert("s1", 64, 3.2);
     Mvec.insert("s2", 63, 4.3);

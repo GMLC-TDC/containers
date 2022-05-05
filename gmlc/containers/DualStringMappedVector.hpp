@@ -13,12 +13,12 @@ SPDX-License-Identifier: BSD-3-Clause
 #include "optionalDefinition.hpp"
 
 #include <algorithm>
-#include <string>
 #include <map>
+#include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
-#include <string_view>
 
 namespace gmlc {
 namespace containers {
@@ -26,10 +26,7 @@ namespace containers {
 The result object can be indexed multiple ways both by searching using indices
 or by numerical index
 */
-    template<
-        class VType,
-        class searchType2,
-        int BLOCK_ORDER = 5>
+    template<class VType, class searchType2, int BLOCK_ORDER = 5>
     class DualStringMappedVector {
       public:
         static_assert(
@@ -197,7 +194,7 @@ or by numerical index
         {
             if (index < dataStorage.size()) {
                 names.emplace_back(searchValue);
-                auto res=lookup1.emplace(names.back(), index);
+                auto res = lookup1.emplace(names.back(), index);
                 return res.second;
             }
             return false;
@@ -211,7 +208,7 @@ or by numerical index
             auto fnd = lookup1.find(existingValue);
             if (fnd != lookup1.end()) {
                 names.emplace_back(searchValue);
-                auto res=lookup1.emplace(names.back(), fnd->second);
+                auto res = lookup1.emplace(names.back(), fnd->second);
                 return res.second;
             }
             return false;
@@ -241,7 +238,9 @@ or by numerical index
         }
 
         /** add an additional index term for searching*/
-        auto addSearchTerm(const searchType2& searchValue, std::string_view existingValue)
+        auto addSearchTerm(
+            const searchType2& searchValue,
+            std::string_view existingValue)
         {
             auto fnd = lookup1.find(existingValue);
             if (fnd != lookup1.end()) {
@@ -259,7 +258,7 @@ or by numerical index
             auto fnd = lookup2.find(existingValue);
             if (fnd != lookup2.end()) {
                 names.emplace_back(searchValue);
-                auto res=lookup1.emplace(names.back(), fnd->second);
+                auto res = lookup1.emplace(names.back(), fnd->second);
                 return res.second;
             }
             return false;
@@ -411,11 +410,11 @@ or by numerical index
 
       private:
         /// primary storage for data
-            StableBlockVector<VType, BLOCK_ORDER> dataStorage;  
+        StableBlockVector<VType, BLOCK_ORDER> dataStorage;
         /// map to lookup the index
-            std::unordered_map<std::string_view, size_t> lookup1;  
-            /// storage for string information
-            StableBlockVector<std::string, BLOCK_ORDER> names;
+        std::unordered_map<std::string_view, size_t> lookup1;
+        /// storage for string information
+        StableBlockVector<std::string, BLOCK_ORDER> names;
         std::conditional_t<
             is_easily_hashable<searchType2>::value,
             std::unordered_map<searchType2, size_t>,

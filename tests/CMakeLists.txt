@@ -12,43 +12,39 @@ include(AddGoogletest)
 
 set(CONTAINERS_TESTS
     StackBufferTests
-	CircularBufferTests
-	AirLockTests
-	MappedVectorTests
+    CircularBufferTests
+    AirLockTests
+    MappedVectorTests
     StringMappedVectorTests
-	MappedVectorTestsStable
-	DualMappedVectorTests
+    MappedVectorTestsStable
+    DualMappedVectorTests
     DualStringMappedVectorTests
-	DualMappedVectorTestsStable
-	MappedPointerVectorTests
-	DualMappedPointerVectorTests
-	BlockingQueueTests
-	SimpleQueueTests
-	PriorityBlockingQueueTests
-	StableBlockDequeTests
-	StableBlockVectorTests
-	WorkQueueTests
-    )
+    DualMappedVectorTestsStable
+    MappedPointerVectorTests
+    DualMappedPointerVectorTests
+    BlockingQueueTests
+    SimpleQueueTests
+    PriorityBlockingQueueTests
+    StableBlockDequeTests
+    StableBlockVectorTests
+    WorkQueueTests
+)
 
 # Only affects current directory, so safe
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 foreach(T ${CONTAINERS_TESTS})
 
-    add_executable(${T} ${T}.cpp )
+    add_executable(${T} ${T}.cpp)
     target_link_libraries(${T} PUBLIC containers)
     add_gtest(${T})
-	set_target_properties(${T} PROPERTIES FOLDER tests)
-   
+    set_target_properties(${T} PROPERTIES FOLDER tests)
+
 endforeach()
 
 if(CMAKE_BUILD_TYPE STREQUAL Coverage)
     include(CodeCoverage)
     setup_target_for_coverage(
-        NAME CONTAINERS_coverage
-        EXECUTABLE ctest
-        DEPENDENCIES
-          ${CONTAINERS_TESTS}
-          )
+        NAME CONTAINERS_coverage EXECUTABLE ctest DEPENDENCIES ${CONTAINERS_TESTS}
+    )
 endif()
-

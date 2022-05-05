@@ -13,20 +13,18 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include <algorithm>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <string_view>
 
 namespace gmlc {
 namespace containers {
-    /** class combining a vector of objects with a string map to search them by a
-separate index term the main use case is a bunch of inserts then searching with
-limited to no removal since removal is a rather expensive operation
+    /** class combining a vector of objects with a string map to search them by
+a separate index term the main use case is a bunch of inserts then searching
+with limited to no removal since removal is a rather expensive operation
 */
-    template<
-        class VType,
-        int BLOCK_ORDER = 5>
+    template<class VType, int BLOCK_ORDER = 5>
     class StringMappedVector {
       public:
         /** insert an element into the mapped vector
@@ -187,7 +185,6 @@ limited to no removal since removal is a rather expensive operation
         }
 
       private:
-        
         bool localErase(
             StableBlockVector<VType, BLOCK_ORDER>& vect,
             size_t index)
