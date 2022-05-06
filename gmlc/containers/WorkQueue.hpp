@@ -317,26 +317,21 @@ value)
             if (!halt.load()) {
                 halt.store(true);
                 lv.unlock();
-                std::cout << "halting" << std::endl;
                 auto dummyWork = std::make_shared<NullWorkBlock>();
 
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
-                std::cout << "cleared" << std::endl;
+
                 queueCondition.notify_all();
-                std::cout << "notify1" << std::endl;
                 for (int ii = 0; ii < numWorkers; ++ii) {
                     addWorkBlock(dummyWork, WorkPriority::required);
                 }
-                std::cout << "added" << std::endl;
                 queueCondition.notify_all();
             }
-            std::cout << "joining" << std::endl;
             for (auto& thrd : threadpool) {
                 if (thrd.joinable()) {
                     thrd.join();
-                    std::cout << "joined" << std::endl;
                 }
             }
         }
@@ -476,22 +471,18 @@ value)
                 if (isEmpty()) {
                     std::unique_lock<std::mutex> lv(queueLock);
                     if (halt.load()) {
-                        std::cout << std::this_thread::get_id << " halting\n";
                         return;
                     }
-                    std::cout << std::this_thread::get_id << " waiting\n";
                     queueCondition.wait_for(
                         lv, std::chrono::milliseconds(5000));
                     if (halt) {
                         return;
                     }
-                    std::cout << std::this_thread::get_id << " halting\n";
                 }
                 auto wb =
                     getWorkBlock();  // this will return empty if it is spurious
                                      // and also sync the size if needed
                 if ((wb) && (!wb->isFinished())) {
-                    std::cout << std::this_thread::get_id << " executing\n";
                     wb->execute();
                 }
             }
