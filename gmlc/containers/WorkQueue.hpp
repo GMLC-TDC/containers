@@ -413,9 +413,8 @@ value)
     */
         bool isEmpty() const
         {
-            return (
-                (workToDoHigh.empty()) && (workToDoMed.empty()) &&
-                (workToDoLow.empty()));
+            return (workToDoHigh.empty() && workToDoMed.empty() &&
+                workToDoLow.empty());
         };
         /** get the number of remaining blocks
      @details this function may not be that useful since it is multithreaded and
@@ -481,7 +480,7 @@ value)
                         return;
                     }
                     std::cout << std::this_thread::get_id << " waiting\n";
-                    queueCondition.wait(lv);
+                    queueCondition.wait_for(lv,std::chrono::milliseconds(5000));
                     if (halt) {
                         return;
                     }
