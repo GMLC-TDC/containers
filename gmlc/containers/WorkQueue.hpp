@@ -28,6 +28,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <thread>
 #include <utility>
 #include <vector>
+#include <iostream>
 
 namespace gmlc {
 namespace containers {
@@ -274,6 +275,7 @@ the priority ratio
                   //!< by
             //!< the priority ratio
             high,  //!< do the work as soon as possible
+            required, //!< high priority work job that always is scheduled
         };
 
         /** construct a queue
@@ -314,12 +316,13 @@ value)
         {
             bool exp = false;
             if (halt.compare_exchange_strong(exp, true)) {
+                std::cout << "halting" << std::endl;
                 auto dummyWork = std::make_shared<NullWorkBlock>();
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
                 for (int ii = 0; ii < numWorkers; ++ii) {
-                    addWorkBlock(dummyWork, WorkPriority::high);
+                    addWorkBlock(dummyWork, WorkPriority::required);
                 }
                 queueCondition.notify_all();
             }
@@ -332,18 +335,20 @@ value)
 
         /** add a block of work to the WorkQueue
     @param[in] newWork  the block of new work for the queue
+    @param[in] priority  
     */
         void addWorkBlock(
             std::shared_ptr<BasicWorkBlock> newWork,
             WorkPriority priority = WorkPriority::medium)
         {
-            if ((!newWork) || (newWork->isFinished())) {
+            if ((!newWork) || (newWork->isFinished() && priority!=WorkPriority::required)) {
                 return;
             }
             if (numWorkers > 0) {
                 size_t ccount;
                 switch (priority) {
                     case WorkPriority::high:
+                    case WorkPriority::required:
                         ccount = workToDoHigh.size();
                         workToDoHigh.push(std::move(newWork));
                         break;
@@ -374,6 +379,7 @@ value)
             if (numWorkers > 0) {
                 switch (priority) {
                     case WorkPriority::high:
+                    case WorkPriority::required:
                         workToDoHigh.pushVector(newWork);
                         break;
                     case WorkPriority::medium:
