@@ -9,13 +9,13 @@
 
 cmake_minimum_required(VERSION 3.10...3.22)
 
-project(GMLC_CONTAINERS VERSION 0.5)
+project(GMLC_CONTAINERS VERSION 0.4.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 # -----------------------------------------------------------------------------
 set(GMLC_CONTAINERS_VERSION_BUILD)
-set(GMLC_CONTAINERS_DATE "2022-05-08")
+set(GMLC_CONTAINERS_DATE "2022-05-06")
 
 set(GMLC_CONTAINERS_VERSION_STRING
     "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})"
@@ -75,7 +75,7 @@ endif()
 
 option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
 # Add boost to test boost::optional if available
-find_package(Boost 1.58)
+find_package(Boost 1.65)
 if(Boost_FOUND)
     target_link_libraries(containers_base INTERFACE Boost::boost)
 
