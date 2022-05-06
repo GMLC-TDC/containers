@@ -85,9 +85,8 @@ atomic flag indicating the queue is empty
     have any meaning depending on the number of consumers
     */
         bool empty() const
-        {
-            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
-            return pullElements.empty();
+        { 
+            return queueEmptyFlag.load();
         }
         /** get the current size of the queue*/
         size_t size() const
@@ -103,7 +102,7 @@ atomic flag indicating the queue is empty
             std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
             pullElements.clear();
             pushElements.clear();
-            queueEmptyFlag = true;
+            queueEmptyFlag.store(true);
         }
         /** set the capacity of the queue
     actually double the requested the size will be reserved due to the use of

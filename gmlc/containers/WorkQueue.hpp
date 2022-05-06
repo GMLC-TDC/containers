@@ -475,6 +475,10 @@ value)
                 if (isEmpty()) {
                     // std::cout << std::this_thread::get_id << " sleeping\n";
                     lv.lock();
+                    if (halt.load()) {
+                        lv.unlock();
+                        break;
+                    }
                     queueCondition.wait(lv);
                     lv.unlock();
                     // std::cout << std::this_thread::get_id << " awoken\n";
