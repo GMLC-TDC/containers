@@ -303,7 +303,7 @@ TEST(stableBlockDequeTest, test_front_back)
 
 TEST(stableBlockDequeTest, move_construct)
 {
-    auto sbd= new StableBlockDeque<size_t, 4>(200);
+    auto sbd = new StableBlockDeque<size_t, 4>(200);
     size_t ii = 0;
     for (auto& val : *sbd) {
         val = ii++;
