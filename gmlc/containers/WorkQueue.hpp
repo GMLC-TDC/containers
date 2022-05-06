@@ -321,14 +321,20 @@ value)
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
+                std::cout << "cleared" << std::endl;
+                queueCondition.notify_all();
+                std::cout << "notify1" << std::endl;
                 for (int ii = 0; ii < numWorkers; ++ii) {
                     addWorkBlock(dummyWork, WorkPriority::required);
                 }
+                std::cout << "added" << std::endl;
                 queueCondition.notify_all();
             }
+            std::cout << "joining" << std::endl;
             for (auto& thrd : threadpool) {
                 if (thrd.joinable()) {
                     thrd.join();
+                    std::cout << "joined" << std::endl;
                 }
             }
         }
@@ -465,7 +471,7 @@ value)
         void workerLoop()
         {
             std::unique_lock<std::mutex> lv(queueLock, std::defer_lock);
-            while (!halt) {
+            while (!halt.load()) {
                 if (isEmpty()) {
                     // std::cout << std::this_thread::get_id << " sleeping\n";
                     lv.lock();
