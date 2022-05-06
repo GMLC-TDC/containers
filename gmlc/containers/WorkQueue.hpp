@@ -319,7 +319,7 @@ value)
                 lv.unlock();
                 std::cout << "halting" << std::endl;
                 auto dummyWork = std::make_shared<NullWorkBlock>();
-                
+
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
