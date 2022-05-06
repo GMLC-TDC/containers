@@ -318,6 +318,7 @@ value)
             if (halt.compare_exchange_strong(exp, true)) {
                 std::cout << "halting" << std::endl;
                 auto dummyWork = std::make_shared<NullWorkBlock>();
+                
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
@@ -473,25 +474,26 @@ value)
             std::unique_lock<std::mutex> lv(queueLock, std::defer_lock);
             while (!halt.load()) {
                 if (isEmpty()) {
-                    // std::cout << std::this_thread::get_id << " sleeping\n";
+                    std::cout << std::this_thread::get_id << " sleeping\n";
                     lv.lock();
+                    std::cout << std::this_thread::get_id << " gotlock\n";
                     if (halt.load()) {
                         lv.unlock();
                         break;
                     }
                     queueCondition.wait(lv);
                     lv.unlock();
-                    // std::cout << std::this_thread::get_id << " awoken\n";
+                    std::cout << std::this_thread::get_id << " awoken\n";
                 }
                 auto wb =
                     getWorkBlock();  // this will return empty if it is spurious
                                      // and also sync the size if needed
                 if ((wb) && (!wb->isFinished())) {
+                    std::cout << std::this_thread::get_id << " executing\n";
                     wb->execute();
-                    //  std::cout << std::this_thread::get_id << " executing\n";
                 }
             }
-            // std::cout << std::this_thread::get_id << " halting\n";
+             std::cout << std::this_thread::get_id << " halting\n";
         }
 
       private:
