@@ -307,15 +307,16 @@ value)
         }
 
         /** get the number of workers
-    static so it can be called before instance is valid
     @return int with the current worker count
     */
         int getWorkerCount() { return (!halt) ? numWorkers : 0; }
         /** destroy the WorkQueue*/
         void closeWorkerQueue()
         {
-            bool exp = false;
-            if (halt.compare_exchange_strong(exp, true)) {
+            std::unique_lock<std::mutex> lv(queueLock);
+            if (!halt.load()) {
+                halt.store(true);
+                lv.unlock();
                 std::cout << "halting" << std::endl;
                 auto dummyWork = std::make_shared<NullWorkBlock>();
                 
@@ -471,19 +472,20 @@ value)
         /** the main worker loop*/
         void workerLoop()
         {
-            std::unique_lock<std::mutex> lv(queueLock, std::defer_lock);
-            while (!halt.load()) {
+            
+            while (true) {
                 if (isEmpty()) {
-                    std::cout << std::this_thread::get_id << " sleeping\n";
-                    lv.lock();
-                    std::cout << std::this_thread::get_id << " gotlock\n";
+                    std::unique_lock<std::mutex> lv(queueLock);
                     if (halt.load()) {
-                        lv.unlock();
-                        break;
+                        std::cout << std::this_thread::get_id << " halting\n";
+                        return;
                     }
+                    std::cout << std::this_thread::get_id << " waiting\n";
                     queueCondition.wait(lv);
-                    lv.unlock();
-                    std::cout << std::this_thread::get_id << " awoken\n";
+                    if (halt) {
+                        return;
+                    }
+                    std::cout << std::this_thread::get_id << " halting\n";
                 }
                 auto wb =
                     getWorkBlock();  // this will return empty if it is spurious
@@ -493,7 +495,6 @@ value)
                     wb->execute();
                 }
             }
-             std::cout << std::this_thread::get_id << " halting\n";
         }
 
       private:
@@ -517,11 +518,10 @@ value)
         std::atomic<int> MedCounter{
             0};  //!< the counter to use low instead of Med
         std::vector<std::thread> threadpool;  //!< the threads
-        std::mutex queueLock;  //!< mutex for condition variable
+        std::mutex queueLock;  //!< mutex for condition variable and halt
         std::condition_variable queueCondition;  //!< condition variable for
                                                  //!< waking the threads
-        std::atomic<bool> halt{
-            false};  //!< flag indicating the threads should halt
+        std::atomic<bool> halt{false};  //!< flag indicating the threads should halt
     };
 
 }  // namespace containers

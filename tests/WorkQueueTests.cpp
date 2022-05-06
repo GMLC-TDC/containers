@@ -55,6 +55,7 @@ TEST(work_queue, WorkQueue_test1)
     }
     std::cout << "loc5" << std::endl;
     wq2.addWorkBlock(bblocks);
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
     std::cout << "loc6" << std::endl;
     std::vector<decltype(fk())> res(10);
     for (size_t kk = 0; kk < 10; ++kk) {
