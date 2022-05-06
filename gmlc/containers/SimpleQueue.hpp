@@ -84,10 +84,7 @@ atomic flag indicating the queue is empty
     because this is meant for multi threaded applications this may or may not
     have any meaning depending on the number of consumers
     */
-        bool empty() const
-        { 
-            return queueEmptyFlag.load();
-        }
+        bool empty() const { return queueEmptyFlag.load(); }
         /** get the current size of the queue*/
         size_t size() const
         {
