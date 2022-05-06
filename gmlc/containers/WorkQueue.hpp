@@ -318,7 +318,7 @@ value)
             if (halt.compare_exchange_strong(exp, true)) {
                 std::cout << "halting" << std::endl;
                 auto dummyWork = std::make_shared<NullWorkBlock>();
-                
+
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
@@ -493,7 +493,7 @@ value)
                     wb->execute();
                 }
             }
-             std::cout << std::this_thread::get_id << " halting\n";
+            std::cout << std::this_thread::get_id << " halting\n";
         }
 
       private:
