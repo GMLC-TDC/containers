@@ -1,6 +1,6 @@
 /*
  * LLNS Copyright Start
- * Copyright (c) 2014-2018, Lawrence Livermore National Security
+ * Copyright (c) 2014-2022, Lawrence Livermore National Security
  * This work was performed under the auspices of the U.S. Department
  * of Energy by Lawrence Livermore National Laboratory in part under
  * Contract W-7405-Eng-48 and in part under Contract DE-AC52-07NA27344.
@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "optionalDefinition.hpp"
+#include <optional>
 
 #include <map>
 #include <unordered_map>
@@ -31,7 +31,7 @@ std::optional<X2> mapFind(const std::map<X1, X2>& mapS, const X1& val)
     if (map_it != mapS.end()) {
         return map_it->second;
     }
-    return {};
+    return std::nullopt;
 }
 
 template<class X1, class X2>
@@ -51,5 +51,5 @@ std::optional<X2> mapFind(const std::unordered_map<X1, X2>& mapS, const X1& val)
     if (map_it != mapS.end()) {
         return map_it->second;
     }
-    return {};
+    return std::nullopt;
 }

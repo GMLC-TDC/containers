@@ -62,7 +62,8 @@ blocks of raw data
         int getCurrentCount() const { return dataCount; }
         bool isSpaceAvailable(int sz) const
         {
-            return (dataSize - (next - origin) - (dataCount + 1) * diSize) >=
+            return (dataSize - (next - origin) -
+                    (static_cast<std::ptrdiff_t>(dataCount) + 1) * diSize) >=
                 static_cast<ptrdiff_t>(sz);
         }
         bool empty() const { return (dataCount == 0); }
@@ -107,6 +108,9 @@ blocks of raw data
                             origin + dataSize - diSize);
                     }
                     return blkSize;
+                } else {
+                    // return a negagtive value with the space required if maxSize is too small
+                    return -blkSize;
                 }
             }
             return 0;
@@ -282,7 +286,8 @@ blocks of raw data
         }
 
         int nextDataSize() const { return stack.nextDataSize(); }
-
+        /** get the next block available 
+        @return the size if filled, 0 if no blocks available and -nextSize if maxSize< required size*/
         int pop(unsigned char* block, int maxSize)
         {
             return stack.pop(block, maxSize);
@@ -322,9 +327,9 @@ blocks of raw data
         }
 
       private:
-        unsigned char* data = nullptr;  //!< pointer to the memory data block
-        int statedSize = 0;  //!< the stated size of the memory block
-        int actualCapacity = 0;  //!< the actual size of the memory block
+        unsigned char* data{nullptr};  //!< pointer to the memory data block
+        int statedSize{0};  //!< the stated size of the memory block
+        int actualCapacity{0};  //!< the actual size of the memory block
         StackBufferRaw stack;  //!< The actual stack controller
     };
 

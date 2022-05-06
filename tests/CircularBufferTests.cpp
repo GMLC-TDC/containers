@@ -14,7 +14,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 using namespace gmlc::containers;
 
-TEST(CircBuff_tests, test_circularbuffraw_simple)
+TEST(CircBuff, circularbuffraw_simple)
 {
     unsigned char* block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
@@ -31,7 +31,8 @@ TEST(CircBuff_tests, test_circularbuffraw_simple)
     EXPECT_FALSE(buf.empty());
     // this is too small a space
     auto res0 = buf.pop(testData.data(), 10);
-    EXPECT_EQ(res0, 0);
+    EXPECT_LT(res0, 0);
+    EXPECT_EQ(res0, -200);
     res = buf.pop(testData.data(), 1024);
     EXPECT_EQ(res, 200);
     EXPECT_EQ(testData[0], 'a');
@@ -44,7 +45,7 @@ TEST(CircBuff_tests, test_circularbuffraw_simple)
     delete[] block;
 }
 
-TEST(CircBuff_tests, test_circularbuffraw_loop_around)
+TEST(CircBuff, circularbuffraw_loop_around)
 {
     unsigned char* block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
@@ -72,7 +73,7 @@ TEST(CircBuff_tests, test_circularbuffraw_loop_around)
     delete[] block;
 }
 
-TEST(CircBuff_tests, test_circularbuffraw_loop_around_repeat)
+TEST(CircBuff, circularbuffraw_loop_around_repeat)
 {
     unsigned char* block =
         new unsigned char[1520];  // 3x504+4  otherwise there is a potential
@@ -98,7 +99,7 @@ TEST(CircBuff_tests, test_circularbuffraw_loop_around_repeat)
     delete[] block;
 }
 
-TEST(CircBuff_tests, test_circularbuff_simple)
+TEST(CircBuff, circularbuff_simple)
 {
     CircularBuffer buf(1024);
 
@@ -121,7 +122,7 @@ TEST(CircBuff_tests, test_circularbuff_simple)
     EXPECT_TRUE(buf.empty());
 }
 
-TEST(CircBuff_tests, test_circularbuff_loop_around)
+TEST(CircBuff, circularbuff_loop_around)
 {
     CircularBuffer buf(1024);
 
@@ -147,7 +148,7 @@ TEST(CircBuff_tests, test_circularbuff_loop_around)
     EXPECT_TRUE(buf.empty());
 }
 
-TEST(CircBuff_tests, test_circularbuff_loop_around_repeat)
+TEST(CircBuff, circularbuff_loop_around_repeat)
 {
     CircularBuffer buf(1520);
 
@@ -165,7 +166,7 @@ TEST(CircBuff_tests, test_circularbuff_loop_around_repeat)
     }
 }
 
-TEST(CircBuff_tests, test_circularbuff_simple_move)
+TEST(CircBuff, circularbuff_simple_move)
 {
     CircularBuffer buf(1024);
 
@@ -190,7 +191,7 @@ TEST(CircBuff_tests, test_circularbuff_simple_move)
     EXPECT_TRUE(buf2.empty());
 }
 
-TEST(CircBuff_tests, test_circularbuff_simple_copy)
+TEST(CircBuff, circularbuff_simple_copy)
 {
     CircularBuffer buf(1024);
 
@@ -225,7 +226,7 @@ TEST(CircBuff_tests, test_circularbuff_simple_copy)
     EXPECT_EQ(testData[200], 0);
 }
 
-TEST(CircBuff_tests, test_circularbuff_simple_move_assignment)
+TEST(CircBuff, circularbuff_simple_move_assignment)
 {
     CircularBuffer buf(1024);
 
@@ -254,7 +255,7 @@ TEST(CircBuff_tests, test_circularbuff_simple_move_assignment)
     EXPECT_TRUE(buf2.empty());
 }
 
-TEST(CircBuff_tests, test_circularbuff_simple_copy_assignment)
+TEST(CircBuff, circularbuff_simple_copy_assignment)
 {
     CircularBuffer buf(1024);
 
@@ -287,7 +288,7 @@ TEST(CircBuff_tests, test_circularbuff_simple_copy_assignment)
     EXPECT_FALSE(buf.empty());
 }
 
-TEST(CircBuff_tests, test_circularbuff_resize)
+TEST(CircBuff, circularbuff_resize)
 {
     CircularBuffer buf(1024);
 
@@ -307,7 +308,7 @@ TEST(CircBuff_tests, test_circularbuff_resize)
     EXPECT_EQ(buf.capacity(), 2048);
 }
 
-TEST(CircBuff_tests, test_circularbuff_resize_smaller)
+TEST(CircBuff, circularbuff_resize_smaller)
 {
     CircularBuffer buf(1024);
 
@@ -327,7 +328,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_smaller)
     EXPECT_EQ(buf.capacity(), 450);
 }
 
-TEST(CircBuff_tests, test_circularbuff_resize_bigger_wrap)
+TEST(CircBuff, circularbuff_resize_bigger_wrap)
 {
     CircularBuffer buf(1024);
 
@@ -356,7 +357,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_bigger_wrap)
     EXPECT_EQ(buf.capacity(), 2048);
 }
 
-TEST(CircBuff_tests, test_circularbuff_resize_smaller_wrap)
+TEST(CircBuff, circularbuff_resize_smaller_wrap)
 {
     CircularBuffer buf(1024);
 
@@ -383,7 +384,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_smaller_wrap)
     EXPECT_EQ(buf.capacity(), 620);
 }
 
-TEST(CircBuff_tests, test_circularbuff_resize_wrap)
+TEST(CircBuff, circularbuff_resize_wrap)
 {
     CircularBuffer buf(1024);
     std::vector<unsigned char> testData(256, 'a');
@@ -402,7 +403,7 @@ TEST(CircBuff_tests, test_circularbuff_resize_wrap)
     EXPECT_EQ(buf.capacity(), 512);
 }
 
-TEST(CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
+TEST(CircBuff, circularbuff_loop_around_repeat_resize)
 {
     CircularBuffer buf(45);
 
@@ -425,7 +426,7 @@ TEST(CircBuff_tests, test_circularbuff_loop_around_repeat_resize)
     }
 }
 
-TEST(CircBuff_tests, odd_conditions)
+TEST(CircBuff, odd_conditions)
 {
     CircularBuffer buf(1024);
 

@@ -96,7 +96,7 @@ namespace containers {
             }
             return size;
         }
-        // Return number of bytes read.
+        /// Return number of bytes read, 0 if no data available and -nextSize if insuffient space available
         int pop(unsigned char* data, int maxSize)
         {
             if (next_write == next_read) {
@@ -109,14 +109,14 @@ namespace containers {
                 memcpy(&size, next_read, sizeof(int));
             }
             if (size <= maxSize) {
-                memcpy(data, next_read + 4, size);
-                next_read += static_cast<size_t>(size) + 4;
+                memcpy(data, next_read + sizeof(int), size);
+                next_read += static_cast<size_t>(size) + sizeof(int);
                 if ((capacity_ - (next_read - origin)) < 8) {
                     next_read = origin;
                 }
                 return size;
-            }
-            return 0;
+            } 
+            return -size;
         }
         /** check if the block is Empty or not*/
         bool empty() const { return (next_write == next_read); }
@@ -127,7 +127,7 @@ namespace containers {
         unsigned char* origin;
         unsigned char* next_write;
         unsigned char* next_read;
-        int capacity_ = 0;
+        int capacity_{0};
 
       private:
         friend class CircularBuffer;
@@ -328,9 +328,9 @@ namespace containers {
         }
 
       private:
-        unsigned char* data = nullptr;
-        int actualSize = 0;
-        int actualCapacity = 0;
+        unsigned char* data{nullptr};
+        int actualSize{0};
+        int actualCapacity{0};
         CircularBufferRaw buffer;
     };
 

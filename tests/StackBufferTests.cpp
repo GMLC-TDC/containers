@@ -12,7 +12,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 using namespace gmlc::containers;
 
-TEST(stackQueueTest, test_stackqueueraw_simple)
+TEST(stackBuffer, stack_bufferraw_simple)
 {
     unsigned char* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
@@ -24,7 +24,9 @@ TEST(stackQueueTest, test_stackqueueraw_simple)
     bool pushed = stack.push(testData.data(), 571);
     EXPECT_TRUE(pushed);
     testData.assign(1024, '\0');
-
+    res = stack.pop(testData.data(), 265);
+    EXPECT_LT(res, 0);
+    EXPECT_EQ(res, -571);
     res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 571);
     EXPECT_EQ(testData[0], 'a');
@@ -34,7 +36,7 @@ TEST(stackQueueTest, test_stackqueueraw_simple)
     delete[] block;
 }
 
-TEST(stackQueueTest, test_stackqueueraw_3_push)
+TEST(stackBuffer, stack_bufferraw_3_push)
 {
     unsigned char* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
@@ -74,7 +76,7 @@ TEST(stackQueueTest, test_stackqueueraw_3_push)
     delete[] block;
 }
 
-TEST(stackQueueTest, test_stackqueueraw_push_full)
+TEST(stackBuffer, stack_bufferraw_push_full)
 {
     unsigned char* block = new unsigned char[1024];
     StackBufferRaw stack(block, 1024);
@@ -131,7 +133,7 @@ TEST(stackQueueTest, test_stackqueueraw_push_full)
     delete[] block;
 }
 
-TEST(stackQueueTest, test_stackqueueraw_reverse)
+TEST(stackBuffer, stack_bufferraw_reverse)
 {
     unsigned char* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
@@ -173,7 +175,7 @@ TEST(stackQueueTest, test_stackqueueraw_reverse)
     delete[] block;
 }
 
-TEST(stackQueueTest, test_stackqueue_clear)
+TEST(stackBuffer, stack_buffer_clear)
 {
     StackBuffer stack(4096);
     std::vector<unsigned char> testData(1024, 'a');
@@ -189,7 +191,7 @@ TEST(stackQueueTest, test_stackqueue_clear)
     EXPECT_TRUE(stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_swap)
+TEST(stackBuffer, stack_buffer_swap)
 {
     StackBuffer stack(4096);
 
@@ -212,7 +214,7 @@ TEST(stackQueueTest, test_stackqueue_swap)
     EXPECT_EQ(stack2.nextDataSize(), 245);
 }
 
-TEST(stackQueueTest, test_stackqueue_simple)
+TEST(stackBuffer, stack_buffer_simple)
 {
     StackBuffer stack(4096);
 
@@ -232,7 +234,7 @@ TEST(stackQueueTest, test_stackqueue_simple)
     EXPECT_EQ(testData[1023], 0);
 }
 
-TEST(stackQueueTest, test_stackqueue_3_push)
+TEST(stackBuffer, stack_buffer_3_push)
 {
     StackBuffer stack(4096);
 
@@ -268,7 +270,7 @@ TEST(stackQueueTest, test_stackqueue_3_push)
     EXPECT_TRUE(stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_push_full)
+TEST(stackBuffer, stack_buffer_push_full)
 {
     StackBuffer stack(1024);
 
@@ -322,7 +324,7 @@ TEST(stackQueueTest, test_stackqueue_push_full)
     EXPECT_TRUE(stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_reverse)
+TEST(stackBuffer, stack_buffer_reverse)
 {
     StackBuffer stack(4096);
 
@@ -361,7 +363,7 @@ TEST(stackQueueTest, test_stackqueue_reverse)
     EXPECT_TRUE(stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_move)
+TEST(stackBuffer, stack_buffer_move)
 {
     StackBuffer stack(2048);
 
@@ -382,7 +384,7 @@ TEST(stackQueueTest, test_stackqueue_move)
     EXPECT_EQ(testData[1023], 0);
 }
 
-TEST(stackQueueTest, test_stackqueue_3_push_and_copy)
+TEST(stackBuffer, stack_buffer_3_push_and_copy)
 {
     StackBuffer stack(4096);
 
@@ -439,7 +441,7 @@ TEST(stackQueueTest, test_stackqueue_3_push_and_copy)
     EXPECT_TRUE(!stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_move_assignement)
+TEST(stackBuffer, stack_buffer_move_assignement)
 {
     StackBuffer stack(2048);
     StackBuffer stack2(1024);
@@ -463,7 +465,7 @@ TEST(stackQueueTest, test_stackqueue_move_assignement)
     EXPECT_EQ(testData[1023], 0);
 }
 
-TEST(stackQueueTest, test_stackqueue_3_push_resize)
+TEST(stackBuffer, stack_buffer_3_push_resize)
 {
     StackBuffer stack(2048);
 
@@ -501,7 +503,7 @@ TEST(stackQueueTest, test_stackqueue_3_push_resize)
     EXPECT_TRUE(stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_3_push_resize_shrink)
+TEST(stackBuffer, stack_buffer_3_push_resize_shrink)
 {
     StackBuffer stack(2048);
 
@@ -543,7 +545,7 @@ TEST(stackQueueTest, test_stackqueue_3_push_resize_shrink)
     EXPECT_TRUE(stack.empty());
 }
 
-TEST(stackQueueTest, test_stackqueue_resize)
+TEST(stackBuffer, stack_buffer_resize)
 {
     StackBuffer stack(2048);
     EXPECT_EQ(stack.capacity(), 2048);
@@ -560,7 +562,7 @@ TEST(stackQueueTest, test_stackqueue_resize)
     EXPECT_FALSE(stack.resize(-262354));  // this should do nothing
 }
 
-TEST(stackQueueTest, odd_conditions)
+TEST(stackBuffer, odd_conditions)
 {
     StackBuffer buf(1024);
 
