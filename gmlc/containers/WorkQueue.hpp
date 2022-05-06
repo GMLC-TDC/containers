@@ -48,7 +48,7 @@ namespace containers {
     class NullWorkBlock : public BasicWorkBlock {
       public:
         NullWorkBlock() noexcept {}
-        virtual void execute() override{}
+        virtual void execute() override {}
         virtual bool isFinished() const override { return true; }
     };
 
@@ -318,7 +318,7 @@ value)
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
-                for (int ii=0;ii<numWorkers;++ii) {
+                for (int ii = 0; ii < numWorkers; ++ii) {
                     addWorkBlock(dummyWork, WorkPriority::high);
                 }
                 queueCondition.notify_all();
