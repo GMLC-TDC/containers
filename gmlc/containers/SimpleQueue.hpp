@@ -84,11 +84,7 @@ atomic flag indicating the queue is empty
     because this is meant for multi threaded applications this may or may not
     have any meaning depending on the number of consumers
     */
-        bool empty() const
-        {
-            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
-            return pullElements.empty();
-        }
+        bool empty() const { return queueEmptyFlag.load(); }
         /** get the current size of the queue*/
         size_t size() const
         {
@@ -103,7 +99,7 @@ atomic flag indicating the queue is empty
             std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
             pullElements.clear();
             pushElements.clear();
-            queueEmptyFlag = true;
+            queueEmptyFlag.store(true);
         }
         /** set the capacity of the queue
     actually double the requested the size will be reserved due to the use of
@@ -127,23 +123,17 @@ atomic flag indicating the queue is empty
             std::unique_lock<MUTEX> pushLock(
                 m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
-                bool expEmpty = true;
-                if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
-                    // release the push lock
-                    pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(
-                        m_pullLock);  // first pullLock
-                    queueEmptyFlag =
-                        false;  // set the flag to false again just in case
-                    if (pullElements.empty()) {
-                        pullElements.push_back(std::forward<Z>(val));
-                        return;
-                    }
-                    // reengage the push lock so we can push next
-                    // LCOV_EXCL_START
-                    pushLock.lock();
-                    // LCOV_EXCL_STOP
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                if (pullElements.empty()) {
+                    pullElements.push_back(std::forward<Z>(val));
+                    queueEmptyFlag.store(false);
+                    return;
                 }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
+                pushLock.lock();
+                // LCOV_EXCL_STOP
             }
             pushElements.push_back(std::forward<Z>(val));
         }
@@ -156,24 +146,19 @@ atomic flag indicating the queue is empty
             std::unique_lock<MUTEX> pushLock(
                 m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
-                bool expEmpty = true;
-                if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
-                    // release the push lock
-                    pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(
-                        m_pullLock);  // first pullLock
-                    queueEmptyFlag =
-                        false;  // set the flag to false again just in case
-                    if (pullElements.empty()) {
-                        pullElements.insert(
-                            pullElements.end(), val.rbegin(), val.rend());
-                        return;
-                    }
-                    // reengage the push lock so we can push next
-                    // LCOV_EXCL_START
-                    pushLock.lock();
-                    // LCOV_EXCL_STOP
+                // release the push lock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                if (pullElements.empty()) {
+                    pullElements.insert(
+                        pullElements.end(), val.rbegin(), val.rend());
+                    queueEmptyFlag.store(false);
+                    return;
                 }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
+                pushLock.lock();
+                // LCOV_EXCL_STOP
             }
             pushElements.insert(pushElements.end(), val.begin(), val.end());
         }
@@ -187,22 +172,18 @@ atomic flag indicating the queue is empty
             std::unique_lock<MUTEX> pushLock(
                 m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
-                bool expEmpty = true;
-                if (queueEmptyFlag.compare_exchange_strong(expEmpty, false)) {
-                    // release the push lock
-                    pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(
-                        m_pullLock);  // first pullLock
+                // release the push lock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                if (pullElements.empty()) {
+                    pullElements.emplace_back(std::forward<Args>(args)...);
                     queueEmptyFlag = false;
-                    if (pullElements.empty()) {
-                        pullElements.emplace_back(std::forward<Args>(args)...);
-                        return;
-                    }
-                    // reengage the push lock so we can push next
-                    // LCOV_EXCL_START
-                    pushLock.lock();
-                    // LCOV_EXCL_STOP
+                    return;
                 }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
+                pushLock.lock();
+                // LCOV_EXCL_STOP
             }
             pushElements.emplace_back(std::forward<Args>(args)...);
         }
@@ -219,8 +200,8 @@ atomic flag indicating the queue is empty
         {
             std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
             checkPullandSwap();
-            if (pullElements.empty()) {
-                return {};
+            if (queueEmptyFlag) {
+                return std::nullopt;
             }
             std::optional<X> val(
                 std::move(pullElements.back()));  // do it this way to
@@ -241,7 +222,7 @@ atomic flag indicating the queue is empty
             std::lock_guard<MUTEX> lock(m_pullLock);
 
             if (pullElements.empty()) {
-                return {};
+                return std::nullopt;
             }
 
             auto t = pullElements.back();

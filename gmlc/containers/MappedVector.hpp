@@ -43,7 +43,7 @@ limited to no removal since removal is a rather expensive operation
         {
             auto fnd = lookup.find(searchValue);
             if (fnd != lookup.end()) {
-                return {};
+                return std::nullopt;
             }
             auto index = dataStorage.size();
             dataStorage.emplace_back(std::forward<Us>(data)...);

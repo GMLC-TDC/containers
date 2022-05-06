@@ -11,6 +11,17 @@ aliases:
       ctest --verbose
 
 jobs:
+  containersgccTSan:
+    docker:
+      - image: helics/buildenv:builder
+    environment:
+      CMAKE_FLAGS: '-DCMAKE_CXX_FLAGS="-fsanitize=thread -g -O1 "  '
+      TSAN_OPTIONS: "second_deadlock_stack=1 suppressions=/root/project/.circleci/tsan_suppression.txt history_size=4"
+
+    steps:
+      - checkout
+      - run: *run_containers
+
   containersTSan:
     docker:
       - image: helics/clang-tsan:latest
@@ -51,3 +62,4 @@ workflows:
       - containersMSan
       - containersASan
       - containersTSan
+      - containersgccTSan

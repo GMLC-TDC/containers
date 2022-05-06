@@ -157,7 +157,6 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
 
             switch (dist(rng)) {
                 case 1:
-
                     break;
                 case 2:
                     sq.pushPriority(el);
@@ -167,6 +166,7 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
                         std::this_thread::sleep_for(
                             std::chrono::milliseconds(10));
                     }
+                    [[fallthrough]];
                 default:
                     sq.push(el);
                     break;
@@ -191,6 +191,7 @@ TEST(blocking_priority_queue_tests, multithreaded_tests_wait)
                     break;
                 case 3:
                     std::this_thread::sleep_for(std::chrono::milliseconds(30));
+                    [[fallthrough]];
                 default:
                     sq.emplace(30, 30);
                     break;

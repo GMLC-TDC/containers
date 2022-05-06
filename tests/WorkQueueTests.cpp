@@ -34,11 +34,8 @@ TEST(work_queue, WorkQueue_test1)
     WorkQueue wq(1);
 
     EXPECT_EQ(wq.getWorkerCount(), 1);
-
     wq.closeWorkerQueue();
-
     EXPECT_EQ(wq.getWorkerCount(), 0);
-
     auto fk = [] {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         return std::hash<std::thread::id>()(std::this_thread::get_id());
@@ -47,12 +44,13 @@ TEST(work_queue, WorkQueue_test1)
     WorkQueue wq2(5);
     EXPECT_EQ(wq2.getWorkerCount(), 5);
     std::vector<decltype(make_shared_workBlock(fk))> blocks(10);
-    std::vector<std::shared_ptr<basicWorkBlock>> bblocks(10);
+    std::vector<std::shared_ptr<BasicWorkBlock>> bblocks(10);
     for (size_t kk = 0; kk < 10; ++kk) {
         blocks[kk] = make_shared_workBlock(fk);
         bblocks[kk] = blocks[kk];
     }
     wq2.addWorkBlock(bblocks);
+    std::this_thread::sleep_for(std::chrono::milliseconds(400));
     std::vector<decltype(fk())> res(10);
     for (size_t kk = 0; kk < 10; ++kk) {
         res[kk] = blocks[kk]->getReturnVal();
@@ -119,39 +117,48 @@ TEST(work_queue, WorkQueue_test3)
     };
 
     auto b1 = make_workBlock(fk);
-    // only 1 worker thread so don't worry about locking
     std::vector<int> order;
-
-    auto hp = [&order] { order.push_back(1); };
-    auto mp = [&order] { order.push_back(2); };
-    auto lp = [&order] { order.push_back(3); };
+    std::mutex lk;
+    auto hp = [&order, &lk] {
+        std::unique_lock<std::mutex> m(lk);
+        order.push_back(1);
+    };
+    auto mp = [&order, &lk] {
+        std::unique_lock<std::mutex> m(lk);
+        order.push_back(2);
+    };
+    auto lp = [&order, &lk] {
+        std::unique_lock<std::mutex> m(lk);
+        order.push_back(3);
+    };
     wq.setPriorityRatio(3);
-    wq.addWorkBlock(std::move(b1), WorkQueue::workPriority::high);
+    wq.addWorkBlock(std::move(b1), WorkQueue::WorkPriority::high);
 
-    wq.addWorkBlock(make_workBlock(lp), WorkQueue::workPriority::low);
-    wq.addWorkBlock(make_workBlock(lp), WorkQueue::workPriority::low);
-    wq.addWorkBlock(make_workBlock(lp), WorkQueue::workPriority::low);
+    wq.addWorkBlock(make_workBlock(lp), WorkQueue::WorkPriority::low);
+    wq.addWorkBlock(make_workBlock(lp), WorkQueue::WorkPriority::low);
+    wq.addWorkBlock(make_workBlock(lp), WorkQueue::WorkPriority::low);
 
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
-    wq.addWorkBlock(make_workBlock(mp), WorkQueue::workPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(make_workBlock(mp), WorkQueue::WorkPriority::medium);
 
-    wq.addWorkBlock(make_workBlock(hp), WorkQueue::workPriority::high);
-    wq.addWorkBlock(make_workBlock(hp), WorkQueue::workPriority::high);
+    wq.addWorkBlock(make_workBlock(hp), WorkQueue::WorkPriority::high);
+    wq.addWorkBlock(make_workBlock(hp), WorkQueue::WorkPriority::high);
     std::this_thread::sleep_for(std::chrono::milliseconds(340));
     while (!wq.isEmpty()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(40));
     }
+    std::unique_lock<std::mutex> m(lk);
     EXPECT_EQ(order.size(), 14u);
     std::vector<int> orderCorrect = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
     int cdiff = 0;
-    for (size_t kk = 0; kk < 14; ++kk) {
+    for (size_t kk = 0; kk < order.size(); ++kk) {
         if (order[kk] != orderCorrect[kk]) {
             ++cdiff;
         }
@@ -172,36 +179,46 @@ TEST(work_queue, WorkQueue_test3_vector)
     auto b1 = make_workBlock(fk);
     // only 1 worker thread so don't worry about locking
     std::vector<int> order;
-
-    auto hp = [&order] { order.push_back(1); };
-    auto mp = [&order] { order.push_back(2); };
-    auto lp = [&order] { order.push_back(3); };
-    std::vector<std::shared_ptr<basicWorkBlock>> lpv;
+    std::mutex lk;
+    auto hp = [&order, &lk] {
+        std::unique_lock<std::mutex> m(lk);
+        order.push_back(1);
+    };
+    auto mp = [&order, &lk] {
+        std::unique_lock<std::mutex> m(lk);
+        order.push_back(2);
+    };
+    auto lp = [&order, &lk] {
+        std::unique_lock<std::mutex> m(lk);
+        order.push_back(3);
+    };
+    std::vector<std::shared_ptr<BasicWorkBlock>> lpv;
     for (int ii = 0; ii < 3; ++ii) {
         auto res = make_workBlock(lp);
         lpv.push_back(std::move(res));
     }
 
-    std::vector<std::shared_ptr<basicWorkBlock>> mpv;
+    std::vector<std::shared_ptr<BasicWorkBlock>> mpv;
     for (int ii = 0; ii < 9; ++ii) {
         auto res = make_workBlock(mp);
         mpv.push_back(std::move(res));
     }
 
-    std::vector<std::shared_ptr<basicWorkBlock>> hpv;
+    std::vector<std::shared_ptr<BasicWorkBlock>> hpv;
     for (int ii = 0; ii < 2; ++ii) {
         auto res = make_workBlock(hp);
         hpv.push_back(std::move(res));
     }
 
     wq.setPriorityRatio(3);
-    wq.addWorkBlock(std::move(b1), WorkQueue::workPriority::high);
+    wq.addWorkBlock(std::move(b1), WorkQueue::WorkPriority::high);
 
-    wq.addWorkBlock(lpv, WorkQueue::workPriority::low);
-    wq.addWorkBlock(mpv, WorkQueue::workPriority::medium);
-    wq.addWorkBlock(hpv, WorkQueue::workPriority::high);
+    wq.addWorkBlock(lpv, WorkQueue::WorkPriority::low);
+    wq.addWorkBlock(mpv, WorkQueue::WorkPriority::medium);
+    wq.addWorkBlock(hpv, WorkQueue::WorkPriority::high);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(340));
+    std::unique_lock<std::mutex> m(lk);
     while (!wq.isEmpty()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(40));
     }

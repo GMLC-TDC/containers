@@ -32,10 +32,10 @@ SPDX-License-Identifier: BSD-3-Clause
 namespace gmlc {
 namespace containers {
     /** basic work block abstract class*/
-    class basicWorkBlock {
+    class BasicWorkBlock {
       public:
-        basicWorkBlock() noexcept {}
-        virtual ~basicWorkBlock() = default;
+        BasicWorkBlock() noexcept {}
+        virtual ~BasicWorkBlock() = default;
         /** run the work block*/
         virtual void execute() = 0;
         /** check if the work is finished
@@ -44,26 +44,34 @@ namespace containers {
         virtual bool isFinished() const = 0;
     };
 
+    /** a dummy work block that does nothing*/
+    class NullWorkBlock : public BasicWorkBlock {
+      public:
+        NullWorkBlock() noexcept {}
+        virtual void execute() override {}
+        virtual bool isFinished() const override { return true; }
+    };
+
     /** implementation of a workBlock class
 The class takes as an input object of some kind function, std::function, lambda
 that can be executed, functionoid, or something that implements operator()
 */
     template<typename retType>
-    class workBlock : public basicWorkBlock {
+    class WorkBlock : public BasicWorkBlock {
       public:
-        workBlock() { reset(); }
+        WorkBlock() { reset(); }
         // copy constructor intentionally omitted*/
         /** move constructor*/
-        workBlock(workBlock&& wb) = default;
+        WorkBlock(WorkBlock&& wb) = default;
         /** constructor from a packaged task*/
-        workBlock(std::packaged_task<retType()>&& newTask) :
+        WorkBlock(std::packaged_task<retType()>&& newTask) :
             task(std::move(newTask)), loaded(true)
         {
             reset();
         }
         /** construct from a some sort of functional object*/
         template<typename Func>  // forwarding reference
-        workBlock(Func&& newWork) :
+        WorkBlock(Func&& newWork) :
             task(std::forward<Func>(newWork)), loaded(true)
         {
             static_assert(
@@ -72,7 +80,7 @@ that can be executed, functionoid, or something that implements operator()
             reset();
         }
         /** move assignment*/
-        workBlock& operator=(workBlock&& wb) = default;
+        WorkBlock& operator=(WorkBlock&& wb) = default;
         /** execute the work block*/
         virtual void execute() override
         {
@@ -135,17 +143,17 @@ The class takes as an input object of some kind function, std::function, lambda
 that can be executed
 */
     template<>
-    class workBlock<void> : public basicWorkBlock {
+    class WorkBlock<void> : public BasicWorkBlock {
       public:
-        workBlock() { reset(); }
-        workBlock(std::packaged_task<void()>&& newTask) :
+        WorkBlock() { reset(); }
+        WorkBlock(std::packaged_task<void()>&& newTask) :
             task(std::move(newTask)), loaded(true)
         {
             reset();
         }
 
         template<typename Func>
-        workBlock(Func&& newWork) :
+        WorkBlock(Func&& newWork) :
             task(std::forward<Func>(newWork)), loaded(true)
         {
             static_assert(
@@ -154,8 +162,8 @@ that can be executed
             reset();
         }
 
-        workBlock(workBlock&& wb) = default;
-        workBlock& operator=(workBlock&& wb) = default;
+        WorkBlock(WorkBlock&& wb) = default;
+        WorkBlock& operator=(WorkBlock&& wb) = default;
         virtual void execute() override
         {
             if (!finished) {
@@ -212,7 +220,7 @@ anything else that could be called with operator()
     template<typename X>
     auto make_workBlock(X&& fptr)
     {
-        return std::make_unique<workBlock<decltype(fptr())>>(
+        return std::make_unique<WorkBlock<decltype(fptr())>>(
             std::forward<X>(fptr));
     }
     /** make a shared pointer to a workBlock object from a functional object
@@ -223,7 +231,7 @@ anything else that could be called with operator()
     template<typename X>
     auto make_shared_workBlock(X&& fptr)
     {
-        return std::make_shared<workBlock<decltype(fptr())>>(
+        return std::make_shared<WorkBlock<decltype(fptr())>>(
             std::forward<X>(fptr));
     }
 
@@ -234,7 +242,7 @@ anything else that could be called with operator()
     template<typename X>
     auto make_workBlock(std::packaged_task<X()>&& task)
     {
-        return std::make_unique<workBlock<X>>(std::move(task));
+        return std::make_unique<WorkBlock<X>>(std::move(task));
     }
 
     /** make a shared pointer to a workBlock object from a packaged task object
@@ -244,7 +252,7 @@ anything else that could be called with operator()
     template<typename X>
     auto make_shared_workBlock(std::packaged_task<X()>&& task)
     {
-        return std::make_shared<workBlock<X>>(std::move(task));
+        return std::make_shared<WorkBlock<X>>(std::move(task));
     }
 
     /** the default ratio between med and low priority tasks*/
@@ -259,13 +267,14 @@ the priority ratio
     class WorkQueue {
       public:
         /** enumeration defining the work block priority*/
-        enum class workPriority {
+        enum class WorkPriority {
             medium,  //!< do the work with a specific ratio of priority to low
             //!< priority tasks
             low,  //!< low priority do the work every once in a while determined
                   //!< by
             //!< the priority ratio
             high,  //!< do the work as soon as possible
+            required,  //!< high priority work job that always is scheduled
         };
 
         /** construct a queue
@@ -297,18 +306,26 @@ value)
         }
 
         /** get the number of workers
-    static so it can be called before instance is valid
     @return int with the current worker count
     */
         int getWorkerCount() { return (!halt) ? numWorkers : 0; }
         /** destroy the WorkQueue*/
         void closeWorkerQueue()
         {
-            bool exp = false;
-            if (halt.compare_exchange_strong(exp, true)) {
+            std::unique_lock<std::mutex> lv(queueLock);
+            if (!halt.load()) {
+                halt.store(true);
+                lv.unlock();
+                auto dummyWork = std::make_shared<NullWorkBlock>();
+
                 workToDoHigh.clear();
                 workToDoMed.clear();
                 workToDoLow.clear();
+
+                queueCondition.notify_all();
+                for (int ii = 0; ii < numWorkers; ++ii) {
+                    addWorkBlock(dummyWork, WorkPriority::required);
+                }
                 queueCondition.notify_all();
             }
             for (auto& thrd : threadpool) {
@@ -320,26 +337,29 @@ value)
 
         /** add a block of work to the WorkQueue
     @param[in] newWork  the block of new work for the queue
+    @param[in] priority
     */
         void addWorkBlock(
-            std::shared_ptr<basicWorkBlock> newWork,
-            workPriority priority = workPriority::medium)
+            std::shared_ptr<BasicWorkBlock> newWork,
+            WorkPriority priority = WorkPriority::medium)
         {
-            if ((!newWork) || (newWork->isFinished())) {
+            if ((!newWork) ||
+                (newWork->isFinished() && priority != WorkPriority::required)) {
                 return;
             }
             if (numWorkers > 0) {
                 size_t ccount;
                 switch (priority) {
-                    case workPriority::high:
+                    case WorkPriority::high:
+                    case WorkPriority::required:
                         ccount = workToDoHigh.size();
                         workToDoHigh.push(std::move(newWork));
                         break;
-                    case workPriority::medium:
+                    case WorkPriority::medium:
                         ccount = workToDoMed.size();
                         workToDoMed.push(std::move(newWork));
                         break;
-                    case workPriority::low:
+                    case WorkPriority::low:
                     default:
                         ccount = workToDoLow.size();
                         workToDoLow.push(std::move(newWork));
@@ -356,18 +376,19 @@ value)
     @param[in] newWork  a vector of workBlocks to add to the queue
     */
         void addWorkBlock(
-            std::vector<std::shared_ptr<basicWorkBlock>>& newWork,
-            workPriority priority = workPriority::medium)
+            std::vector<std::shared_ptr<BasicWorkBlock>>& newWork,
+            WorkPriority priority = WorkPriority::medium)
         {
             if (numWorkers > 0) {
                 switch (priority) {
-                    case workPriority::high:
+                    case WorkPriority::high:
+                    case WorkPriority::required:
                         workToDoHigh.pushVector(newWork);
                         break;
-                    case workPriority::medium:
+                    case WorkPriority::medium:
                         workToDoMed.pushVector(newWork);
                         break;
-                    case workPriority::low:
+                    case WorkPriority::low:
                     default:
                         workToDoLow.pushVector(newWork);
                         break;
@@ -387,8 +408,8 @@ value)
         bool isEmpty() const
         {
             return (
-                (workToDoHigh.empty()) && (workToDoMed.empty()) &&
-                (workToDoLow.empty()));
+                workToDoHigh.empty() && workToDoMed.empty() &&
+                workToDoLow.empty());
         };
         /** get the number of remaining blocks
      @details this function may not be that useful since it is multithreaded and
@@ -411,9 +432,9 @@ value)
         /** get the next work block
     @return a shared pointer to a work block
     */
-        std::shared_ptr<basicWorkBlock> getWorkBlock()
+        std::shared_ptr<BasicWorkBlock> getWorkBlock()
         {
-            std::shared_ptr<basicWorkBlock> wb;
+            std::shared_ptr<BasicWorkBlock> wb;
             auto wbb = workToDoHigh.pop();
             if (wbb) {
                 return *wbb;
@@ -445,24 +466,25 @@ value)
         /** the main worker loop*/
         void workerLoop()
         {
-            std::unique_lock<std::mutex> lv(queueLock, std::defer_lock);
-            while (!halt) {
+            while (true) {
                 if (isEmpty()) {
-                    // std::cout << std::this_thread::get_id << " sleeping\n";
-                    lv.lock();
-                    queueCondition.wait(lv);
-                    lv.unlock();
-                    // std::cout << std::this_thread::get_id << " awoken\n";
+                    std::unique_lock<std::mutex> lv(queueLock);
+                    if (halt.load()) {
+                        return;
+                    }
+                    queueCondition.wait_for(
+                        lv, std::chrono::milliseconds(5000));
+                    if (halt) {
+                        return;
+                    }
                 }
                 auto wb =
                     getWorkBlock();  // this will return empty if it is spurious
                                      // and also sync the size if needed
                 if ((wb) && (!wb->isFinished())) {
                     wb->execute();
-                    //  std::cout << std::this_thread::get_id << " executing\n";
                 }
             }
-            // std::cout << std::this_thread::get_id << " halting\n";
         }
 
       private:
@@ -476,17 +498,17 @@ value)
                                                                //!< low
         //!< priority blocks
 
-        SimpleQueue<std::shared_ptr<basicWorkBlock>>
+        SimpleQueue<std::shared_ptr<BasicWorkBlock>>
             workToDoHigh;  //!< queue containing the work to do
-        SimpleQueue<std::shared_ptr<basicWorkBlock>>
+        SimpleQueue<std::shared_ptr<BasicWorkBlock>>
             workToDoMed;  //!< queue containing the work to do
-        SimpleQueue<std::shared_ptr<basicWorkBlock>>
+        SimpleQueue<std::shared_ptr<BasicWorkBlock>>
             workToDoLow;  //!< queue containing the work to do
         const int numWorkers;  //!< counter for the number of workers
         std::atomic<int> MedCounter{
             0};  //!< the counter to use low instead of Med
         std::vector<std::thread> threadpool;  //!< the threads
-        std::mutex queueLock;  //!< mutex for condition variable
+        std::mutex queueLock;  //!< mutex for condition variable and halt
         std::condition_variable queueCondition;  //!< condition variable for
                                                  //!< waking the threads
         std::atomic<bool> halt{

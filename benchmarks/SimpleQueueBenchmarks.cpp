@@ -6,6 +6,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "SimpleQueue.hpp"
+#include "warningDisable.h"
 
 #include <benchmark/benchmark.h>
 #include <future>
@@ -336,8 +337,16 @@ BENCHMARK_REGISTER_F(bspscFixture, SProdSCons_bspsc)
     ->Unit(benchmark::kMillisecond);
 
 #endif
+DISABLE_WARNING_PUSH
+
+DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER
+DISABLE_WARNING_CONSTANT_CONDITIONAL
+DISABLE_WARNING_UNDEF
+DISABLE_WARNING_SHADOW
 
 #include <moodycamel/concurrentqueue.h>
+DISABLE_WARNING_POP
+
 template<class X>
 class mcFixture : public benchmark::Fixture {
   public:
