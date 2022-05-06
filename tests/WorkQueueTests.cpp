@@ -188,15 +188,15 @@ TEST(work_queue, WorkQueue_test3_vector)
     // only 1 worker thread so don't worry about locking
     std::vector<int> order;
     std::mutex lk;
-    auto hp = [&order,&lk] {
+    auto hp = [&order, &lk] {
         std::unique_lock<std::mutex> m(lk);
         order.push_back(1);
     };
-    auto mp = [&order,&lk] {
+    auto mp = [&order, &lk] {
         std::unique_lock<std::mutex> m(lk);
         order.push_back(2);
     };
-    auto lp = [&order,&lk] {
+    auto lp = [&order, &lk] {
         std::unique_lock<std::mutex> m(lk);
         order.push_back(3);
     };

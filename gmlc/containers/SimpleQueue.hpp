@@ -123,18 +123,17 @@ atomic flag indicating the queue is empty
             std::unique_lock<MUTEX> pushLock(
                 m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
-                    pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(
-                        m_pullLock);  // first pullLock
-                    if (pullElements.empty()) {
-                        pullElements.push_back(std::forward<Z>(val));
-                        queueEmptyFlag.store(false);
-                        return;
-                    }
-                    // reengage the push lock so we can push next
-                    // LCOV_EXCL_START
-                    pushLock.lock();
-                    // LCOV_EXCL_STOP
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                if (pullElements.empty()) {
+                    pullElements.push_back(std::forward<Z>(val));
+                    queueEmptyFlag.store(false);
+                    return;
+                }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
+                pushLock.lock();
+                // LCOV_EXCL_STOP
             }
             pushElements.push_back(std::forward<Z>(val));
         }
@@ -147,20 +146,19 @@ atomic flag indicating the queue is empty
             std::unique_lock<MUTEX> pushLock(
                 m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
-                    // release the push lock
-                    pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(
-                        m_pullLock);  // first pullLock
-                    if (pullElements.empty()) {
-                        pullElements.insert(
-                            pullElements.end(), val.rbegin(), val.rend());
-                        queueEmptyFlag.store(false);
-                        return;
-                    }
-                    // reengage the push lock so we can push next
-                    // LCOV_EXCL_START
-                    pushLock.lock();
-                    // LCOV_EXCL_STOP
+                // release the push lock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                if (pullElements.empty()) {
+                    pullElements.insert(
+                        pullElements.end(), val.rbegin(), val.rend());
+                    queueEmptyFlag.store(false);
+                    return;
+                }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
+                pushLock.lock();
+                // LCOV_EXCL_STOP
             }
             pushElements.insert(pushElements.end(), val.begin(), val.end());
         }
@@ -174,19 +172,18 @@ atomic flag indicating the queue is empty
             std::unique_lock<MUTEX> pushLock(
                 m_pushLock);  // only one lock on this branch
             if (pushElements.empty()) {
-                    // release the push lock
-                    pushLock.unlock();
-                    std::unique_lock<MUTEX> pullLock(
-                        m_pullLock);  // first pullLock
-                    if (pullElements.empty()) {
-                        pullElements.emplace_back(std::forward<Args>(args)...);
-                        queueEmptyFlag = false;
-                        return;
-                    }
-                    // reengage the push lock so we can push next
-                    // LCOV_EXCL_START
-                    pushLock.lock();
-                    // LCOV_EXCL_STOP
+                // release the push lock
+                pushLock.unlock();
+                std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                if (pullElements.empty()) {
+                    pullElements.emplace_back(std::forward<Args>(args)...);
+                    queueEmptyFlag = false;
+                    return;
+                }
+                // reengage the push lock so we can push next
+                // LCOV_EXCL_START
+                pushLock.lock();
+                // LCOV_EXCL_STOP
             }
             pushElements.emplace_back(std::forward<Args>(args)...);
         }

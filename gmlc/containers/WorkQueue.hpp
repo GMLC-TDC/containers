@@ -413,7 +413,8 @@ value)
     */
         bool isEmpty() const
         {
-            return (workToDoHigh.empty() && workToDoMed.empty() &&
+            return (
+                workToDoHigh.empty() && workToDoMed.empty() &&
                 workToDoLow.empty());
         };
         /** get the number of remaining blocks
@@ -471,7 +472,6 @@ value)
         /** the main worker loop*/
         void workerLoop()
         {
-            
             while (true) {
                 if (isEmpty()) {
                     std::unique_lock<std::mutex> lv(queueLock);
@@ -480,7 +480,8 @@ value)
                         return;
                     }
                     std::cout << std::this_thread::get_id << " waiting\n";
-                    queueCondition.wait_for(lv,std::chrono::milliseconds(5000));
+                    queueCondition.wait_for(
+                        lv, std::chrono::milliseconds(5000));
                     if (halt) {
                         return;
                     }
@@ -520,7 +521,8 @@ value)
         std::mutex queueLock;  //!< mutex for condition variable and halt
         std::condition_variable queueCondition;  //!< condition variable for
                                                  //!< waking the threads
-        std::atomic<bool> halt{false};  //!< flag indicating the threads should halt
+        std::atomic<bool> halt{
+            false};  //!< flag indicating the threads should halt
     };
 
 }  // namespace containers
