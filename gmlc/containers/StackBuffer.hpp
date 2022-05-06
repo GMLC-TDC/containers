@@ -138,15 +138,12 @@ blocks of raw data
       public:
         StackBuffer() noexcept : stack() {}
         explicit StackBuffer(int size) :
-            data(new unsigned char[size]),
-            statedSize{size}, actualCapacity{size}, stack(data, size)
+            data(new unsigned char[size]), statedSize{size},
+            actualCapacity{size}, stack(data, size)
         {
         }
 
-        ~StackBuffer()
-        {
-            delete[] data;
-        }
+        ~StackBuffer() { delete[] data; }
 
         StackBuffer(StackBuffer&& sq) noexcept :
             data(sq.data), statedSize(sq.statedSize),
@@ -162,11 +159,10 @@ blocks of raw data
             sq.stack.nextIndex = nullptr;
         }
         StackBuffer(const StackBuffer& sq) :
-            data{new unsigned char[sq.statedSize]},
-            statedSize{sq.statedSize}, actualCapacity{sq.statedSize},
-            stack(sq.stack)
+            data{new unsigned char[sq.statedSize]}, statedSize{sq.statedSize},
+            actualCapacity{sq.statedSize}, stack(sq.stack)
         {
-            if (data != nullptr && sq.data != nullptr && sq.statedSize>0) {
+            if (data != nullptr && sq.data != nullptr && sq.statedSize > 0) {
                 memcpy(data, sq.data, static_cast<size_t>(statedSize));
                 auto offset = stack.next - stack.origin;
                 stack.origin = data;

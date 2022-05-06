@@ -138,14 +138,14 @@ namespace containers {
       public:
         CircularBuffer() noexcept : buffer(nullptr, 0) {}
         explicit CircularBuffer(int size) :
-            data(new unsigned char[size]),
-            actualSize{size}, actualCapacity{size}, buffer(data, size)
+            data(new unsigned char[size]), actualSize{size},
+            actualCapacity{size}, buffer(data, size)
         {
         }
         ~CircularBuffer()
         {
             if (actualCapacity > 0) {
-                delete [] data;
+                delete[] data;
             }
         }
         CircularBuffer(CircularBuffer&& cb) noexcept :
@@ -161,9 +161,8 @@ namespace containers {
             cb.buffer.next_write = nullptr;
         }
         CircularBuffer(const CircularBuffer& cb) :
-            data{new unsigned char[cb.actualSize]},
-            actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
-            buffer(cb.buffer)
+            data{new unsigned char[cb.actualSize]}, actualSize{cb.actualSize},
+            actualCapacity{cb.actualSize}, buffer(cb.buffer)
         {
             if (data != nullptr && cb.data != nullptr) {
                 memcpy(data, cb.data, actualSize);
@@ -255,7 +254,8 @@ namespace containers {
                         memmove(
                             buffer.origin,
                             buffer.next_read,
-                            static_cast<std::size_t>(write_offset) - read_offset);
+                            static_cast<std::size_t>(write_offset) -
+                                read_offset);
                         buffer.next_read = buffer.origin;
                         buffer.next_write =
                             buffer.origin + write_offset - read_offset;
@@ -319,7 +319,7 @@ namespace containers {
                         memcpy(buf, data, actualSize);
                     }
 
-                    delete [] data;
+                    delete[] data;
                 }
                 data = buf;
                 actualCapacity = newsize;
