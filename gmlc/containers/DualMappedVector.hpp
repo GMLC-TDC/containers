@@ -55,7 +55,7 @@ or by numerical index
             if (fnd != lookup1.end()) {
                 auto fnd2 = lookup2.find(searchValue2);
                 if (fnd2 != lookup2.end()) {
-                    return {};
+                    return std::nullopt;
                 }
             }
             auto index = dataStorage.size();

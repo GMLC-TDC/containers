@@ -173,7 +173,9 @@ and deallocate methods)*/
             return *this;
         }
         /** destructor*/
-        ~StableBlockDeque() { freeAll(); }
+        ~StableBlockDeque() { 
+            freeAll(); 
+        }
 
         template<class... Args>
         void emplace_back(Args&&... args)

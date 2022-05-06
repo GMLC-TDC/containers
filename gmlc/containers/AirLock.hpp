@@ -88,7 +88,7 @@ a single thread so it can be accessed without locks
                     return val;
                 }
             }
-            return {};
+            return std::nullopt;
         }
         /** check if the airlock is loaded
     @details this may or may  not mean anything depending on usage
