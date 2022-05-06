@@ -138,14 +138,14 @@ namespace containers {
       public:
         CircularBuffer() noexcept : buffer(nullptr, 0) {}
         explicit CircularBuffer(int size) :
-            data(reinterpret_cast<unsigned char*>(std::malloc(size))),
+            data(new unsigned char[size]),
             actualSize{size}, actualCapacity{size}, buffer(data, size)
         {
         }
         ~CircularBuffer()
         {
             if (actualCapacity > 0) {
-                free(data);
+                delete [] data;
             }
         }
         CircularBuffer(CircularBuffer&& cb) noexcept :
@@ -161,7 +161,7 @@ namespace containers {
             cb.buffer.next_write = nullptr;
         }
         CircularBuffer(const CircularBuffer& cb) :
-            data{reinterpret_cast<unsigned char*>(std::malloc(cb.actualSize))},
+            data{new unsigned char[cb.actualSize]},
             actualSize{cb.actualSize}, actualCapacity{cb.actualSize},
             buffer(cb.buffer)
         {
@@ -173,7 +173,7 @@ namespace containers {
                 buffer.next_read = buffer.origin + read_offset;
                 buffer.next_write = buffer.origin + write_offset;
             } else {
-                free(data);
+                delete[] data;
                 actualSize = 0;
                 actualCapacity = 0;
             }
@@ -182,7 +182,7 @@ namespace containers {
         CircularBuffer& operator=(CircularBuffer&& cb) noexcept
         {
             if (data != nullptr) {
-                std::free(data);
+                delete[] data;
             }
             data = cb.data;
             actualSize = cb.actualSize;
@@ -255,7 +255,7 @@ namespace containers {
                         memmove(
                             buffer.origin,
                             buffer.next_read,
-                            write_offset - read_offset);
+                            static_cast<std::size_t>(write_offset) - read_offset);
                         buffer.next_read = buffer.origin;
                         buffer.next_write =
                             buffer.origin + write_offset - read_offset;
@@ -313,13 +313,13 @@ namespace containers {
         void resizeMemory(int newsize, bool copyData = true)
         {
             if (newsize > actualCapacity) {
-                auto buf = reinterpret_cast<unsigned char*>(malloc(newsize));
+                auto buf = new unsigned char[newsize];
                 if (actualCapacity > 0) {
                     if (copyData) {
                         memcpy(buf, data, actualSize);
                     }
 
-                    free(data);
+                    delete [] data;
                 }
                 data = buf;
                 actualCapacity = newsize;

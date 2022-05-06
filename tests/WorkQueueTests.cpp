@@ -34,17 +34,18 @@ TEST(work_queue, WorkQueue_test1)
     WorkQueue wq(1);
 
     EXPECT_EQ(wq.getWorkerCount(), 1);
-
+    std::cout << "loc1" << std::endl;
     wq.closeWorkerQueue();
-
+    std::cout << "loc2" << std::endl;
     EXPECT_EQ(wq.getWorkerCount(), 0);
-
+    std::cout << "loc3" << std::endl;
     auto fk = [] {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         return std::hash<std::thread::id>()(std::this_thread::get_id());
     };
 
     WorkQueue wq2(5);
+    std::cout << "loc4" << std::endl;
     EXPECT_EQ(wq2.getWorkerCount(), 5);
     std::vector<decltype(make_shared_workBlock(fk))> blocks(10);
     std::vector<std::shared_ptr<basicWorkBlock>> bblocks(10);
@@ -52,15 +53,19 @@ TEST(work_queue, WorkQueue_test1)
         blocks[kk] = make_shared_workBlock(fk);
         bblocks[kk] = blocks[kk];
     }
+    std::cout << "loc5" << std::endl;
     wq2.addWorkBlock(bblocks);
+    std::cout << "loc6" << std::endl;
     std::vector<decltype(fk())> res(10);
     for (size_t kk = 0; kk < 10; ++kk) {
         res[kk] = blocks[kk]->getReturnVal();
     }
+    std::cout << "loc7" << std::endl;
     std::sort(res.begin(), res.end());
     auto last = std::unique(res.begin(), res.end());
     res.erase(last, res.end());
     EXPECT_EQ(res.size(), 5u);
+    std::cout << "loc8" << std::endl;
 }
 
 TEST(work_queue, WorkQueue_test2)

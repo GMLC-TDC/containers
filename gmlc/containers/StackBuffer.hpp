@@ -138,16 +138,14 @@ blocks of raw data
       public:
         StackBuffer() noexcept : stack() {}
         explicit StackBuffer(int size) :
-            data(reinterpret_cast<unsigned char*>(std::malloc(size))),
+            data(new unsigned char[size]),
             statedSize{size}, actualCapacity{size}, stack(data, size)
         {
         }
 
         ~StackBuffer()
         {
-            if (actualCapacity > 0) {
-                free(data);
-            }
+            delete[] data;
         }
 
         StackBuffer(StackBuffer&& sq) noexcept :
@@ -164,11 +162,11 @@ blocks of raw data
             sq.stack.nextIndex = nullptr;
         }
         StackBuffer(const StackBuffer& sq) :
-            data{reinterpret_cast<unsigned char*>(std::malloc(sq.statedSize))},
+            data{new unsigned char[sq.statedSize]},
             statedSize{sq.statedSize}, actualCapacity{sq.statedSize},
             stack(sq.stack)
         {
-            if (data != nullptr && sq.data != nullptr) {
+            if (data != nullptr && sq.data != nullptr && sq.statedSize>0) {
                 memcpy(data, sq.data, static_cast<size_t>(statedSize));
                 auto offset = stack.next - stack.origin;
                 stack.origin = data;
@@ -177,7 +175,8 @@ blocks of raw data
                     stack.origin + stack.dataSize - diSize);
                 stack.nextIndex -= stack.dataCount;
             } else {
-                free(data);
+                delete[] data;
+                data = nullptr;
                 statedSize = 0;
                 actualCapacity = 0;
             }
@@ -185,9 +184,7 @@ blocks of raw data
 
         StackBuffer& operator=(StackBuffer&& sq) noexcept
         {
-            if (data != nullptr) {
-                std::free(data);
-            }
+            delete[] data;
             data = sq.data;
             statedSize = sq.statedSize;
             actualCapacity = sq.actualCapacity;
@@ -314,13 +311,13 @@ blocks of raw data
                 return;
             }
             if (newsize > actualCapacity) {
-                auto buf = reinterpret_cast<unsigned char*>(malloc(newsize));
+                auto buf = new unsigned char[newsize];
                 if (actualCapacity > 0) {
                     if (copyData) {
                         memcpy(buf, data, statedSize);
                     }
 
-                    free(data);
+                    delete[] data;
                 }
                 data = buf;
                 actualCapacity = newsize;

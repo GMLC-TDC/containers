@@ -100,7 +100,7 @@ a single thread so it can be accessed without locks
         std::atomic_bool loaded{
             false};  //!< flag if the airlock is loaded with cargo
         MUTEX door;  //!< check if one of the doors to the airlock is open
-        T data;  //!< the data to be stored in the airlock
+        T data{};  //!< the data to be stored in the airlock
         COND condition;  //!< condition variable for notification of new data
     };
 
