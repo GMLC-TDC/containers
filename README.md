@@ -49,7 +49,7 @@ Similar to MappedVector but with two search types. One or both search terms may 
 
 ### DualStringMappedVector
 
-Specialization of DualMappedVector where the first search type is a std::string and reference Stability is assumed.  Uses std::string_view for most arguments and searching.
+Specialization of DualMappedVector where the first search type is a std::string and reference Stability is assumed. Uses std::string_view for most arguments and searching.
 
 ### DualMappedPointerVector
 

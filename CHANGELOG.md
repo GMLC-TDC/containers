@@ -11,7 +11,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - Use C++17, Minimum CMake 3.10
 - Update google test
-- added negative return codes for stack buffer pop and circular buffer pop to indicate insufficient size in memory storage.  
+- added negative return codes for stack buffer pop and circular buffer pop to indicate insufficient size in memory storage.
 
 ### Fixed
 
@@ -24,4 +24,5 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - added several CI tests and precommit.ci
 
 ### Removed
+
 - removed optionalDefinition as we are now using std::optional
