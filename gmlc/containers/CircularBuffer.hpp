@@ -96,7 +96,8 @@ namespace containers {
             }
             return size;
         }
-        /// Return number of bytes read, 0 if no data available and -nextSize if insuffient space available
+        /// Return number of bytes read, 0 if no data available and -nextSize if
+        /// insuffient space available
         int pop(unsigned char* data, int maxSize)
         {
             if (next_write == next_read) {
@@ -115,7 +116,7 @@ namespace containers {
                     next_read = origin;
                 }
                 return size;
-            } 
+            }
             return -size;
         }
         /** check if the block is Empty or not*/

@@ -109,7 +109,8 @@ blocks of raw data
                     }
                     return blkSize;
                 } else {
-                    // return a negagtive value with the space required if maxSize is too small
+                    // return a negagtive value with the space required if
+                    // maxSize is too small
                     return -blkSize;
                 }
             }
@@ -286,8 +287,9 @@ blocks of raw data
         }
 
         int nextDataSize() const { return stack.nextDataSize(); }
-        /** get the next block available 
-        @return the size if filled, 0 if no blocks available and -nextSize if maxSize< required size*/
+        /** get the next block available
+        @return the size if filled, 0 if no blocks available and -nextSize if
+        maxSize< required size*/
         int pop(unsigned char* block, int maxSize)
         {
             return stack.pop(block, maxSize);

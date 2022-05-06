@@ -29,11 +29,15 @@ Very similar to stableBlockVector but has push/pop front and can grow and contra
 
 ## Mapped Vector containers
 
-All of these types are basically a vector(or vector like construct) along with a searchable map of some kind. The map contains an index and additional terms may be added to existing elements. So there is not a 1 to 1 map from search terms to objects. The map is either a std::map or unordered_map if the search type can be hashed easily. see MapTraits. This may change to use one of the other better performing hash maps in the future. It can take an additional template argument to allow reference stability of the objects so may use StableBlockVector in the future
+All of these types are basically a vector(or vector like construct) along with a searchable map of some kind. The map contains an index and additional terms may be added to existing elements. So there is not a 1 to 1 map from search terms to objects. The map is either a std::map or unordered_map if the search type can be hashed easily. see MapTraits. This may change to use one of the other better performing hash maps in the future. It can take an additional template argument to allow reference stability of the objects so may use StableBlockVector.
 
 ### MappedVector
 
 Just a single element with the objects stored directly
+
+### StringMappedVector
+
+Specialization of the MappedVector that uses strings for the mapping and the stableBlockVector for storage for reference stability
 
 ### MappedPointerVector
 
@@ -42,6 +46,10 @@ Similar to MappedVector but a vector of unique_ptrs of the element data type. Th
 ### DualMappedVector
 
 Similar to MappedVector but with two search types. One or both search terms may be omitted for any given element.
+
+### DualStringMappedVector
+
+Specialization of DualMappedVector where the first search type is a std::string and reference Stability is assumed. Uses std::string_view for most arguments and searching.
 
 ### DualMappedPointerVector
 
