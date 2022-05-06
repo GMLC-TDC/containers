@@ -303,13 +303,13 @@ TEST(stableBlockDequeTest, test_front_back)
 
 TEST(stableBlockDequeTest, move_construct)
 {
-    auto sbd= new StableBlockDeque<size_t, 4>(200);
+    auto sbd = new StableBlockDeque<size_t, 4>(200);
     size_t ii = 0;
     for (auto& val : *sbd) {
         val = ii++;
     }
     StableBlockDeque<size_t, 4> sbd2(std::move(*sbd));
-    //force the destructor to run to test the transfer actually occured
+    // force the destructor to run to test the transfer actually occured
     delete sbd;
     EXPECT_EQ(sbd2.size(), 200);
     for (ii = 0; ii < 100; ++ii) {
