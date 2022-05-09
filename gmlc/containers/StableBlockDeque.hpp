@@ -400,7 +400,7 @@ and deallocate methods)*/
         X& at(size_t n)
         {
             if (n >= csize) {
-                throw std::out_of_range;
+                throw std::out_of_range{"invalid index"};
             }
             return operator[](n);
         }
@@ -408,7 +408,7 @@ and deallocate methods)*/
         const X& at(size_t n) const
         {
             if (n >= csize) {
-                throw std::out_of_range;
+                throw std::out_of_range{"invalid index"};
             }
             return operator[](n);
         }
