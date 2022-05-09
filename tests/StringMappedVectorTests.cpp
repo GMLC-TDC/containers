@@ -156,7 +156,6 @@ TEST(string_mapped_vector, apply_tests)
     EXPECT_DOUBLE_EQ(sum, sum1 + 4.0);
 }
 
-
 TEST(mapped_vector_tests, modify_tests)
 {
     StringMappedVector<double> Mvec;

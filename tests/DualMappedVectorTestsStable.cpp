@@ -209,7 +209,6 @@ TEST(dual_mapped_vector_tests_stable, modify_tests)
     EXPECT_EQ(Mvec[0], 3.2 + 1.0);
     EXPECT_EQ(Mvec[1], 4.3 + 1.0);
     EXPECT_EQ(Mvec[2], 9.7 + 1.0);
-
 }
 
 TEST(dual_mapped_vector_tests_stable, remove_tests)
