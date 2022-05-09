@@ -371,10 +371,7 @@ or by numerical index
 
         VType& at(size_t index) { return dataStorage.at(index); }
 
-        const VType& at(size_t index) const
-        {
-            return dataStorage.at(index);
-        }
+        const VType& at(size_t index) const { return dataStorage.at(index); }
 
         VType& back() { return dataStorage.back(); }
 

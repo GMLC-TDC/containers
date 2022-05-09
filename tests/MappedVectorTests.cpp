@@ -166,7 +166,7 @@ TEST(mapped_vector_tests, modify_tests)
     Mvec.insert("s4", 11.4);
 
     EXPECT_EQ(Mvec.size(), 4);
-    
+
     Mvec.modify([](double& val) { ++val; });
 
     EXPECT_EQ(Mvec[0], 3.2 + 1.0);

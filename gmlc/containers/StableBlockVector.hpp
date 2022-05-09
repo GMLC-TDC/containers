@@ -277,7 +277,6 @@ no erase or insert
             return dataptr[n >> N][n & cntmask];
         }
 
-
         X& at(size_t n)
         {
             if (n >= csize) {

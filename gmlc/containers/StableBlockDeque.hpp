@@ -12,9 +12,9 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include <algorithm>
 #include <memory>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
-#include <stdexcept>
 
 namespace gmlc {
 namespace containers {
@@ -395,7 +395,6 @@ and deallocate methods)*/
             return dataptr[dataSlotFront + ((fsize + n + 1) >> N)]
                           [(fsize + n + 1) & cntmask];
         }
-
 
         X& at(size_t n)
         {
