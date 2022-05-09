@@ -15,6 +15,8 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <type_traits>
 #include <utility>
 
+#include <stdexcept>
+
 namespace gmlc {
 namespace containers {
     /** class to function as a vector in with push back and pop_back
@@ -275,6 +277,21 @@ no erase or insert
             return dataptr[n >> N][n & cntmask];
         }
 
+        X& at(size_t n)
+        {
+            if (n >= csize) {
+                throw std::out_of_range{"invalid index"};
+            }
+            return operator[](n);
+        }
+
+        const X& at(size_t n) const
+        {
+            if (n >= csize) {
+                throw std::out_of_range{"invalid index"};
+            }
+            return operator[](n);
+        }
         size_t size() const { return csize; }
 
         bool empty() const { return (csize == 0); }

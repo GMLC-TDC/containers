@@ -156,6 +156,24 @@ TEST(string_mapped_vector, apply_tests)
     EXPECT_DOUBLE_EQ(sum, sum1 + 4.0);
 }
 
+TEST(mapped_vector_tests, modify_tests)
+{
+    StringMappedVector<double> Mvec;
+
+    Mvec.insert("s1", 3.2);
+    Mvec.insert("s2", 4.3);
+    Mvec.insert("s3", 9.7);
+    Mvec.insert("s4", 11.4);
+
+    EXPECT_EQ(Mvec.size(), 4);
+
+    Mvec.modify([](double& val) { ++val; });
+
+    EXPECT_EQ(Mvec[0], 3.2 + 1.0);
+    EXPECT_EQ(Mvec[1], 4.3 + 1.0);
+    EXPECT_EQ(Mvec[2], 9.7 + 1.0);
+}
+
 TEST(string_mapped_vector, remove_tests)
 {
     StringMappedVector<double> Mvec;

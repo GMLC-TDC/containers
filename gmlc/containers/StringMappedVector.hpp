@@ -24,7 +24,10 @@ namespace containers {
 a separate index term the main use case is a bunch of inserts then searching
 with limited to no removal since removal is a rather expensive operation
 */
-    template<class VType, int BLOCK_ORDER = 5>
+    template<
+        class VType,
+        reference_stability STABILITY = reference_stability::stable,
+        int BLOCK_ORDER = 5>
     class StringMappedVector {
       public:
         /** insert an element into the mapped vector
@@ -105,6 +108,10 @@ with limited to no removal since removal is a rather expensive operation
             return dataStorage[index];
         }
 
+        VType& at(size_t index) { return dataStorage.at(index); }
+
+        const VType& at(size_t index) const { return dataStorage.at(index); }
+
         /** get the last element of the vector*/
         VType& back() { return dataStorage.back(); }
 
@@ -156,6 +163,14 @@ with limited to no removal since removal is a rather expensive operation
             std::for_each(dataStorage.begin(), dataStorage.end(), F);
         }
 
+        /** apply a function to all the values
+    @param F must be a function with signature like void fun(VType &a);*/
+        template<class UnaryFunction>
+        void modify(UnaryFunction F)
+        {
+            std::for_each(dataStorage.begin(), dataStorage.end(), F);
+        }
+
         /** transform all the values
     F must be a function with signature like void VType(const VType &a);*/
         template<class UnaryFunction>
@@ -199,7 +214,11 @@ with limited to no removal since removal is a rather expensive operation
 
       private:
         /// primary storage for data
-        StableBlockVector<VType, BLOCK_ORDER> dataStorage;
+        std::conditional_t<
+            STABILITY == reference_stability::unstable,
+            std::vector<VType>,
+            StableBlockVector<VType, BLOCK_ORDER>>
+            dataStorage;  //!< primary storage for data
         /// storage for string information
         StableBlockVector<std::string, BLOCK_ORDER> names;
         /// map to lookup the index

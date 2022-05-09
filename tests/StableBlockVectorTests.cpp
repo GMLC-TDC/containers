@@ -32,7 +32,16 @@ TEST(stableBlockVectorTest, test_lookup)
     EXPECT_EQ(sbv[2], "bob3");
     EXPECT_EQ(sbv[3], "bob4");
     EXPECT_EQ(sbv[4], "bob5");
+
+    EXPECT_EQ(sbv.at(0), "bob");
+    EXPECT_EQ(sbv.at(1), "bob2_mod");
+    sbv.at(1) = "bob2_mod2";
+    EXPECT_EQ(sbv.at(1), "bob2_mod2");
+    EXPECT_EQ(sbv.at(2), "bob3");
+    EXPECT_EQ(sbv.at(3), "bob4");
+    EXPECT_EQ(sbv.at(4), "bob5");
     EXPECT_FALSE(sbv.empty());
+    EXPECT_THROW(sbv.at(10), std::out_of_range);
 }
 
 TEST(stableBlockVectorTest, test_const_lookup)
@@ -53,6 +62,13 @@ TEST(stableBlockVectorTest, test_const_lookup)
     EXPECT_EQ(sbvc[3], "bob4");
     EXPECT_EQ(sbvc[4], "bob5");
     EXPECT_FALSE(sbvc.empty());
+
+    EXPECT_EQ(sbvc.at(1), "bob2_mod");
+    EXPECT_EQ(sbvc.at(2), "bob3");
+    EXPECT_EQ(sbvc.at(3), "bob4");
+    EXPECT_EQ(sbvc.at(4), "bob5");
+
+    EXPECT_THROW(sbvc.at(10), std::out_of_range);
 }
 
 TEST(stableBlockVectorTest, test_iterator)

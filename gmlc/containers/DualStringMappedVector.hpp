@@ -19,6 +19,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace gmlc {
 namespace containers {
@@ -26,7 +27,11 @@ namespace containers {
 The result object can be indexed multiple ways both by searching using indices
 or by numerical index
 */
-    template<class VType, class searchType2, int BLOCK_ORDER = 5>
+    template<
+        class VType,
+        class searchType2,
+        reference_stability STABILITY = reference_stability::stable,
+        int BLOCK_ORDER = 5>
     class DualStringMappedVector {
       public:
         static_assert(
@@ -364,6 +369,10 @@ or by numerical index
             return dataStorage[index];
         }
 
+        VType& at(size_t index) { return dataStorage.at(index); }
+
+        const VType& at(size_t index) const { return dataStorage.at(index); }
+
         VType& back() { return dataStorage.back(); }
 
         const VType& back() const { return dataStorage.back(); }
@@ -374,7 +383,13 @@ or by numerical index
         {
             std::for_each(dataStorage.begin(), dataStorage.end(), F);
         }
-
+        /** apply a modifying function to all the values
+    @param F must be a function with signature like void fun(VType &a);*/
+        template<class UnaryFunction>
+        void modify(UnaryFunction F)
+        {
+            std::for_each(dataStorage.begin(), dataStorage.end(), F);
+        }
         /** transform all the values
     F must be a function with signature like void VType(const VType &a);*/
         template<class UnaryFunction>
@@ -409,8 +424,11 @@ or by numerical index
         }
 
       private:
-        /// primary storage for data
-        StableBlockVector<VType, BLOCK_ORDER> dataStorage;
+        std::conditional_t<
+            STABILITY == reference_stability::unstable,
+            std::vector<VType>,
+            StableBlockVector<VType, BLOCK_ORDER>>
+            dataStorage;  //!< primary storage for data
         /// map to lookup the index
         std::unordered_map<std::string_view, size_t> lookup1;
         /// storage for string information

@@ -108,6 +108,10 @@ limited to no removal since removal is a rather expensive operation
             return dataStorage[index];
         }
 
+        VType& at(size_t index) { return dataStorage.at(index); }
+
+        const VType& at(size_t index) const { return dataStorage.at(index); }
+
         /** get the last element of the vector*/
         VType& back() { return dataStorage.back(); }
 
@@ -158,7 +162,13 @@ limited to no removal since removal is a rather expensive operation
         {
             std::for_each(dataStorage.begin(), dataStorage.end(), F);
         }
-
+        /** apply a modifying function to all the values
+    @param F must be a function with signature like void fun(VType &a);*/
+        template<class UnaryFunction>
+        void modify(UnaryFunction F)
+        {
+            std::for_each(dataStorage.begin(), dataStorage.end(), F);
+        }
         /** transform all the values
     F must be a function with signature like void VType(const VType &a);*/
         template<class UnaryFunction>

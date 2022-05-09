@@ -238,6 +238,8 @@ namespace containers {
                                                   nullptr;
         }
 
+        VType* at(size_t index) const { return dataStorage.at(index); }
+
         /** get a pointer to the last element inserted*/
         VType* back() { return dataStorage.back().get(); }
         /** remove an element at a specific index

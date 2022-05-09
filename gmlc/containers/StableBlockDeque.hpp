@@ -12,6 +12,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include <algorithm>
 #include <memory>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 
@@ -393,6 +394,22 @@ and deallocate methods)*/
         {
             return dataptr[dataSlotFront + ((fsize + n + 1) >> N)]
                           [(fsize + n + 1) & cntmask];
+        }
+
+        X& at(size_t n)
+        {
+            if (n >= csize) {
+                throw std::out_of_range{"invalid index"};
+            }
+            return operator[](n);
+        }
+
+        const X& at(size_t n) const
+        {
+            if (n >= csize) {
+                throw std::out_of_range{"invalid index"};
+            }
+            return operator[](n);
         }
 
         size_t size() const { return csize; }
