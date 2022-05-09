@@ -362,6 +362,10 @@ or by numerical index
             return dataStorage[index];
         }
 
+         VType& at(size_t index) { return dataStorage.at(index); }
+
+        const VType& at(size_t index) const { return dataStorage.at(index); }
+
         VType& back() { return dataStorage.back(); }
 
         const VType& back() const { return dataStorage.back(); }
@@ -369,6 +373,14 @@ or by numerical index
     @param F must be a function with signature like void fun(const VType &a);*/
         template<class UnaryFunction>
         void apply(UnaryFunction F)
+        {
+            std::for_each(dataStorage.begin(), dataStorage.end(), F);
+        }
+
+        /** apply a modifying function to all the values
+    @param F must be a function with signature like void fun(VType &a);*/
+        template<class UnaryFunction>
+        void modify(UnaryFunction F)
         {
             std::for_each(dataStorage.begin(), dataStorage.end(), F);
         }
