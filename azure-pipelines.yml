@@ -75,8 +75,8 @@ jobs:
         gcc9:
           containerImage: helics/buildenv:gcc9-builder
           container.options: -DCMAKE_CXX_FLAGS="-Wstrict-overflow=5"
-        gcc13:
-          containerImage: helics/buildenv:gcc13-builder
+        gcc12:
+          containerImage: helics/buildenv:gcc12-builder
           containers.std: 20
         clang8:
           containerImage: helics/buildenv:clang8-builder
