@@ -49,7 +49,6 @@ jobs:
           vmImage: "ubuntu-latest"
         macOS17:
           vmImage: "macOS-latest"
-          containers.std: 17
         macOS11:
           vmImage: "macOS-latest"
         Windows17:
@@ -59,7 +58,7 @@ jobs:
           vmImage: "windows-2019"
         Windowslatest:
           vmImage: "windows-2022"
-          containers.std: 17
+          containers.std: 20
     pool:
       vmImage: $(vmImage)
     steps:
@@ -73,13 +72,11 @@ jobs:
       matrix:
         gcc8:
           containerImage: helics/buildenv:gcc8-builder
-          containers.std: 17
         gcc9:
           containerImage: helics/buildenv:gcc9-builder
-          containers.std: 17
           container.options: -DCMAKE_CXX_FLAGS="-Wstrict-overflow=5"
-        gcc11:
-          containerImage: helics/buildenv:gcc11-builder
+        gcc13:
+          containerImage: helics/buildenv:gcc13-builder
           containers.std: 20
         clang8:
           containerImage: helics/buildenv:clang8-builder

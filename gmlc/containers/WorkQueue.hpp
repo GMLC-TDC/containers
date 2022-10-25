@@ -337,7 +337,7 @@ value)
 
         /** add a block of work to the WorkQueue
     @param[in] newWork  the block of new work for the queue
-    @param[in] priority
+    @param[in] priority specify the priority of the work, can be low, medium(default), or high.  High is always done first, low and medium alternate with medium jobs executing more often 
     */
         void addWorkBlock(
             std::shared_ptr<BasicWorkBlock> newWork,
