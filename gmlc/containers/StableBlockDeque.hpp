@@ -530,7 +530,8 @@ and deallocate methods)*/
 
                         dataSlotFront = (dataSlotsAvailable - dataSlotBack) / 2;
                     } else {
-                        auto mem = new X*[static_cast<std::size_t>(dataSlotsAvailable) * 2];
+                        auto mem =
+                            new X*[static_cast<std::size_t>(dataSlotsAvailable) * 2];
                         std::copy(
                             dataptr,
                             dataptr + dataSlotBack + 1,

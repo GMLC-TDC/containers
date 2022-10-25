@@ -34,7 +34,8 @@ namespace containers {
 
       public:
         DualMappedPointerVector() = default;
-        DualMappedPointerVector(DualMappedPointerVector&& mp) noexcept = default;
+        DualMappedPointerVector(DualMappedPointerVector&& mp) noexcept =
+            default;
         DualMappedPointerVector&
             operator=(DualMappedPointerVector&& mp) noexcept = default;
         DualMappedPointerVector(const DualMappedPointerVector& mp) = delete;
