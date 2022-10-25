@@ -7,15 +7,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # ~~~
 
-cmake_minimum_required(VERSION 3.10...3.22)
+cmake_minimum_required(VERSION 3.10...3.25)
 
-project(GMLC_CONTAINERS VERSION 0.4.0)
+project(GMLC_CONTAINERS VERSION 0.5.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 # -----------------------------------------------------------------------------
 set(GMLC_CONTAINERS_VERSION_BUILD)
-set(GMLC_CONTAINERS_DATE "2022-05-06")
+set(GMLC_CONTAINERS_DATE "2022-10-25")
 
 set(GMLC_CONTAINERS_VERSION_STRING
     "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})"

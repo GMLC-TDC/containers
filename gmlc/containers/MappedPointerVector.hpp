@@ -28,7 +28,7 @@ namespace containers {
     class MappedPointerVector {
       public:
         MappedPointerVector() = default;
-        MappedPointerVector(MappedPointerVector&& mp) = default;
+        MappedPointerVector(MappedPointerVector&& mp) noexcept = default;
         MappedPointerVector& operator=(MappedPointerVector&& mp) = default;
 
         std::optional<size_t>
