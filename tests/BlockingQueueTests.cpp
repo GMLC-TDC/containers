@@ -228,6 +228,7 @@ TEST(blocking_queue, multithreaded2)
 /** test with multiple producer/multiple consumer*/
 TEST(blocking_queue, multithreaded3)
 {
+    std::mutex printer;
     BlockingQueue<int64_t> sq;
     sq.reserve(3'010'000);
     for (int64_t ii = 0; ii < 10'000; ++ii) {
@@ -237,6 +238,7 @@ TEST(blocking_queue, multithreaded3)
         for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
+        std::lock_guard<std::mutex> printlock(printer);
         std::cout<<"produce completed"<<std::endl;
     };
 
@@ -249,6 +251,7 @@ TEST(blocking_queue, multithreaded3)
             if (!res) {  // make an additional sleep period so the producer can
                          // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::lock_guard<std::mutex> printlock(printer);
                 std::cout<<"sleeping "<<cnt<<std::endl;
                 res = sq.try_pop();
             }
@@ -263,13 +266,20 @@ TEST(blocking_queue, multithreaded3)
     auto res1 = std::async(std::launch::async, cons);
     auto res2 = std::async(std::launch::async, cons);
     auto res3 = std::async(std::launch::async, cons);
+    std::unique_lock<std::mutex> printlock(printer);
     std::cout<<"launched"<<std::endl;
+    printlock.unlock();
     ret1.wait();
     ret2.wait();
     ret3.wait();
+    printlock.lock();
     std::cout<<"production complete"<<std::endl;
+    printlock.unlock();
     auto V1 = res1.get();
     auto V2 = res2.get();
+    printlock.lock();
+    std::cout<<"got2"<<std::endl;
+    printlock.unlock();
     auto V3 = res3.get();
 
     EXPECT_EQ(V1 + V2 + V3, 3'010'000);
