@@ -234,8 +234,7 @@ TEST(work_queue, WorkQueue_test3_vector)
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     std::unique_lock<std::mutex> m(lk);
-    if (order.size() < 14U)
-    {
+    if (order.size() < 14U) {
         m.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(350));
         while (!wq.isEmpty()) {
