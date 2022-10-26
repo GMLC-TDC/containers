@@ -222,7 +222,6 @@ TEST(work_queue, WorkQueue_test3_vector)
         hpv.push_back(std::move(res));
     }
 
-    
     wq.addWorkBlock(std::move(b1), WorkQueue::WorkPriority::high);
 
     wq.addWorkBlock(lpv, WorkQueue::WorkPriority::low);
@@ -230,7 +229,7 @@ TEST(work_queue, WorkQueue_test3_vector)
     wq.addWorkBlock(hpv, WorkQueue::WorkPriority::high);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
-    
+
     while (!wq.isEmpty()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
