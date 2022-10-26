@@ -41,8 +41,8 @@ TEST(work_queue, WorkQueue_test1)
         return std::hash<std::thread::id>()(std::this_thread::get_id());
     };
 
-    WorkQueue wq2(5);
-    EXPECT_EQ(wq2.getWorkerCount(), 5);
+    WorkQueue wq2(4);
+    EXPECT_EQ(wq2.getWorkerCount(), 4);
     std::vector<decltype(make_shared_workBlock(fk))> blocks(10);
     std::vector<std::shared_ptr<BasicWorkBlock>> bblocks(10);
     for (size_t kk = 0; kk < 10; ++kk) {
@@ -50,7 +50,7 @@ TEST(work_queue, WorkQueue_test1)
         bblocks[kk] = blocks[kk];
     }
     wq2.addWorkBlock(bblocks);
-    std::this_thread::sleep_for(std::chrono::milliseconds(400));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     std::vector<decltype(fk())> res(10);
     for (size_t kk = 0; kk < 10; ++kk) {
         res[kk] = blocks[kk]->getReturnVal();
@@ -58,7 +58,7 @@ TEST(work_queue, WorkQueue_test1)
     std::sort(res.begin(), res.end());
     auto last = std::unique(res.begin(), res.end());
     res.erase(last, res.end());
-    EXPECT_EQ(res.size(), 5u);
+    EXPECT_EQ(res.size(), 4U);
 }
 
 TEST(work_queue, WorkQueue_test2)
