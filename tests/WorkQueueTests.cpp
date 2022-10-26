@@ -154,15 +154,15 @@ TEST(work_queue, WorkQueue_test3)
     wq.addWorkBlock(make_workBlock(hp), WorkQueue::WorkPriority::high);
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
     while (!wq.isEmpty()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
     std::unique_lock<std::mutex> m(lk);
     if (order.size() < 14U)
     {
         m.unlock();
-        std::this_thread::sleep_for(std::chrono::milliseconds(340));
+        std::this_thread::sleep_for(std::chrono::milliseconds(350));
         while (!wq.isEmpty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         m.lock();
     }
@@ -184,11 +184,11 @@ TEST(work_queue, WorkQueue_test3_vector)
 
     WorkQueue wq(1);
     // a sleeper work block to give us time to set up the rest
-    auto fk = [] {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    auto sleeper = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     };
 
-    auto b1 = make_workBlock(fk);
+    auto b1 = make_workBlock(sleeper);
     // only 1 worker thread so don't worry about locking
     std::vector<int> order;
     std::mutex lk;
@@ -229,12 +229,21 @@ TEST(work_queue, WorkQueue_test3_vector)
     wq.addWorkBlock(mpv, WorkQueue::WorkPriority::medium);
     wq.addWorkBlock(hpv, WorkQueue::WorkPriority::high);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(340));
+    std::this_thread::sleep_for(std::chrono::milliseconds(350));
     std::unique_lock<std::mutex> m(lk);
     while (!wq.isEmpty()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
-    EXPECT_EQ(order.size(), 14u);
+    std::unique_lock<std::mutex> m(lk);
+    if (order.size() < 14U)
+    {
+        m.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(350));
+        while (!wq.isEmpty()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        m.lock();
+    }
     std::vector<int> orderCorrect = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
     int cdiff = 0;
     for (size_t kk = 0; kk < 14; ++kk) {
