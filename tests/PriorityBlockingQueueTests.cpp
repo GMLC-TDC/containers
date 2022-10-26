@@ -433,7 +433,7 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3_pop)
 
     EXPECT_EQ(V1 + V2 + V3, 3'000'000);
 
-    std::cout<<"production complete"<<std::endl;
+    std::cout << "production complete" << std::endl;
     c1thread.join();
     c2thread.join();
 }
