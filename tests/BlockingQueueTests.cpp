@@ -237,7 +237,7 @@ TEST(blocking_queue, multithreaded3)
         for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
-        std::cout<<"produce completed"<<std::endl;
+        std::cout << "produce completed" << std::endl;
     };
 
     auto cons = [&]() {
@@ -249,7 +249,7 @@ TEST(blocking_queue, multithreaded3)
             if (!res) {  // make an additional sleep period so the producer can
                          // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                std::cout<<"sleeping "<<cnt<<std::endl;
+                std::cout << "sleeping " << cnt << std::endl;
                 res = sq.try_pop();
             }
         }
@@ -263,11 +263,11 @@ TEST(blocking_queue, multithreaded3)
     auto res1 = std::async(std::launch::async, cons);
     auto res2 = std::async(std::launch::async, cons);
     auto res3 = std::async(std::launch::async, cons);
-    std::cout<<"launched"<<std::endl;
+    std::cout << "launched" << std::endl;
     ret1.wait();
     ret2.wait();
     ret3.wait();
-    std::cout<<"production complete"<<std::endl;
+    std::cout << "production complete" << std::endl;
     auto V1 = res1.get();
     auto V2 = res2.get();
     auto V3 = res3.get();
