@@ -423,14 +423,17 @@ TEST(blocking_priority_queue_tests, multithreaded_tests3_pop)
     auto prodthread2 = std::thread(prod1);
     auto prodthread3 = std::thread(prod1);
     auto V3 = cons();
+
+    prodthread1.join();
+    prodthread2.join();
+    prodthread3.join();
+
     auto V1 = res1.get();
     auto V2 = res2.get();
 
     EXPECT_EQ(V1 + V2 + V3, 3'000'000);
 
-    prodthread1.join();
-    prodthread2.join();
-    prodthread3.join();
+    std::cout << "production complete" << std::endl;
     c1thread.join();
     c2thread.join();
 }
