@@ -17,7 +17,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 using namespace gmlc::containers;
 
 /** test basic operations */
-TEST(blocking_queue_tests, basic_tests)
+TEST(blocking_queue, basic)
 {
     BlockingQueue<int> sq;
 
@@ -38,7 +38,7 @@ TEST(blocking_queue_tests, basic_tests)
 }
 
 /** test with a move only element*/
-TEST(blocking_queue_tests, move_only_tests)
+TEST(blocking_queue, move_only)
 {
     BlockingQueue<std::unique_ptr<double>> sq;
 
@@ -62,7 +62,7 @@ TEST(blocking_queue_tests, move_only_tests)
 
 /** test the ordering with a larger number of inputs*/
 
-TEST(blocking_queue_tests, ordering_tests)
+TEST(blocking_queue, ordering)
 {
     BlockingQueue<int> sq;
 
@@ -87,7 +87,7 @@ TEST(blocking_queue_tests, ordering_tests)
     EXPECT_TRUE(sq.empty());
 }
 
-TEST(blocking_queue_tests, emplace_tests)
+TEST(blocking_queue, emplace)
 {
     BlockingQueue<std::pair<int, double>> sq;
 
@@ -105,7 +105,7 @@ TEST(blocking_queue_tests, emplace_tests)
 }
 
 /** test with single consumer/single producer*/
-TEST(blocking_queue_tests, multithreaded_tests)
+TEST(blocking_queue, multithreaded)
 {
     BlockingQueue<int64_t> sq(1010000);
 
@@ -143,7 +143,7 @@ TEST(blocking_queue_tests, multithreaded_tests)
 }
 
 /** test with single consumer / single producer */
-TEST(blocking_queue_tests, pop_tests)
+TEST(blocking_queue, pop)
 {
     BlockingQueue<int64_t> sq(1010000);
 
@@ -184,7 +184,7 @@ TEST(blocking_queue_tests, pop_tests)
 }
 
 /** test with multiple consumer/single producer*/
-TEST(blocking_queue_tests, multithreaded_tests2)
+TEST(blocking_queue, multithreaded2)
 {
     BlockingQueue<int64_t> sq(1010000);
 
@@ -226,7 +226,7 @@ TEST(blocking_queue_tests, multithreaded_tests2)
 }
 
 /** test with multiple producer/multiple consumer*/
-TEST(blocking_queue_tests, multithreaded_tests3)
+TEST(blocking_queue, multithreaded3)
 {
     BlockingQueue<int64_t> sq;
     sq.reserve(3'010'000);
@@ -237,6 +237,7 @@ TEST(blocking_queue_tests, multithreaded_tests3)
         for (int64_t ii = 0; ii < 1'000'000; ++ii) {
             sq.push(ii);
         }
+        std::cout<<"produce completed"<<std::endl;
     };
 
     auto cons = [&]() {
@@ -248,6 +249,7 @@ TEST(blocking_queue_tests, multithreaded_tests3)
             if (!res) {  // make an additional sleep period so the producer can
                          // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                std::cout<<"sleeping "<<cnt<<std::endl;
                 res = sq.try_pop();
             }
         }
@@ -261,9 +263,11 @@ TEST(blocking_queue_tests, multithreaded_tests3)
     auto res1 = std::async(std::launch::async, cons);
     auto res2 = std::async(std::launch::async, cons);
     auto res3 = std::async(std::launch::async, cons);
+    std::cout<<"launched"<<std::endl;
     ret1.wait();
     ret2.wait();
     ret3.wait();
+    std::cout<<"production complete"<<std::endl;
     auto V1 = res1.get();
     auto V2 = res2.get();
     auto V3 = res3.get();
@@ -272,7 +276,7 @@ TEST(blocking_queue_tests, multithreaded_tests3)
 }
 
 /** test with multiple producer/multiple consumer*/
-TEST(blocking_queue_tests, multithreaded_tests3_pop)
+TEST(blocking_queue, multithreaded_tests3_pop)
 {
     BlockingQueue<int64_t> sq;
     sq.reserve(3'010'000);
@@ -312,7 +316,7 @@ TEST(blocking_queue_tests, multithreaded_tests3_pop)
 }
 
 /** test with multiple producer/multiple consumer*/
-TEST(blocking_queue_tests, pop_callback_tests)
+TEST(blocking_queue, pop_callback_tests)
 {
     BlockingQueue<int64_t> sq;
     int pushcnt = 0;
