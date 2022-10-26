@@ -239,7 +239,7 @@ TEST(blocking_queue, multithreaded3)
             sq.push(ii);
         }
         std::lock_guard<std::mutex> printlock(printer);
-        std::cout<<"produce completed"<<std::endl;
+        std::cout << "produce completed" << std::endl;
     };
 
     auto cons = [&]() {
@@ -252,7 +252,7 @@ TEST(blocking_queue, multithreaded3)
                          // catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 std::lock_guard<std::mutex> printlock(printer);
-                std::cout<<"sleeping "<<cnt<<std::endl;
+                std::cout << "sleeping " << cnt << std::endl;
                 res = sq.try_pop();
             }
         }
@@ -267,18 +267,18 @@ TEST(blocking_queue, multithreaded3)
     auto res2 = std::async(std::launch::async, cons);
     auto res3 = std::async(std::launch::async, cons);
     std::unique_lock<std::mutex> printlock(printer);
-    std::cout<<"launched"<<std::endl;
+    std::cout << "launched" << std::endl;
     printlock.unlock();
     ret1.wait();
     ret2.wait();
     ret3.wait();
     printlock.lock();
-    std::cout<<"production complete"<<std::endl;
+    std::cout << "production complete" << std::endl;
     printlock.unlock();
     auto V1 = res1.get();
     auto V2 = res2.get();
     printlock.lock();
-    std::cout<<"got2"<<std::endl;
+    std::cout << "got2" << std::endl;
     printlock.unlock();
     auto V3 = res3.get();
 
