@@ -157,8 +157,7 @@ TEST(work_queue, WorkQueue_test3)
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     std::unique_lock<std::mutex> m(lk);
-    if (order.size() < 14U)
-    {
+    if (order.size() < 14U) {
         m.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(340));
         while (!wq.isEmpty()) {
@@ -167,7 +166,7 @@ TEST(work_queue, WorkQueue_test3)
         m.lock();
     }
     EXPECT_EQ(order.size(), 14u);
-    
+
     std::vector<int> orderCorrect = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
     int cdiff = 0;
     for (size_t kk = 0; kk < order.size(); ++kk) {
