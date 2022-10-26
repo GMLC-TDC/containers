@@ -114,11 +114,11 @@ TEST(work_queue, WorkQueue_test3)
 
     WorkQueue wq(1);
     // a sleeper work block to give us time to set up the rest
-    auto fk = [] {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    auto sleeper = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(400));
     };
 
-    auto b1 = make_workBlock(fk);
+    auto b1 = make_workBlock(sleeper);
     std::vector<int> order;
     std::mutex lk;
     auto hp = [&order, &lk] {
@@ -152,12 +152,22 @@ TEST(work_queue, WorkQueue_test3)
 
     wq.addWorkBlock(make_workBlock(hp), WorkQueue::WorkPriority::high);
     wq.addWorkBlock(make_workBlock(hp), WorkQueue::WorkPriority::high);
-    std::this_thread::sleep_for(std::chrono::milliseconds(340));
+    std::this_thread::sleep_for(std::chrono::milliseconds(350));
     while (!wq.isEmpty()) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(40));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     std::unique_lock<std::mutex> m(lk);
+    if (order.size() < 14U)
+    {
+        m.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(340));
+        while (!wq.isEmpty()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+        m.lock();
+    }
     EXPECT_EQ(order.size(), 14u);
+    
     std::vector<int> orderCorrect = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
     int cdiff = 0;
     for (size_t kk = 0; kk < order.size(); ++kk) {

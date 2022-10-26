@@ -213,7 +213,7 @@ that can be executed
     };
 
     /** make a unique pointer to a workBlock object from a functional object
-@param[in] fptr a std::function, std::bind, functionoid, lamda function or
+@param[in] fptr a std::function, std::bind, functionoid, lambda function or
 anything else that could be called with operator()
 @return a unique pointer to a work block function
 */
