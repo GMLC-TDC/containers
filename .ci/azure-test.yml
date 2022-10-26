@@ -1,5 +1,5 @@
 steps:
-  - script: ctest --output-on-failure -C $(containers.build_type) -T test
+  - script: ctest --output-on-failure --timeout 100 -C $(containers.build_type) -T test 
     displayName: "Test"
     workingDirectory: build
 
