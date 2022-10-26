@@ -182,6 +182,7 @@ TEST(work_queue, WorkQueue_test3_vector)
     // Test a queue priority mechanisms
 
     WorkQueue wq(1);
+    wq.setPriorityRatio(3);
     // a sleeper work block to give us time to set up the rest
     auto sleeper = [] {
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -192,15 +193,15 @@ TEST(work_queue, WorkQueue_test3_vector)
     std::vector<int> order;
     std::mutex lk;
     auto hp = [&order, &lk] {
-        std::unique_lock<std::mutex> m(lk);
+        std::lock_guard<std::mutex> m(lk);
         order.push_back(1);
     };
     auto mp = [&order, &lk] {
-        std::unique_lock<std::mutex> m(lk);
+        std::lock_guard<std::mutex> m(lk);
         order.push_back(2);
     };
     auto lp = [&order, &lk] {
-        std::unique_lock<std::mutex> m(lk);
+        std::lock_guard<std::mutex> m(lk);
         order.push_back(3);
     };
     std::vector<std::shared_ptr<BasicWorkBlock>> lpv;
@@ -221,7 +222,7 @@ TEST(work_queue, WorkQueue_test3_vector)
         hpv.push_back(std::move(res));
     }
 
-    wq.setPriorityRatio(3);
+    
     wq.addWorkBlock(std::move(b1), WorkQueue::WorkPriority::high);
 
     wq.addWorkBlock(lpv, WorkQueue::WorkPriority::low);
@@ -229,7 +230,7 @@ TEST(work_queue, WorkQueue_test3_vector)
     wq.addWorkBlock(hpv, WorkQueue::WorkPriority::high);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
-    std::unique_lock<std::mutex> m(lk);
+    
     while (!wq.isEmpty()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
