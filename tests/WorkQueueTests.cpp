@@ -42,18 +42,19 @@ TEST(work_queue, WorkQueue_test1)
     };
 
     WorkQueue wq2(4);
+    constexpr std::size_t blockCount{20};
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(wq2.getWorkerCount(), 4);
-    std::vector<decltype(make_shared_workBlock(fk))> blocks(20);
-    std::vector<std::shared_ptr<BasicWorkBlock>> bblocks(20);
-    for (size_t kk = 0; kk < 20; ++kk) {
+    std::vector<decltype(make_shared_workBlock(fk))> blocks(blockCount);
+    std::vector<std::shared_ptr<BasicWorkBlock>> bblocks(blockCount);
+    for (size_t kk = 0; kk < blockCount; ++kk) {
         blocks[kk] = make_shared_workBlock(fk);
         bblocks[kk] = blocks[kk];
     }
     wq2.addWorkBlock(bblocks);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    std::vector<decltype(fk())> res(10);
-    for (size_t kk = 0; kk < 20; ++kk) {
+    std::vector<decltype(fk())> res(blockCount);
+    for (size_t kk = 0; kk < blockCount; ++kk) {
         res[kk] = blocks[kk]->getReturnVal();
     }
     std::sort(res.begin(), res.end());
