@@ -1,4 +1,4 @@
-# Contributing to HELICS
+# Contributing to GMLC-TDC libraries
 
 :+1: First off, thank you for taking the time to contribute! :+1:
 
