@@ -18,8 +18,8 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <type_traits>
 #include <utility>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
+
     /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
 will check performance at a later time
@@ -105,4 +105,3 @@ a single thread so it can be accessed without locks
     };
 
 }  // namespace containers
-}  // namespace gmlc

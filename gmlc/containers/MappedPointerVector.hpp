@@ -19,8 +19,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class merging a vector of pointer with a map that can be used to lookup
      * specific values
      */
@@ -56,6 +55,17 @@ namespace containers {
             dataStorage.emplace_back(
                 std::make_unique<VType>(std::forward<Us>(data)...));
             lookup.emplace(searchValue, index);
+            return index;
+        }
+
+        /** insert a new element into the vector*/
+        template<typename... Us>
+        std::optional<size_t>
+            insert(no_search_type /*searchValue*/, Us&&... data)
+        {
+            auto index = dataStorage.size();
+            dataStorage.emplace_back(
+                std::make_unique<VType>(std::forward<Us>(data)...));
             return index;
         }
 
@@ -109,6 +119,16 @@ namespace containers {
         {
             return (index < dataStorage.size()) ? (dataStorage[index].get()) :
                                                   nullptr;
+        }
+
+        /** add an additional index term for searching*/
+        bool addSearchTermForIndex(const searchType& searchValue, size_t index)
+        {
+            if (index < dataStorage.size()) {
+                auto res = lookup.emplace(searchValue, index);
+                return res.second;
+            }
+            return false;
         }
 
         /** remove an element at a specific index
@@ -192,4 +212,3 @@ namespace containers {
     };
 
 }  // namespace containers
-}  // namespace gmlc

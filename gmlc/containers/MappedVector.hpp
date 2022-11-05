@@ -117,6 +117,17 @@ limited to no removal since removal is a rather expensive operation
 
         /** get a const reference to the last element of the vector*/
         const VType& back() const { return dataStorage.back(); }
+
+        /** add an additional index term for searching*/
+        bool addSearchTermForIndex(const searchType& searchValue, size_t index)
+        {
+            if (index < dataStorage.size()) {
+                auto res = lookup.emplace(searchValue, index);
+                return res.second;
+            }
+            return false;
+        }
+
         /** remove an element by its index*/
         void removeIndex(size_t index)
         {

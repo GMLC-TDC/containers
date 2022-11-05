@@ -12,7 +12,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 using namespace gmlc::containers;
 
 /** test basic operations */
-TEST(mapped_vector_tests, definition_tests)
+TEST(mapped_pointer_vector, definition)
 {
     MappedPointerVector<double> M;
     MappedPointerVector<std::string> S2;
@@ -27,7 +27,7 @@ TEST(mapped_vector_tests, definition_tests)
     decltype(TV2) TV3(std::move(TV2));
 }
 
-TEST(mapped_vector_tests, insertion_tests)
+TEST(mapped_pointer_vector, insertion)
 {
     MappedPointerVector<std::vector<double>> Mvec;
     Mvec.insert("el1", 3, 1.7);
@@ -49,7 +49,34 @@ TEST(mapped_vector_tests, insertion_tests)
     EXPECT_EQ(V4->size(), 45);
 }
 
-TEST(mapped_vector_tests, iterator_tests)
+TEST(mapped_pointer_vector, insertion_no_search)
+{
+    MappedPointerVector<std::vector<double>> Mvec;
+    Mvec.insert("el1", 3, 1.7);
+    EXPECT_EQ(Mvec.size(), 1);
+    auto res=Mvec.insert(no_search_type(), std::vector<double>(45));
+    EXPECT_EQ(Mvec.size(), 2);
+    EXPECT_TRUE(res);
+    auto V = Mvec[0];
+    EXPECT_EQ(V->size(), 3);
+    EXPECT_EQ((*V)[0], 1.7);
+    EXPECT_EQ((*V)[2], 1.7);
+
+    auto V2 = Mvec[1];
+    EXPECT_EQ(V2->size(), 45);
+
+    auto V3 = Mvec.find("el1");
+    EXPECT_EQ(V3->size(), 3);
+
+    auto V4 = Mvec.find("a2");
+    EXPECT_EQ(V4,nullptr);
+
+    EXPECT_TRUE(Mvec.addSearchTermForIndex("a2",*res));
+     V4 = Mvec.find("a2");
+    EXPECT_NE(V4,nullptr);
+}
+
+TEST(mapped_pointer_vector, iterator)
 {
     MappedPointerVector<double> Mvec;
 
@@ -67,7 +94,7 @@ TEST(mapped_vector_tests, iterator_tests)
     EXPECT_EQ(*Mvec[2], 9.7 + 1.0);
 }
 
-TEST(mapped_vector_tests, remove_tests)
+TEST(mapped_pointer_vector, remove)
 {
     MappedPointerVector<double> Mvec;
 
