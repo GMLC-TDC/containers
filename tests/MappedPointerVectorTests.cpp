@@ -54,7 +54,7 @@ TEST(mapped_pointer_vector, insertion_no_search)
     MappedPointerVector<std::vector<double>> Mvec;
     Mvec.insert("el1", 3, 1.7);
     EXPECT_EQ(Mvec.size(), 1);
-    auto res=Mvec.insert(no_search_type(), std::vector<double>(45));
+    auto res = Mvec.insert(no_search_type(), std::vector<double>(45));
     EXPECT_EQ(Mvec.size(), 2);
     EXPECT_TRUE(res);
     auto V = Mvec[0];
@@ -69,11 +69,11 @@ TEST(mapped_pointer_vector, insertion_no_search)
     EXPECT_EQ(V3->size(), 3);
 
     auto V4 = Mvec.find("a2");
-    EXPECT_EQ(V4,nullptr);
+    EXPECT_EQ(V4, nullptr);
 
-    EXPECT_TRUE(Mvec.addSearchTermForIndex("a2",*res));
-     V4 = Mvec.find("a2");
-    EXPECT_NE(V4,nullptr);
+    EXPECT_TRUE(Mvec.addSearchTermForIndex("a2", *res));
+    V4 = Mvec.find("a2");
+    EXPECT_NE(V4, nullptr);
 }
 
 TEST(mapped_pointer_vector, iterator)
