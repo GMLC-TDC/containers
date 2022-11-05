@@ -105,7 +105,7 @@ namespace containers {
         /** insert a new element into the vector*/
         template<typename... Us>
         std::optional<size_t> insert(
-            std::nullptr_t /*unused*/,
+            no_search_type /*unused*/,
             const searchType2& searchValue2,
             Us&&... data)
         {
