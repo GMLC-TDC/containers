@@ -405,7 +405,7 @@ TEST(blocking_priority_queue, multithreaded_tests3_pop)
 
     auto cons = [&]() {
         int64_t res{1};
-        int64_t cnt{ 0 };
+        int64_t cnt{0};
         while (res >= 0) {
             ++cnt;
             res = sq.pop();
