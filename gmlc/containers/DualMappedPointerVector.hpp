@@ -53,7 +53,7 @@ namespace containers {
             if (fnd != lookup1.end()) {
                 auto fnd2 = lookup2.find(searchValue2);
                 if (fnd2 != lookup2.end()) {
-                    return {};
+                    return std::nullopt;
                 }
             }
             auto index = dataStorage.size();
@@ -73,7 +73,7 @@ namespace containers {
             if (fnd != lookup1.end()) {
                 auto fnd2 = lookup2.find(searchValue2);
                 if (fnd2 != lookup2.end()) {
-                    return {};
+                    return std::nullopt;
                 }
             }
             auto index = dataStorage.size();
@@ -93,7 +93,7 @@ namespace containers {
         {
             auto fnd = lookup1.find(searchValue1);
             if (fnd != lookup1.end()) {
-                return {};
+                return std::nullopt;
             }
             auto index = dataStorage.size();
             dataStorage.emplace_back(
@@ -111,7 +111,7 @@ namespace containers {
         {
             auto fnd = lookup2.find(searchValue2);
             if (fnd != lookup2.end()) {
-                return {};
+                return std::nullopt;
             }
             auto index = dataStorage.size();
             dataStorage.emplace_back(

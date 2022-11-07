@@ -196,7 +196,7 @@ contention the two locks will reduce contention in most cases.
             std::lock_guard<MUTEX> lock(m_pullLock);
 
             if (pullElements.empty()) {
-                return {};
+                return std::nullopt;
             }
 
             auto t = pullElements.back();
@@ -342,7 +342,7 @@ any meaning depending on the number of consumers
         std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
         checkPullAndSwap();
         if (pullElements.empty()) {
-            return {};
+            return std::nullopt;
         }
         std::optional<T> val(
             std::move(pullElements.back()));  // do it this way to allow
