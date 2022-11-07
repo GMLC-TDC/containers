@@ -244,7 +244,7 @@ the two locks will reduce contention in most cases.
                 return priorityQueue.front();
             }
             if (pullElements.empty()) {
-                return {};
+                return std::nullopt;
             }
 
             auto t = pullElements.back();
@@ -425,7 +425,7 @@ any meaning depending on the number of consumers
         }
         checkPullAndSwap();
         if (pullElements.empty()) {
-            return {};
+            return std::nullopt;
         }
         // do it this way to allow movable only types
         std::optional<T> val(std::move(pullElements.back()));
