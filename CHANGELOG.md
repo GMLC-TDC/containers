@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0][] ~ 2024-11-27
+
+### Changed
+- Use C++20
+- Update all copyright dates
+- use submodules for googletest and benchmark
+
+### Fixed
+- Fixed clang tidy definition
+
 ## [0.4.0][] ~ 2022-05-06
 
 ### Changed

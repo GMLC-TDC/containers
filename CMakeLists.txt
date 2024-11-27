@@ -9,7 +9,7 @@
 
 cmake_minimum_required(VERSION 3.10...3.31)
 
-project(GMLC_CONTAINERS VERSION 0.6.0)
+project(GMLC_CONTAINERS VERSION 0.5.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
