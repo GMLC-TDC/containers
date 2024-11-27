@@ -199,8 +199,12 @@ if(NOT Boost_FOUND)
 
     endif()
 endif()
-if(NOT Boost_FOUND)
+if(NOT Boost_FOUND )
+if (BOOST_OPTIONAL)
+    message(WARNING " Unable to find BOOST library")
+else()
     message(FATAL_ERROR " Unable to find BOOST library")
+    endif()
 endif()
 # Minimum version of Boost required for building test suite
 set(BOOST_VERSION_LEVEL ${Boost_MINOR_VERSION})

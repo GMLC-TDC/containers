@@ -64,6 +64,7 @@ endif()
 option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
 # Add boost to test boost::optional if available
 if(GMLC_CONTAINERS_INCLUDE_BOOST)
+set(BOOST_OPTIONAL TRUE)
     include(addBoost)
     if(Boost_FOUND)
         target_link_libraries(containers_base INTERFACE Boost::boost)
