@@ -9,9 +9,9 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "gtest/gtest.h"
 #include <iostream>
-#include <vector>
 #include <string>
 #include <utility>
+#include <vector>
 
 using gmlc::containers::DualMappedPointerVector;
 
