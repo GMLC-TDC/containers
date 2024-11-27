@@ -8,11 +8,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [0.5.0][] ~ 2024-11-27
 
 ### Changed
+
 - Use C++20
 - Update all copyright dates
 - use submodules for googletest and benchmark
 
 ### Fixed
+
 - Fixed clang tidy definition
 
 ## [0.4.0][] ~ 2022-05-06

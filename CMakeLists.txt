@@ -75,15 +75,15 @@ endif()
 
 option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
 # Add boost to test boost::optional if available
-if (GMLC_CONTAINERS_INCLUDE_BOOST)
-include(addBoost)
-if(Boost_FOUND)
+if(GMLC_CONTAINERS_INCLUDE_BOOST)
+    include(addBoost)
+    if(Boost_FOUND)
     target_link_libraries(containers_base INTERFACE Boost::boost)
 
     target_compile_definitions(containers_base INTERFACE USE_BOOST_OPTIONAL)
     target_compile_definitions(containers_base INTERFACE ENABLE_BOOST_TYPES)
 
-endif()
+    endif()
 endif()
 target_include_directories(containers_base SYSTEM INTERFACE ThirdParty)
 
