@@ -41,6 +41,14 @@ if(WIN32 AND NOT UNIX_LIKE)
         boost_1_75_0
         boost_1_74_0
         boost_1_73_0
+         boost_1_72_0
+        boost_1_71_0
+        boost_1_70_0
+        boost_1_69_0
+        boost_1_68_0
+        boost_1_67_0
+        boost_1_66_0
+        boost_1_65_0
     )
 
     set(poss_prefixes
@@ -98,6 +106,14 @@ if(WIN32 AND NOT UNIX_LIKE)
                     Boost-1.75.0
                     Boost-1.74.0
                     Boost-1.73.0
+                     Boost-1.72.0
+                    Boost-1.71.0
+                    Boost-1.10.0
+                    Boost-1.69.0
+                    Boost-1.68.0
+                    Boost-1.67.0
+                    Boost-1.66.0
+                    Boost-1.65.0
             )
             set(Boost_ROOT ${BOOST_CMAKE_PATH})
         else()
@@ -129,7 +145,7 @@ if(NOT BOOST_REQUIRED_LIBRARIES)
     set(BOOST_REQUIRED_LIBRARIES)
 endif()
 
-set(BOOST_MINIMUM_VERSION 1.73)
+set(BOOST_MINIMUM_VERSION 1.65)
 
 if(BOOST_REQUIRED_LIBRARIES)
     find_package(
