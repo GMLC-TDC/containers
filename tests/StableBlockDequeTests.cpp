@@ -12,8 +12,10 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <atomic>
 #include <iostream>
 #include <string>
+#include <utility>
+#include <vector>
 
-using namespace gmlc::containers;
+using gmlc::containers::StableBlockDeque;
 
 TEST(stableBlockDequeTest, test_lookup)
 {

@@ -10,11 +10,12 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <iostream>
 #include <memory>
 #include <thread>
+#include <utility>
 /** these test cases test data_block and data_view objects
  */
 
 #include "BlockingQueue.hpp"
-using namespace gmlc::containers;
+using gmlc::containers::BlockingQueue;
 
 /** test basic operations */
 TEST(blocking_queue, basic)

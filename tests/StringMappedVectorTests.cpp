@@ -9,7 +9,11 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "gtest/gtest.h"
 #include <iostream>
-using namespace gmlc::containers;
+#include <string>
+#include <vector>
+#include <utility>
+
+using gmlc::containers::StringMappedVector;
 
 /** test basic operations */
 TEST(string_mapped_vector, definition_tests)

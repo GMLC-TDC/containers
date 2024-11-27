@@ -26,8 +26,11 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "gtest/gtest.h"
 #include <chrono>
 #include <iostream>
+#include <algorithm>
+#include <utility>
+#include <vector>
 
-using namespace gmlc::containers;
+using gmlc::containers::WorkQueue;
 
 TEST(work_queue, WorkQueue_test1)
 {

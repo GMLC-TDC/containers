@@ -9,7 +9,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include <benchmark/benchmark.h>
 
-using namespace gmlc::containers;
+using gmlc::containers::CircularBuffer;
 
 static void BM_BufferPushPop(benchmark::State& state)
 {

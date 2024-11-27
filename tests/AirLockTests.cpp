@@ -18,7 +18,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "gtest/gtest.h"
 #include <iostream>
 
-using namespace gmlc::containers;
+using gmlc::containers::AirLock;
 
 /** test basic operations */
 TEST(airlock_tests, basic_tests)

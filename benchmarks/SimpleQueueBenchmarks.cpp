@@ -11,7 +11,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <benchmark/benchmark.h>
 #include <future>
 
-using namespace gmlc::containers;
+using gmlc::containers::SimpleQueue;
 
 template<class X>
 class sqFixture : public benchmark::Fixture {

@@ -16,7 +16,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "BlockingPriorityQueue.hpp"
-using namespace gmlc::containers;
+using gmlc::containers::BlockingPriorityQueue;
 
 /** test basic operations */
 TEST(blocking_priority_queue, basic_tests)

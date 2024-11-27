@@ -14,7 +14,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
  */
 
 #include "SimpleQueue.hpp"
-using namespace gmlc::containers;
+using gmlc::containers::SimpleQueue;
 
 /** test basic operations */
 TEST(simple_queue_tests, basic_tests)
