@@ -93,6 +93,8 @@ option(GMLC_CONTAINERS_TEST "Enable tests for the containers library" ON)
 option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" ON)
 
 if(GMLC_CONTAINERS_TEST)
+    
+    include(updateGitSubmodules)
     enable_testing()
     if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/googletest/CMakeLists.txt")
             submod_update(ThirdParty/googletest)
@@ -101,6 +103,7 @@ if(GMLC_CONTAINERS_TEST)
 endif()
 
 if(GMLC_CONTAINERS_BENCHMARK)
+include(updateGitSubmodules)
 if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/benchmark/CMakeLists.txt")
             submod_update(ThirdParty/benchmark)
         endif()
