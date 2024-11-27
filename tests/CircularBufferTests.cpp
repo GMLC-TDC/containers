@@ -11,8 +11,8 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include "gtest/gtest.h"
 #include <iostream>
-#include <vector>
 #include <utility>
+#include <vector>
 
 using gmlc::containers::CircularBuffer;
 using gmlc::containers::CircularBufferRaw;

@@ -24,9 +24,9 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "WorkQueue.hpp"
 
 #include "gtest/gtest.h"
+#include <algorithm>
 #include <chrono>
 #include <iostream>
-#include <algorithm>
 #include <utility>
 #include <vector>
 
