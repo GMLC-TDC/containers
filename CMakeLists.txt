@@ -78,10 +78,10 @@ option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be us
 if(GMLC_CONTAINERS_INCLUDE_BOOST)
     include(addBoost)
     if(Boost_FOUND)
-    target_link_libraries(containers_base INTERFACE Boost::boost)
+        target_link_libraries(containers_base INTERFACE Boost::boost)
 
-    target_compile_definitions(containers_base INTERFACE USE_BOOST_OPTIONAL)
-    target_compile_definitions(containers_base INTERFACE ENABLE_BOOST_TYPES)
+        target_compile_definitions(containers_base INTERFACE USE_BOOST_OPTIONAL)
+        target_compile_definitions(containers_base INTERFACE ENABLE_BOOST_TYPES)
 
     endif()
 endif()
@@ -93,20 +93,20 @@ option(GMLC_CONTAINERS_TEST "Enable tests for the containers library" ON)
 option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" ON)
 
 if(GMLC_CONTAINERS_TEST)
-    
+
     include(updateGitSubmodules)
     enable_testing()
     if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/googletest/CMakeLists.txt")
-            submod_update(ThirdParty/googletest)
-        endif()
+        submod_update(ThirdParty/googletest)
+    endif()
     add_subdirectory(tests)
 endif()
 
 if(GMLC_CONTAINERS_BENCHMARK)
-include(updateGitSubmodules)
-if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/benchmark/CMakeLists.txt")
-            submod_update(ThirdParty/benchmark)
-        endif()
+    include(updateGitSubmodules)
+    if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/benchmark/CMakeLists.txt")
+        submod_update(ThirdParty/benchmark)
+    endif()
     add_subdirectory(benchmarks)
 endif()
 
