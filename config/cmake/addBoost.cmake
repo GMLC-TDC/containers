@@ -41,7 +41,7 @@ if(WIN32 AND NOT UNIX_LIKE)
         boost_1_75_0
         boost_1_74_0
         boost_1_73_0
-         boost_1_72_0
+        boost_1_72_0
         boost_1_71_0
         boost_1_70_0
         boost_1_69_0
@@ -106,7 +106,7 @@ if(WIN32 AND NOT UNIX_LIKE)
                     Boost-1.75.0
                     Boost-1.74.0
                     Boost-1.73.0
-                     Boost-1.72.0
+                    Boost-1.72.0
                     Boost-1.71.0
                     Boost-1.10.0
                     Boost-1.69.0
