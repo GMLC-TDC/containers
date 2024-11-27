@@ -1,5 +1,5 @@
 # ~~~
-# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2024, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -7,15 +7,15 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # ~~~
 
-cmake_minimum_required(VERSION 3.10...3.25)
+cmake_minimum_required(VERSION 3.10...3.31)
 
-project(GMLC_CONTAINERS VERSION 0.5.0)
+project(GMLC_CONTAINERS VERSION 0.6.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 # -----------------------------------------------------------------------------
 set(GMLC_CONTAINERS_VERSION_BUILD)
-set(GMLC_CONTAINERS_DATE "2022-10-25")
+set(GMLC_CONTAINERS_DATE "2024-11-27")
 
 set(GMLC_CONTAINERS_VERSION_STRING
     "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})"
@@ -24,7 +24,7 @@ set(GMLC_CONTAINERS_VERSION_STRING
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # User settable
     set(GMLC_CONTAINERS_CXX_STD
-        "17"
+        "20"
         CACHE STRING "The CMake standard to require"
     )
 
@@ -34,7 +34,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 17)
+    set(CMAKE_CXX_STANDARD 20)
 endif()
 # -----------------------------------------------------------------------------
 # set the module path and include some common macros
@@ -75,7 +75,8 @@ endif()
 
 option(GMLC_CONTAINERS_INCLUDE_BOOST "Enable some boost library headers to be used" ON)
 # Add boost to test boost::optional if available
-find_package(Boost 1.65)
+if (GMLC_CONTAINERS_INCLUDE_BOOST)
+include(addBoost)
 if(Boost_FOUND)
     target_link_libraries(containers_base INTERFACE Boost::boost)
 
@@ -83,8 +84,8 @@ if(Boost_FOUND)
     target_compile_definitions(containers_base INTERFACE ENABLE_BOOST_TYPES)
 
 endif()
-
-target_include_directories(containers_base INTERFACE ThirdParty)
+endif()
+target_include_directories(containers_base SYSTEM INTERFACE ThirdParty)
 
 add_subdirectory(gmlc)
 
@@ -93,10 +94,16 @@ option(GMLC_CONTAINERS_BENCHMARK "Enable benchmarks for the containers library" 
 
 if(GMLC_CONTAINERS_TEST)
     enable_testing()
+    if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/googletest/CMakeLists.txt")
+            submod_update(ThirdParty/googletest)
+        endif()
     add_subdirectory(tests)
 endif()
 
 if(GMLC_CONTAINERS_BENCHMARK)
+if(NOT EXISTS "${PROJECT_SOURCE_DIR}/ThirdParty/benchmark/CMakeLists.txt")
+            submod_update(ThirdParty/benchmark)
+        endif()
     add_subdirectory(benchmarks)
 endif()
 
