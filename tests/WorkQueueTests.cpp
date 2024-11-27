@@ -30,10 +30,10 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-using gmlc::containers::WorkQueue;
+using gmlc::containers::BasicWorkBlock;
 using gmlc::containers::make_shared_workBlock;
 using gmlc::containers::make_workBlock;
-using gmlc::containers::BasicWorkBlock;
+using gmlc::containers::WorkQueue;
 
 TEST(work_queue, WorkQueue_test1)
 {
