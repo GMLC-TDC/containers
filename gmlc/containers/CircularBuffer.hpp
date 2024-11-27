@@ -97,7 +97,7 @@ namespace containers {
             return size;
         }
         /// Return number of bytes read, 0 if no data available and -nextSize if
-        /// insuffient space available
+        /// insufficient space available
         int pop(unsigned char* data, int maxSize)
         {
             if (next_write == next_read) {
