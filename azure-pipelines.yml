@@ -83,8 +83,8 @@ jobs:
         gcc12:
           containerImage: helics/buildenv:gcc12-builder
           containers.std: 20
-        clang8:
-          containerImage: helics/buildenv:clang8-builder
+        clang9:
+          containerImage: helics/buildenv:clang9-builder
           containers.std: 17
     container: $[ variables['containerImage'] ]
     steps:
