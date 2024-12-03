@@ -6,11 +6,10 @@ aliases:
     command: |
       mkdir -p build
       cd build
-      sysctl vm.mmap_rnd_bits=28
-      echo 0 > /proc/sys/kernel/randomize_va_space
       eval cmake .. ${CMAKE_FLAGS}
       make -j 4
-      ctest --verbose --timeout 120
+      setarch --list
+      setarch linux64 -R `ctest --verbose --timeout 120`
 
 jobs:
   containersgccTSan:
