@@ -8,6 +8,7 @@ aliases:
       cd build
       eval cmake .. ${CMAKE_FLAGS}
       make -j 4
+      sysctl vm.mmap_rnd_bits=30
       ctest --verbose --timeout 120
 
 jobs:
