@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2024, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -77,9 +77,13 @@ target_compile_options(
 
 if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     target_compile_options(
-        compile_flags_target INTERFACE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall
-                                       -pedantic>
+        compile_flags_target INTERFACE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>
     )
+    if(NOT WIN32)
+        # to support clang-cl which doesn't support these options
+        target_compile_options(compile_flags_target INTERFACE -pedantic)
+
+    endif()
     target_compile_options(
         compile_flags_target
         INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wextra
@@ -113,31 +117,47 @@ if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
         # for checking for any internal usages
         target_compile_options(
             compile_flags_target
-            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wduplicated-cond -Wnull-dereference
-                      -Wshadow -Wimplicit-fallthrough=2 -Wno-psabi
+            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wduplicated-cond
+                      -Wclass-memaccess
+                      -Wnull-dereference
+                      -Wshadow
+                      -Wimplicit-fallthrough=2
+                      -Wno-psabi
                       -Wno-deprecated-declarations>
         )
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.9)
-            target_compile_options(
-                compile_flags_target
-                INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wclass-memaccess>
-            )
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
+            target_link_libraries(build_flags_target INTERFACE "stdc++fs")
 
+        endif()
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+            target_compile_options(
+                compile_flags_target INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wparentheses>
+            )
         endif()
     endif()
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         target_compile_options(
             compile_flags_target INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wshadow>
         )
-        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 6.0)
+        target_compile_options(
+            compile_flags_target INTERFACE -Wdocumentation
+                                           -Wno-documentation-deprecated-sync
+        )
+        if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+            message(STATUS "clang>=13")
             target_compile_options(
-                compile_flags_target INTERFACE -Wdocumentation
-                                               -Wno-documentation-deprecated-sync
+                compile_flags_target
+                INTERFACE -Wreserved-identifier -Wunused-but-set-parameter
+                          -Wunused-but-set-variable
             )
         endif()
+
     endif()
 endif(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
 
+if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(compile_flags_target INTERFACE -Wno-reserved-identifier)
+endif()
 # -------------------------------------------------------------
 # Extra definitions for visual studio
 # -------------------------------------------------------------
@@ -146,13 +166,7 @@ if(MSVC)
         compile_flags_target INTERFACE -D_CRT_SECURE_NO_WARNINGS
                                        -D_SCL_SECURE_NO_WARNINGS /MP
     )
-    if(MSVC_VERSION LESS 1920)
-        # this is a bug in the visual studio 2017 compiler with C++17
-        target_compile_options(
-            compile_flags_target
-            INTERFACE -D_SILENCE_CXX17_ALLOCATOR_VOID_DEPRECATION_WARNING
-        )
-    endif()
+
     # these next two should be global
     add_compile_options(/EHsc /MP)
     target_compile_options(build_flags_target INTERFACE /EHsc)
@@ -212,7 +226,10 @@ endif()
 # -------------------------------------------------------------
 include(CheckLatestCXXStandardOption)
 
-message(STATUS "setting helics C++ standard build option to \"${CXX_STANDARD_FLAG}\"")
+message(
+    STATUS
+        "setting ${PROJECT_NAME} C++ standard build option to \"${CXX_STANDARD_FLAG}\""
+)
 if(CXX_STANDARD_FLAG)
     if(MSVC)
         add_compile_options(${CXX_STANDARD_FLAG})

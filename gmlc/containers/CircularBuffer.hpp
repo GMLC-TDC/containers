@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2022,
+Copyright (c) 2017-2024,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved.
@@ -97,7 +97,7 @@ namespace containers {
             return size;
         }
         /// Return number of bytes read, 0 if no data available and -nextSize if
-        /// insuffient space available
+        /// insufficient space available
         int pop(unsigned char* data, int maxSize)
         {
             if (next_write == next_read) {

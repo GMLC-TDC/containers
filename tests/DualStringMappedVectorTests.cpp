@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2022,
+Copyright (c) 2017-2024,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
@@ -9,7 +9,11 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "gtest/gtest.h"
 #include <iostream>
-using namespace gmlc::containers;
+#include <string>
+#include <utility>
+#include <vector>
+
+using gmlc::containers::DualStringMappedVector;
 
 /** test basic operations */
 TEST(dual_string_mapped_vector, definition)

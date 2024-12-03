@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2022,
+Copyright (c) 2017-2024,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
@@ -11,7 +11,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include <benchmark/benchmark.h>
 #include <future>
 
-using namespace gmlc::containers;
+using gmlc::containers::SimpleQueue;
 
 template<class X>
 class sqFixture : public benchmark::Fixture {
@@ -22,13 +22,13 @@ class sqFixture : public benchmark::Fixture {
 BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             sq.push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 sq.push(ii);
             }
@@ -57,15 +57,15 @@ BENCHMARK_REGISTER_F(sqFixture, SProdSCons)
 BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             sq.push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             int cnt = 0;
-            while (cnt < state.threads - 1) {
+            while (cnt < state.threads() - 1) {
                 auto res = sq.pop();
                 if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
@@ -118,13 +118,13 @@ class stdqFixture : public benchmark::Fixture {
 BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
             }
@@ -153,13 +153,13 @@ BENCHMARK_REGISTER_F(stdqFixture, SProdSCons_std)
 BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < 3) {
                 auto res = pop();
@@ -211,13 +211,13 @@ class blfFixture : public benchmark::Fixture {
 BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
             }
@@ -246,15 +246,15 @@ BENCHMARK_REGISTER_F(blfFixture, SProdSCons_blf)
 BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             int cnt = 0;
-            while (cnt < state.threads - 1) {
+            while (cnt < state.threads() - 1) {
                 auto res = pop();
                 if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
@@ -304,13 +304,13 @@ class bspscFixture : public benchmark::Fixture {
 BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
             }
@@ -367,13 +367,13 @@ class mcFixture : public benchmark::Fixture {
 BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index == 0) {
+        if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
             }
@@ -402,20 +402,20 @@ BENCHMARK_REGISTER_F(mcFixture, SProdSCons_mc)
 BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)
 (benchmark::State& state)
 {
-    if (state.thread_index == 0) {
+    if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             push(ii);
         }
     }
     for (auto _ : state) {
-        if (state.thread_index != 0) {
+        if (state.thread_index() != 0) {
             for (int64_t ii = 1'000; ii <= 101000; ++ii) {
                 push(ii);
             }
             push(-1);
         } else {
             int cnt = 0;
-            while (cnt < state.threads - 1) {
+            while (cnt < state.threads() - 1) {
                 auto res = pop();
                 if (!res) {  // yield so the producers can catch up
                     std::this_thread::yield();
