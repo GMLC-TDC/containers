@@ -1,1 +1,2 @@
-# Project-specific suppressions can be added here as needed.
+# warningDisable.h pragma-style macros confuse cppcheck in this benchmark file.
+unknownMacro:benchmarks/SimpleQueueBenchmarks.cpp

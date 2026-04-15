@@ -190,6 +190,8 @@ BENCHMARK_REGISTER_F(stdqFixture, MProdSCons_std)
 template<class X>
 class blfFixture : public benchmark::Fixture {
   public:
+    blfFixture() : q(4096) {}
+
     boost::lockfree::queue<X> q;
 
     void push(const X& val)
