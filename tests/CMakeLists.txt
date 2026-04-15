@@ -44,9 +44,3 @@ foreach(T ${CONTAINERS_TESTS})
     endif()
 
 endforeach()
-
-if(CMAKE_BUILD_TYPE STREQUAL Coverage)
-    setup_target_for_coverage(
-        NAME CONTAINERS_coverage EXECUTABLE ctest DEPENDENCIES ${CONTAINERS_TESTS}
-    )
-endif()
