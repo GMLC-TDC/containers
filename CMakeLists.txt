@@ -84,7 +84,8 @@ cmake_dependent_option(
     GMLC_CONTAINERS_CLANG_TIDY "Look for and use Clang-Tidy" OFF
     "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
 )
-set(GMLC_CONTAINERS_CLANG_TIDY_OPTIONS ""
+set(GMLC_CONTAINERS_CLANG_TIDY_OPTIONS
+    ""
     CACHE STRING "Clang tidy options, such as -fix, semicolon separated"
 )
 
@@ -97,7 +98,9 @@ endif()
 
 if(GMLC_CONTAINERS_CLANG_TIDY)
     find_program(
-        CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable" REQUIRED
+        CLANG_TIDY_EXE
+        NAMES "clang-tidy"
+        DOC "Path to clang-tidy executable" REQUIRED
     )
 
     set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" ${GMLC_CONTAINERS_CLANG_TIDY_OPTIONS})
