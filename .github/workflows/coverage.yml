@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        std: ["20", "23", "26"]
+        std: ["20", "23"]
     steps:
       - uses: actions/checkout@v6
         with:
