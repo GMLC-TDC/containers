@@ -153,54 +153,54 @@ namespace containers {
             data{cb.data}, actualSize(cb.actualSize),
             actualCapacity(cb.actualCapacity), buffer(std::move(cb.buffer))
         {
-            cb.data = nullptr;
-            cb.actualSize = 0;
-            cb.actualCapacity = 0;
-            cb.buffer.capacity_ = 0;
-            cb.buffer.origin = nullptr;
-            cb.buffer.next_read = nullptr;
-            cb.buffer.next_write = nullptr;
+            cb.reset();
         }
         CircularBuffer(const CircularBuffer& cb) :
-            data{new unsigned char[cb.actualSize]}, actualSize{cb.actualSize},
-            actualCapacity{cb.actualSize}, buffer(cb.buffer)
+            data{nullptr}, actualSize{cb.actualSize}, actualCapacity{0}, buffer(nullptr, 0)
         {
-            if (data != nullptr && cb.data != nullptr) {
-                memcpy(data, cb.data, actualSize);
-                auto read_offset = buffer.next_read - buffer.origin;
-                auto write_offset = buffer.next_write - buffer.origin;
-                buffer.origin = data;
-                buffer.next_read = buffer.origin + read_offset;
-                buffer.next_write = buffer.origin + write_offset;
-            } else {
-                delete[] data;
+            if (cb.data == nullptr || cb.actualSize <= 0) {
                 actualSize = 0;
-                actualCapacity = 0;
+                return;
             }
+
+            data = new unsigned char[cb.actualSize];
+            actualCapacity = cb.actualSize;
+            memcpy(data, cb.data, actualSize);
+
+            buffer = cb.buffer;
+            auto read_offset = buffer.next_read - buffer.origin;
+            auto write_offset = buffer.next_write - buffer.origin;
+            buffer.origin = data;
+            buffer.next_read = buffer.origin + read_offset;
+            buffer.next_write = buffer.origin + write_offset;
         }
 
         CircularBuffer& operator=(CircularBuffer&& cb) noexcept
         {
-            if (data != nullptr) {
-                delete[] data;
-            }
-            data = cb.data;
-            actualSize = cb.actualSize;
-            actualCapacity = cb.actualCapacity;
-            buffer = std::move(cb.buffer);
-            data = std::move(cb.data);
+            if (this != &cb) {
+                if (data != nullptr) {
+                    delete[] data;
+                }
+                data = cb.data;
+                actualSize = cb.actualSize;
+                actualCapacity = cb.actualCapacity;
+                buffer = std::move(cb.buffer);
 
-            cb.buffer.capacity_ = 0;
-            cb.buffer.origin = nullptr;
-            cb.buffer.next_read = nullptr;
-            cb.buffer.next_write = nullptr;
-            cb.data = nullptr;
-            cb.actualSize = 0;
-            cb.actualCapacity = 0;
+                cb.reset();
+            }
             return *this;
         }
         CircularBuffer& operator=(const CircularBuffer& cb)
         {
+            if (this == &cb) {
+                return *this;
+            }
+            if (cb.data == nullptr || cb.actualSize <= 0) {
+                actualSize = 0;
+                buffer = CircularBufferRaw(data, 0);
+                return *this;
+            }
+
             buffer = cb.buffer;
             resizeMemory(cb.actualSize, false);
             std::memcpy(data, cb.data, cb.actualSize);
@@ -326,6 +326,17 @@ namespace containers {
                 actualCapacity = newsize;
             }
             actualSize = newsize;
+        }
+
+        void reset() noexcept
+        {
+            data = nullptr;
+            actualSize = 0;
+            actualCapacity = 0;
+            buffer.capacity_ = 0;
+            buffer.origin = nullptr;
+            buffer.next_read = nullptr;
+            buffer.next_write = nullptr;
         }
 
       private:
