@@ -12,7 +12,9 @@
 find_package(Git QUIET)
 if(GIT_FOUND AND (GIT_VERSION_STRING VERSION_GREATER "1.5.2"))
     if(EXISTS "${PROJECT_SOURCE_DIR}/.git")
-        option(${PROJECT_NAME}_ENABLE_SUBMODULE_UPDATE "Checkout and update git submodules" ON)
+        option(${PROJECT_NAME}_ENABLE_SUBMODULE_UPDATE
+               "Checkout and update git submodules" ON
+        )
         mark_as_advanced(${PROJECT_NAME}_ENABLE_SUBMODULE_UPDATE)
     else()
         message(
