@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2026, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2025, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -11,31 +11,21 @@
 # MACRO definitions
 # -------------------------------------------------------------
 
-# Macros to hide/show cached variables. These two macros can be used to "hide" or "show"
-# in the list of cached variables various variables and/or options that depend on other
-# options. Note that once a variable is modified, it will preserve its value (hiding it
-# merely makes it internal)
+# Macros to hide/show cached variables. These two macros can be used to "hide" or "show" in the list
+# of cached variables various variables and/or options that depend on other options. Note that once
+# a variable is modified, it will preserve its value (hiding it merely makes it internal)
 
 macro(HIDE_VARIABLE var)
     if(DEFINED ${var})
-        set(${var}
-            "${${var}}"
-            CACHE INTERNAL ""
-        )
+        set(${var} "${${var}}" CACHE INTERNAL "")
     endif(DEFINED ${var})
 endmacro(HIDE_VARIABLE)
 
 macro(SHOW_VARIABLE var type doc default)
     if(DEFINED ${var})
-        set(${var}
-            "${${var}}"
-            CACHE "${type}" "${doc}" FORCE
-        )
+        set(${var} "${${var}}" CACHE "${type}" "${doc}" FORCE)
     else(DEFINED ${var})
-        set(${var}
-            "${default}"
-            CACHE "${type}" "${doc}"
-        )
+        set(${var} "${default}" CACHE "${type}" "${doc}")
     endif(DEFINED ${var})
 endmacro(SHOW_VARIABLE)
 
@@ -109,7 +99,14 @@ the USE_FOO option is saved so that when the option is re-enabled it
 retains its old value.
 #]=======================================================================]
 
-macro(CMAKE_DEPENDENT_ADVANCED_OPTION option doc default depends force)
+macro(
+    CMAKE_DEPENDENT_ADVANCED_OPTION
+    option
+    doc
+    default
+    depends
+    force
+)
     if(${option}_ISSET MATCHES "^${option}_ISSET$")
         set(${option}_AVAILABLE 1)
         foreach(d ${depends})
@@ -122,19 +119,13 @@ macro(CMAKE_DEPENDENT_ADVANCED_OPTION option doc default depends force)
         endforeach()
         if(${option}_AVAILABLE)
             option(${option} "${doc}" "${default}")
-            set(${option}
-                "${${option}}"
-                CACHE BOOL "${doc}" FORCE
-            )
+            set(${option} "${${option}}" CACHE BOOL "${doc}" FORCE)
             mark_as_advanced(${option})
         else()
             if(${option} MATCHES "^${option}$")
 
             else()
-                set(${option}
-                    "${${option}}"
-                    CACHE INTERNAL "${doc}"
-                )
+                set(${option} "${${option}}" CACHE INTERNAL "${doc}")
             endif()
             set(${option} ${force})
         endif()

@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2026, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2025, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -8,47 +8,35 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #
-# Add make check, as well, which gives output on failed tests without having to set an
-# environment variable.
+# Add make check, as well, which gives output on failed tests without having to set an environment
+# variable.
 #
 
 hide_variable(FETCHCONTENT_SOURCE_DIR_GOOGLETEST)
 hide_variable(FETCHCONTENT_UPDATES_DISCONNECTED_GOOGLETEST)
 
-set(gtest_force_shared_crt
-    ON
-    CACHE INTERNAL ""
-)
+set(gtest_force_shared_crt ON CACHE INTERNAL "")
 
-set(BUILD_SHARED_LIBS
-    OFF
-    CACHE INTERNAL ""
-)
-set(HAVE_STD_REGEX
-    ON
-    CACHE INTERNAL ""
-)
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "")
+set(HAVE_STD_REGEX ON CACHE INTERNAL "")
 
-set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS
-    1
-    CACHE INTERNAL ""
-)
+set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "")
 
 if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
     add_subdirectory(
-        ${CMAKE_SOURCE_DIR}/ThirdParty/googletest
-        ${CMAKE_BINARY_DIR}/ThirdParty/googletest EXCLUDE_FROM_ALL SYSTEM
+        ${CMAKE_SOURCE_DIR}/ThirdParty/googletest ${CMAKE_BINARY_DIR}/ThirdParty/googletest
+        EXCLUDE_FROM_ALL SYSTEM
     )
 else()
     add_subdirectory(
-        ${CMAKE_SOURCE_DIR}/ThirdParty/googletest
-        ${CMAKE_BINARY_DIR}/ThirdParty/googletest EXCLUDE_FROM_ALL
+        ${CMAKE_SOURCE_DIR}/ThirdParty/googletest ${CMAKE_BINARY_DIR}/ThirdParty/googletest
+        EXCLUDE_FROM_ALL
     )
 endif()
 
 if(NOT MSVC)
-    # target_Compile_options(gtest PRIVATE "-Wno-undef") target_Compile_options(gmock
-    # PRIVATE "-Wno-undef") target_Compile_options(gtest_main PRIVATE "-Wno-undef")
+    # target_Compile_options(gtest PRIVATE "-Wno-undef") target_Compile_options(gmock PRIVATE
+    # "-Wno-undef") target_Compile_options(gtest_main PRIVATE "-Wno-undef")
     # target_Compile_options(gmock_main PRIVATE "-Wno-undef")
 endif()
 
@@ -61,11 +49,7 @@ macro(add_gtest TESTNAME)
     target_link_libraries(${TESTNAME} PUBLIC gtest gmock gtest_main)
 
     if(GOOGLE_TEST_INDIVIDUAL)
-        gtest_discover_tests(
-            ${TESTNAME}
-            TEST_PREFIX "${TESTNAME}."
-            PROPERTIES FOLDER "Tests"
-        )
+        gtest_discover_tests(${TESTNAME} TEST_PREFIX "${TESTNAME}." PROPERTIES FOLDER "Tests")
     else()
         add_test(${TESTNAME} ${TESTNAME})
         set_target_properties(${TESTNAME} PROPERTIES FOLDER "Tests")
@@ -88,11 +72,7 @@ set_target_properties(gtest gtest_main gmock gmock_main PROPERTIES FOLDER "Exter
 if(MSVC)
     # add_compile_options( /wd4459)
     target_compile_definitions(gtest PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(
-        gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
-    )
+    target_compile_definitions(gtest_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
     target_compile_definitions(gmock PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
-    target_compile_definitions(
-        gmock_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
-    )
+    target_compile_definitions(gmock_main PUBLIC _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING)
 endif()
