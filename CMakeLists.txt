@@ -1,5 +1,5 @@
 # ~~~
-# Copyright (c) 2017-2024, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2026, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -9,13 +9,13 @@
 
 cmake_minimum_required(VERSION 3.10...3.31)
 
-project(GMLC_CONTAINERS VERSION 0.5.0)
+project(GMLC_CONTAINERS VERSION 0.6.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 # -----------------------------------------------------------------------------
 set(GMLC_CONTAINERS_VERSION_BUILD)
-set(GMLC_CONTAINERS_DATE "2024-11-27")
+set(GMLC_CONTAINERS_DATE "2026-04-15")
 
 set(GMLC_CONTAINERS_VERSION_STRING
     "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})"
