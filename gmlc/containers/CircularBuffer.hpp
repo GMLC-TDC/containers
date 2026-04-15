@@ -156,7 +156,8 @@ namespace containers {
             cb.reset();
         }
         CircularBuffer(const CircularBuffer& cb) :
-            data{nullptr}, actualSize{cb.actualSize}, actualCapacity{0}, buffer(nullptr, 0)
+            data{nullptr}, actualSize{cb.actualSize}, actualCapacity{0},
+            buffer(nullptr, 0)
         {
             if (cb.data == nullptr || cb.actualSize <= 0) {
                 actualSize = 0;
