@@ -20,6 +20,9 @@ foreach(T ${CONTAINERS_BENCHMARKS})
     target_link_libraries(${T} PUBLIC containers)
     add_benchmark_with_main(${T})
     set_target_properties(${T} PROPERTIES FOLDER benchmarks)
+    if(GMLC_CONTAINERS_CLANG_TIDY)
+        set_property(TARGET ${T} PROPERTY CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+    endif()
 
 endforeach()
 

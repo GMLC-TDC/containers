@@ -7,7 +7,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # ~~~
 
-cmake_minimum_required(VERSION 3.10...3.31)
+cmake_minimum_required(VERSION 3.22...4.2)
 
 project(GMLC_CONTAINERS VERSION 0.6.0)
 
@@ -24,6 +24,8 @@ set(GMLC_CONTAINERS_VERSION_STRING
 if(NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
 endif()
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 # -----------------------------------------------------------------------------
 # set the module path and include some common macros
 # -----------------------------------------------------------------------------
@@ -32,6 +34,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/config/cmake/"
 )
 include(extraMacros)
 include(CMakeDependentOption)
+include(CTest)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -44,6 +47,7 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 endif()
 
 add_library(containers_base INTERFACE)
+target_compile_features(containers_base INTERFACE cxx_std_20)
 
 include(compiler_flags)
 target_link_libraries(containers_base INTERFACE compile_flags_target)
@@ -75,6 +79,29 @@ if(GMLC_CONTAINERS_INCLUDE_BOOST)
     endif()
 endif()
 target_include_directories(containers_base SYSTEM INTERFACE ThirdParty)
+
+cmake_dependent_option(
+    GMLC_CONTAINERS_CLANG_TIDY "Look for and use Clang-Tidy" OFF
+    "CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME" OFF
+)
+set(GMLC_CONTAINERS_CLANG_TIDY_OPTIONS ""
+    CACHE STRING "Clang tidy options, such as -fix, semicolon separated"
+)
+
+mark_as_advanced(GMLC_CONTAINERS_CLANG_TIDY_OPTIONS)
+mark_as_advanced(GMLC_CONTAINERS_CLANG_TIDY)
+
+if(CMAKE_BUILD_TYPE STREQUAL Coverage)
+    include(CodeCoverage)
+endif()
+
+if(GMLC_CONTAINERS_CLANG_TIDY)
+    find_program(
+        CLANG_TIDY_EXE NAMES "clang-tidy" DOC "Path to clang-tidy executable" REQUIRED
+    )
+
+    set(DO_CLANG_TIDY "${CLANG_TIDY_EXE}" ${GMLC_CONTAINERS_CLANG_TIDY_OPTIONS})
+endif()
 
 add_subdirectory(gmlc)
 
