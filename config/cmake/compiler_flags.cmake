@@ -67,12 +67,18 @@ target_compile_options(
         $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:$<$<BOOL:${${PROJECT_NAME}_ENABLE_ERROR_ON_WARNINGS}>:-Werror>>
 )
 
-target_compile_options(compile_flags_target INTERFACE ${${PROJECT_NAME}_EXTRA_COMPILE_FLAGS})
+target_compile_options(
+    compile_flags_target INTERFACE ${${PROJECT_NAME}_EXTRA_COMPILE_FLAGS}
+)
 
-target_compile_options(build_flags_target INTERFACE ${${PROJECT_NAME}_EXTRA_BUILD_FLAGS})
+target_compile_options(
+    build_flags_target INTERFACE ${${PROJECT_NAME}_EXTRA_BUILD_FLAGS}
+)
 
 if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
-    target_compile_options(compile_flags_target INTERFACE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>)
+    target_compile_options(
+        compile_flags_target INTERFACE $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall>
+    )
     if(NOT WIN32)
         # to support clang-cl which doesn't support these options
         target_compile_options(compile_flags_target INTERFACE -pedantic)
@@ -90,21 +96,25 @@ if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     )
     target_compile_options(
         compile_flags_target
-        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wcast-align -Wlogical-op>>
+        INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wcast-align
+                  -Wlogical-op>>
     )
     # target_compile_options(compile_flags_target INTERFACE
-    # $<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>) target_compile_options(compile_flags_target
-    # INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
+    # $<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
+    # target_compile_options(compile_flags_target INTERFACE
+    # $<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
 
     # this option produces a number of warnings in third party libraries
     # target_compile_options(compile_flags_target INTERFACE
-    # $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wold-style-cast>>) this options produces
-    # lots of warning but is useful for checking every once in a while with Clang, GCC warning
-    # notices with this aren't as useful target_compile_options(compile_flags_target INTERFACE
-    # $<$<COMPILE_LANGUAGE:CXX>:-Wpadded>) add some gnu specific options if the compiler is newer
+    # $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wold-style-cast>>) this
+    # options produces lots of warning but is useful for checking every once in a while
+    # with Clang, GCC warning notices with this aren't as useful
+    # target_compile_options(compile_flags_target INTERFACE
+    # $<$<COMPILE_LANGUAGE:CXX>:-Wpadded>) add some gnu specific options if the compiler
+    # is newer
     if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        # this option produces a number of warnings in third party libraries but useful for checking
-        # for any internal usages
+        # this option produces a number of warnings in third party libraries but useful
+        # for checking for any internal usages
         target_compile_options(
             compile_flags_target
             INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wduplicated-cond
@@ -126,15 +136,19 @@ if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
         endif()
     endif()
     if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(compile_flags_target INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
         target_compile_options(
-            compile_flags_target INTERFACE -Wdocumentation -Wno-documentation-deprecated-sync
+            compile_flags_target INTERFACE $<$<COMPILE_LANGUAGE:CXX>:-Wshadow>
+        )
+        target_compile_options(
+            compile_flags_target INTERFACE -Wdocumentation
+                                           -Wno-documentation-deprecated-sync
         )
         if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
             message(STATUS "clang>=13")
             target_compile_options(
-                compile_flags_target INTERFACE -Wreserved-identifier -Wunused-but-set-parameter
-                                               -Wunused-but-set-variable
+                compile_flags_target
+                INTERFACE -Wreserved-identifier -Wunused-but-set-parameter
+                          -Wunused-but-set-variable
             )
         endif()
 
@@ -149,7 +163,8 @@ endif()
 # -------------------------------------------------------------
 if(MSVC)
     target_compile_options(
-        compile_flags_target INTERFACE -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS /MP
+        compile_flags_target INTERFACE -D_CRT_SECURE_NO_WARNINGS
+                                       -D_SCL_SECURE_NO_WARNINGS /MP
     )
 
     # these next two should be global
@@ -158,13 +173,7 @@ if(MSVC)
 
     if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
         target_compile_options(
-            compile_flags_target
-            INTERFACE /W4
-                      /sdl
-                      /wd4244
-                      /wd4503
-                      /wd4592
-                      /wd4455
+            compile_flags_target INTERFACE /W4 /sdl /wd4244 /wd4503 /wd4592 /wd4455
         )
     endif(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     get_win32_winnt(COPTION_WIN32_WINNT_DEFAULT)
@@ -172,7 +181,8 @@ if(MSVC)
         compile_flags_target INTERFACE "-D_WIN32_WINNT=${COPTION_WIN32_WINNT_DEFAULT}"
     )
     message(
-        STATUS "Detected _WIN32_WINNT from CMAKE_SYSTEM_VERSION: ${COPTION_WIN32_WINNT_DEFAULT}"
+        STATUS
+            "Detected _WIN32_WINNT from CMAKE_SYSTEM_VERSION: ${COPTION_WIN32_WINNT_DEFAULT}"
     )
     if(CMAKE_SIZEOF_VOID_P EQUAL 4)
         # disable some irrelevant integer overflow warnings on 32 bit systems
@@ -198,12 +208,17 @@ endif()
 
 get_target_property(compile_flags_list compile_flags_target INTERFACE_COMPILE_OPTIONS)
 list(REMOVE_DUPLICATES compile_flags_list)
-set_property(TARGET compile_flags_target PROPERTY INTERFACE_COMPILE_OPTIONS ${compile_flags_list})
+set_property(
+    TARGET compile_flags_target PROPERTY INTERFACE_COMPILE_OPTIONS
+                                         ${compile_flags_list}
+)
 
 get_target_property(link_flags_list compile_flags_target INTERFACE_LINK_OPTIONS)
 if(link_flags_list)
     list(REMOVE_DUPLICATES link_flags_list)
-    set_property(TARGET compile_flags_target PROPERTY INTERFACE_LINK_OPTIONS ${link_flags_list})
+    set_property(
+        TARGET compile_flags_target PROPERTY INTERFACE_LINK_OPTIONS ${link_flags_list}
+    )
 endif()
 
 # -------------------------------------------------------------
@@ -219,7 +234,8 @@ if(CXX_STANDARD_FLAG)
     else(MSVC)
         add_compile_options($<$<COMPILE_LANGUAGE:CXX>:${CXX_STANDARD_FLAG}>)
         target_compile_options(
-            build_flags_target INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${CXX_STANDARD_FLAG}>
+            build_flags_target
+            INTERFACE $<$<COMPILE_LANGUAGE:CXX>:${CXX_STANDARD_FLAG}>
         )
     endif(MSVC)
 endif(CXX_STANDARD_FLAG)
@@ -227,4 +243,6 @@ endif(CXX_STANDARD_FLAG)
 # remove potential duplicates from the flags
 get_target_property(build_flags_list build_flags_target INTERFACE_COMPILE_OPTIONS)
 list(REMOVE_DUPLICATES build_flags_list)
-set_property(TARGET build_flags_target PROPERTY INTERFACE_COMPILE_OPTIONS ${build_flags_list})
+set_property(
+    TARGET build_flags_target PROPERTY INTERFACE_COMPILE_OPTIONS ${build_flags_list}
+)
