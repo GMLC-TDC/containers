@@ -16,8 +16,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <stdexcept>
 #include <utility>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     struct dataIndex {
         int32_t offset;
         int32_t dataSize;
@@ -335,5 +334,4 @@ blocks of raw data
         StackBufferRaw stack;  //!< The actual stack controller
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

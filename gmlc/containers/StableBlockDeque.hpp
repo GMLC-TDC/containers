@@ -16,8 +16,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <type_traits>
 #include <utility>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class to function similarly to a deque  with push/ppp back and front
 But the memory is not contiguous and the elements are stable
 no erase or insert
@@ -627,5 +626,4 @@ and deallocate methods)*/
         X** freeblocks{nullptr};  // 56
     };  // namespace containers
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

@@ -12,8 +12,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <iterator>
 #include <type_traits>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     template<typename X, int BLOCKSIZE, typename OUTER>
     /** helper class for iterating through a sequence of blocks*/
     class BlockIterator {
@@ -158,5 +157,4 @@ namespace containers {
         }
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

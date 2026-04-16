@@ -21,8 +21,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class merging a vector of pointer with a map that can be used to lookup
      * specific values
      */
@@ -381,5 +380,4 @@ namespace containers {
             lookup2;  //!< map to lookup the index
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

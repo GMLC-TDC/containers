@@ -20,8 +20,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class implementing a blocking queue with a priority channel
 @details this class uses locks one for push and pull it can exhibit longer
 blocking times if the internal operations require a swap, however in high usage
@@ -455,5 +454,4 @@ priorityQueue are all empty at the instant it is observed.
         return queueEmptyFlag.load();
     }
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

@@ -17,8 +17,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include <stdexcept>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class to function as a vector in with push back and pop_back
 But the memory is not contiguous and the elements are stable
 no erase or insert
@@ -433,5 +432,4 @@ no erase or insert
         X** freeblocks{nullptr};  // 48
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

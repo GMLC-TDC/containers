@@ -23,14 +23,14 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include "SimpleQueue.hpp"
 
+#include <atomic>
 #include <future>
 #include <memory>
 #include <thread>
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** basic work block abstract class*/
     class BasicWorkBlock {
       public:
@@ -84,11 +84,10 @@ that can be executed, functionoid, or something that implements operator()
         /** execute the work block*/
         virtual void execute() override
         {
-            if (!finished) {
+            if (!finished.exchange(true)) {
                 if (loaded) {
                     task();
                 }
-                finished = true;
             }
         }
         /** get the return value,  will block until the task is finished*/
@@ -116,7 +115,7 @@ that can be executed, functionoid, or something that implements operator()
             loaded = true;
         }
         /** check if the task is finished*/
-        bool isFinished() const override { return finished; }
+        bool isFinished() const override { return finished.load(); }
         /** wait until the work is done*/
         void wait() { future_ret.wait(); }
         /** reset the work so it can run again*/
@@ -125,7 +124,7 @@ that can be executed, functionoid, or something that implements operator()
             if (loaded) {
                 task.reset();
             }
-            finished = false;
+            finished.store(false);
             future_ret = task.get_future();
         };
         /** get the shared future object*/
@@ -134,7 +133,8 @@ that can be executed, functionoid, or something that implements operator()
       private:
         std::packaged_task<retType()> task;  //!< the task to do
         std::shared_future<retType> future_ret;  //!< shared future object
-        bool finished;  //!< flag indicating the work has been done
+        std::atomic<bool> finished{
+            false};  //!< flag indicating the work has been done
         bool loaded = false;  //!< flag indicating that the task is loaded
     };
 
@@ -166,11 +166,10 @@ that can be executed
         WorkBlock& operator=(WorkBlock&& wb) = default;
         virtual void execute() override
         {
-            if (!finished) {
+            if (!finished.exchange(true)) {
                 if (loaded) {
                     task();
                 }
-                finished = true;
             }
         };
         void getReturnVal() const { future_ret.wait(); }
@@ -193,14 +192,14 @@ that can be executed
             reset();
             loaded = true;
         }
-        bool isFinished() const override { return finished; };
+        bool isFinished() const override { return finished.load(); };
         void wait() const { future_ret.wait(); }
         void reset()
         {
             if (loaded) {
                 task.reset();
             }
-            finished = false;
+            finished.store(false);
             future_ret = task.get_future();
         };
         std::shared_future<void> get_future() { return future_ret; }
@@ -208,7 +207,7 @@ that can be executed
       private:
         std::packaged_task<void()> task;
         std::shared_future<void> future_ret;
-        bool finished;
+        std::atomic<bool> finished{false};
         bool loaded = false;
     };
 
@@ -349,6 +348,12 @@ value)
                 (newWork->isFinished() && priority != WorkPriority::required)) {
                 return;
             }
+            {
+                std::lock_guard<std::mutex> guard(queueLock);
+                if (halt.load()) {
+                    return;
+                }
+            }
             if (numWorkers > 0) {
                 size_t ccount;
                 switch (priority) {
@@ -381,6 +386,12 @@ value)
             std::vector<std::shared_ptr<BasicWorkBlock>>& newWork,
             WorkPriority priority = WorkPriority::medium)
         {
+            {
+                std::lock_guard<std::mutex> guard(queueLock);
+                if (halt.load()) {
+                    return;
+                }
+            }
             if (numWorkers > 0) {
                 switch (priority) {
                     case WorkPriority::high:
@@ -517,5 +528,4 @@ value)
             false};  //!< flag indicating the threads should halt
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

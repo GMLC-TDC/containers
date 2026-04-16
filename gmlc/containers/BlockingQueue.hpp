@@ -17,8 +17,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** NOTES:: PT Went with unlocking after signaling on the basis of this page
 http://www.domaigne.com/blog/computing/condvars-signal-with-mutex-locked-or-not/
 will check performance at a later time
@@ -48,12 +47,17 @@ contention the two locks will reduce contention in most cases.
         BlockingQueue() = default;
         ~BlockingQueue()
         {
-            // these locks are primarily for memory synchronization multiple
-            // access in the destructor would be a bad thing
-            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
-            pushElements.clear();
-            pullElements.clear();
+            {
+                // these locks are primarily for memory synchronization;
+                // destroying a queue with active waiters is still invalid and
+                // must be prevented by the caller.
+                std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+                std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+                pushElements.clear();
+                pullElements.clear();
+                queueEmptyFlag = true;
+            }
+            condition.notify_all();
         }
         /** constructor with the capacity numbers
     @details there are two internal vectors that alternate
@@ -90,11 +94,14 @@ contention the two locks will reduce contention in most cases.
         /** clear the queue*/
         void clear()
         {
-            std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
-            std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
-            pullElements.clear();
-            pushElements.clear();
-            queueEmptyFlag = true;
+            {
+                std::lock_guard<MUTEX> pullLock(m_pullLock);  // first pullLock
+                std::lock_guard<MUTEX> pushLock(m_pushLock);  // second pushLock
+                pullElements.clear();
+                pushElements.clear();
+                queueEmptyFlag = true;
+            }
+            condition.notify_all();
         }
         /** set the capacity of the queue
     actually double the requested the size will be reserved due to the use of
@@ -216,6 +223,9 @@ contention the two locks will reduce contention in most cases.
             while (!val) {
                 std::unique_lock<MUTEX> pullLock(
                     m_pullLock);  // get the lock then wait
+                // Hold pull first, then transiently take push inside
+                // checkPullAndSwap to preserve the class lock ordering.
+                checkPullAndSwap();
                 if (!pullElements.empty())  // make sure we are actually empty;
                 {
                     auto actval = std::move(pullElements.back());
@@ -223,6 +233,9 @@ contention the two locks will reduce contention in most cases.
                     return actval;
                 }
                 condition.wait(pullLock);  // now wait
+                // Re-run the same pull->push swap path after wake-up so
+                // pushElements data is visible before deciding to sleep again.
+                checkPullAndSwap();
                 if (!pullElements.empty())  // check for spurious wake-ups
                 {
                     auto actval = std::move(pullElements.back());
@@ -244,6 +257,7 @@ contention the two locks will reduce contention in most cases.
             while (!val) {
                 std::unique_lock<MUTEX> pullLock(
                     m_pullLock);  // get the lock then wait
+                checkPullAndSwap();
                 if (!pullElements.empty())  // make sure we are actually empty;
                 {
                     val = std::move(pullElements.back());
@@ -251,6 +265,7 @@ contention the two locks will reduce contention in most cases.
                     break;
                 }
                 auto res = condition.wait_for(pullLock, timeout);  // now wait
+                checkPullAndSwap();
                 if (!pullElements.empty())  // check for spurious wake-ups
                 {
                     val = std::move(pullElements.back());
@@ -282,6 +297,7 @@ contention the two locks will reduce contention in most cases.
                 // may be spurious so make sure actually have a value
                 callOnWaitFunction();
                 std::unique_lock<MUTEX> pullLock(m_pullLock);  // first pullLock
+                checkPullAndSwap();
                 if (!pullElements.empty()) {
                     // the callback may fill the queue or it may have been
                     // filled in the meantime
@@ -291,6 +307,7 @@ contention the two locks will reduce contention in most cases.
                 }
                 condition.wait(pullLock);
                 // need to check again to handle spurious wake-up
+                checkPullAndSwap();
                 if (!pullElements.empty()) {
                     auto actval = std::move(pullElements.back());
                     pullElements.pop_back();
@@ -305,6 +322,9 @@ contention the two locks will reduce contention in most cases.
         /** check whether there are any elements in the queue
 because this is meant for multi-threaded applications this may or may not have
 any meaning depending on the number of consumers
+@note this is an advisory lock-free snapshot based on queueEmptyFlag; it is
+not a synchronized guarantee that pushElements and pullElements are both empty
+at the instant it is observed.
 */
         bool empty() const;
         /** get the current size of the queue
@@ -314,8 +334,10 @@ any meaning depending on the number of consumers
         size_t size() const;
 
       private:
-        /** If pullElements is empty check push and swap and reverse if needed
-    assumes pullLock is active and pushLock is not
+        /** If pullElements is empty check push and swap and reverse if needed.
+    This helper must only be called while m_pullLock is already held and
+    m_pushLock is not held; it temporarily acquires m_pushLock, so the effective
+    lock order is always pull -> push.
     */
         void checkPullAndSwap()
         {
@@ -366,5 +388,4 @@ any meaning depending on the number of consumers
         return queueEmptyFlag;
     }
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

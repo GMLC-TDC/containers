@@ -21,8 +21,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class to create a searchable vector by defined unique indices.
 The result object can be indexed multiple ways both by searching using indices
 or by numerical index
@@ -440,5 +439,4 @@ or by numerical index
             lookup2;  //!< map to lookup the index
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

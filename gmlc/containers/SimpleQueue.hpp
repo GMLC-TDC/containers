@@ -18,8 +18,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class for very simple thread safe queue
 @details  uses two vectors for the operations,  once the pull vector is empty it
 swaps the vectors and reverses it so it can pop from the back as well as an
@@ -83,6 +82,9 @@ atomic flag indicating the queue is empty
         /** check whether there are any elements in the queue
     because this is meant for multi threaded applications this may or may not
     have any meaning depending on the number of consumers
+    @note this is an advisory lock-free snapshot based on queueEmptyFlag; it is
+    not a synchronized guarantee that pushElements and pullElements are both
+    empty at the instant it is observed.
     */
         bool empty() const { return queueEmptyFlag.load(); }
         /** get the current size of the queue*/
@@ -252,5 +254,4 @@ atomic flag indicating the queue is empty
         }
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

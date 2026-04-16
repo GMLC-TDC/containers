@@ -18,8 +18,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <utility>
 #include <vector>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** class combining a vector of objects with a string map to search them by
 a separate index term the main use case is a bunch of inserts then searching
 with limited to no removal since removal is a rather expensive operation
@@ -225,5 +224,4 @@ with limited to no removal since removal is a rather expensive operation
         std::unordered_map<std::string_view, size_t> lookup;
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers

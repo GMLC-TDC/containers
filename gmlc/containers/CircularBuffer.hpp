@@ -15,8 +15,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <stdexcept>
 #include <utility>
 
-namespace gmlc {
-namespace containers {
+namespace gmlc::containers {
     /** A circular buffer for raw data chunks */
     class CircularBufferRaw {
       public:
@@ -347,5 +346,4 @@ namespace containers {
         CircularBufferRaw buffer;
     };
 
-}  // namespace containers
-}  // namespace gmlc
+}  // namespace gmlc::containers
