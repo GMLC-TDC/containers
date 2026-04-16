@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2022,
+Copyright (c) 2017-2026,
 Battelle Memorial Institute; Lawrence Livermore National Security, LLC; Alliance
 for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved.
@@ -21,7 +21,7 @@ the trait can be overloaded for other types which have a std::hash overload
 */
 template<typename X>
 struct is_easily_hashable {
-    static constexpr bool value = std::is_scalar<X>::value;
+    static constexpr bool value = std::is_scalar_v<X>;
 };
 
 /** type overload for std::string*/
@@ -39,3 +39,6 @@ struct is_easily_hashable<std::wstring> {
 using no_search_type = std::false_type;
 
 constexpr no_search_type no_search = no_search_type{};
+
+template<typename X>
+constexpr bool is_easily_hashable_v = is_easily_hashable<X>::value;

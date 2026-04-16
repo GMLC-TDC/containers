@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2026, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -34,3 +34,7 @@ add_library(containers STATIC ${container_sources} ${container_headers})
 
 target_link_libraries(containers containers_base)
 target_include_directories(containers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+
+if(GMLC_CONTAINERS_CLANG_TIDY)
+    set_property(TARGET containers PROPERTY CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+endif()

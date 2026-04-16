@@ -1,7 +1,7 @@
 codecov:
   notify:
     require_ci_to_pass: no
-  branch: master
+  branch: main
 
 coverage:
   precision: 2
@@ -29,6 +29,5 @@ comment:
 ignore:
   - "ThirdParty"
   - "examples"
-  - "test"
+  - "tests"
   - "FuzzTargets"
-  - "gmlc/containers/extra"

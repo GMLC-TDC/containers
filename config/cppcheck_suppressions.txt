@@ -1,0 +1,2 @@
+# warningDisable.h pragma-style macros confuse cppcheck in this benchmark file.
+unknownMacro:benchmarks/SimpleQueueBenchmarks.cpp

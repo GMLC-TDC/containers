@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2026, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -20,6 +20,9 @@ foreach(T ${CONTAINERS_BENCHMARKS})
     target_link_libraries(${T} PUBLIC containers)
     add_benchmark_with_main(${T})
     set_target_properties(${T} PROPERTIES FOLDER benchmarks)
+    if(GMLC_CONTAINERS_CLANG_TIDY)
+        set_property(TARGET ${T} PROPERTY CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+    endif()
 
 endforeach()
 

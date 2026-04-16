@@ -1,5 +1,5 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Copyright (c) 2017-2022, Battelle Memorial Institute; Lawrence Livermore
+# Copyright (c) 2017-2026, Battelle Memorial Institute; Lawrence Livermore
 # National Security, LLC; Alliance for Sustainable Energy, LLC.
 # See the top-level NOTICE for additional details.
 # All rights reserved.
@@ -39,12 +39,8 @@ foreach(T ${CONTAINERS_TESTS})
     target_link_libraries(${T} PUBLIC containers)
     add_gtest(${T})
     set_target_properties(${T} PROPERTIES FOLDER tests)
+    if(GMLC_CONTAINERS_CLANG_TIDY)
+        set_property(TARGET ${T} PROPERTY CXX_CLANG_TIDY "${DO_CLANG_TIDY}")
+    endif()
 
 endforeach()
-
-if(CMAKE_BUILD_TYPE STREQUAL Coverage)
-    include(CodeCoverage)
-    setup_target_for_coverage(
-        NAME CONTAINERS_coverage EXECUTABLE ctest DEPENDENCIES ${CONTAINERS_TESTS}
-    )
-endif()

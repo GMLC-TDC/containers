@@ -313,3 +313,5 @@ function(APPEND_COVERAGE_COMPILER_FLAGS)
             "Appending code coverage compiler flags: ${COVERAGE_COMPILER_FLAGS}"
     )
 endfunction() # APPEND_COVERAGE_COMPILER_FLAGS
+
+
