@@ -270,6 +270,9 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     return actval;
                 }
+                // Hold pull first, then transiently take push inside
+                // checkPullAndSwap to preserve the class lock ordering.
+                checkPullAndSwap();
                 if (!pullElements.empty())  // make sure we are actually empty;
                 {
                     actval = std::move(pullElements.back());
@@ -282,6 +285,9 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     return actval;
                 }
+                // Re-run the same pull->push swap path after wake-up so
+                // pushElements data is visible before deciding to sleep again.
+                checkPullAndSwap();
                 if (!pullElements.empty())  // check for spurious wake-ups
                 {
                     actval = std::move(pullElements.back());
@@ -309,6 +315,7 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     break;
                 }
+                checkPullAndSwap();
                 if (!pullElements.empty())  // make sure we are actually empty;
                 {
                     val = std::move(pullElements.back());
@@ -322,6 +329,7 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     break;
                 }
+                checkPullAndSwap();
                 if (!pullElements.empty())  // check for spurious wake-ups
                 {
                     val = std::move(pullElements.back());
@@ -360,6 +368,7 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     return actval;
                 }
+                checkPullAndSwap();
                 if (!pullElements.empty()) {
                     // the callback may fill the queue or it may have been
                     // filled in the meantime
@@ -374,6 +383,7 @@ the two locks will reduce contention in most cases.
                     priorityQueue.pop();
                     return actval;
                 }
+                checkPullAndSwap();
                 if (!pullElements.empty()) {
                     auto actval = std::move(pullElements.back());
                     pullElements.pop_back();
@@ -388,12 +398,17 @@ the two locks will reduce contention in most cases.
         /** check whether there are any elements in the queue
 because this is meant for multi-threaded applications this may or may not have
 any meaning depending on the number of consumers
+@note this is an advisory lock-free snapshot based on queueEmptyFlag; it is
+not a synchronized guarantee that pushElements, pullElements, and
+priorityQueue are all empty at the instant it is observed.
 */
         bool empty() const;
 
       private:
-        /** If pullElements is empty check push and swap and reverse if needed
-  assumes pullLock is active and pushLock is not
+        /** If pullElements is empty check push and swap and reverse if needed.
+  This helper must only be called while m_pullLock is already held and
+  m_pushLock is not held; it temporarily acquires m_pushLock, so the effective
+  lock order is always pull -> push.
   */
         void checkPullAndSwap()
         {

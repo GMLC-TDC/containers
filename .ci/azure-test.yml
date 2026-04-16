@@ -5,5 +5,5 @@ steps:
 
   - task: PublishTestResults@2
     inputs:
-      testResultsFormat: "cTest"
+      testResultsFormat: "CTest"
       testResultsFiles: "**/Test.xml"
