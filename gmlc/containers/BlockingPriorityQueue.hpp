@@ -231,7 +231,7 @@ val the value to push on the queue
 @details only available for copy assignable objects
 @return an optional object with an object of type T if available
 */
-    template<typename = std::enable_if_t<std::is_copy_assignable_v<T>>>
+    template<typename U = T, std::enable_if_t<std::is_copy_assignable_v<U>, int> = 0>
     std::optional<T> try_peek() const
     {
         std::lock_guard<MUTEX> lock(m_pullLock);
