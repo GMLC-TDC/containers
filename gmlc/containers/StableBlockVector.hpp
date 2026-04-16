@@ -141,8 +141,7 @@ class StableBlockVector {
         new (&(dataptr[dataSlotIndex][bsize++])) X{val};
         ++csize;
     }
-    void push_back(X&& val) noexcept(
-        std::is_nothrow_move_constructible_v<X>)
+    void push_back(X&& val) noexcept(std::is_nothrow_move_constructible_v<X>)
     {
         blockCheck();
         new (&(dataptr[dataSlotIndex][bsize++])) X{std::move(val)};

@@ -25,9 +25,10 @@ class BlockIterator {
     using iterator_category = std::bidirectional_iterator_tag;
     using value_type = X;
     using difference_type = X;
-    using pointer = std::add_pointer_t<std::add_const_t<std::remove_const_t<X>>>;
-    using reference = std::add_lvalue_reference_t<
-        std::add_const_t<std::remove_const_t<X>>>;
+    using pointer =
+        std::add_pointer_t<std::add_const_t<std::remove_const_t<X>>>;
+    using reference =
+        std::add_lvalue_reference_t<std::add_const_t<std::remove_const_t<X>>>;
     using constref = std::add_const_t<std::remove_const_t<X>>;
 
     BlockIterator(OUTER& it, int startoffset) :
