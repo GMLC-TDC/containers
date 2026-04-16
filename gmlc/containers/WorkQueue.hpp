@@ -59,10 +59,16 @@ that can be executed, functionoid, or something that implements operator()
 template<typename retType>
 class WorkBlock : public BasicWorkBlock {
   public:
-    WorkBlock() { reset(); }
-    // copy constructor intentionally omitted*/
-    /** move constructor*/
-    WorkBlock(WorkBlock&& wb) = default;
+        WorkBlock() { reset(); }
+        // copy constructor intentionally omitted*/
+        /** move constructor*/
+        WorkBlock(WorkBlock&& wb) noexcept :
+            task(std::move(wb.task)),
+            future_ret(std::move(wb.future_ret)),
+            finished(wb.finished.load()),
+            loaded(wb.loaded)
+        {
+        }
     /** constructor from a packaged task*/
     WorkBlock(std::packaged_task<retType()>&& newTask) :
         task(std::move(newTask)), loaded(true)
@@ -77,9 +83,18 @@ class WorkBlock : public BasicWorkBlock {
             std::is_same<decltype(newWork()), retType>::value,
             "work does not match type");
         reset();
-    }
-    /** move assignment*/
-    WorkBlock& operator=(WorkBlock&& wb) = default;
+        }
+        /** move assignment*/
+        WorkBlock& operator=(WorkBlock&& wb) noexcept
+        {
+            if (this != &wb) {
+                task = std::move(wb.task);
+                future_ret = std::move(wb.future_ret);
+                finished.store(wb.finished.load());
+                loaded = wb.loaded;
+            }
+            return *this;
+        }
     /** execute the work block*/
     virtual void execute() override
     {
@@ -160,8 +175,23 @@ class WorkBlock<void> : public BasicWorkBlock {
         reset();
     }
 
-    WorkBlock(WorkBlock&& wb) = default;
-    WorkBlock& operator=(WorkBlock&& wb) = default;
+        WorkBlock(WorkBlock&& wb) noexcept :
+            task(std::move(wb.task)),
+            future_ret(std::move(wb.future_ret)),
+            finished(wb.finished.load()),
+            loaded(wb.loaded)
+        {
+        }
+        WorkBlock& operator=(WorkBlock&& wb) noexcept
+        {
+            if (this != &wb) {
+                task = std::move(wb.task);
+                future_ret = std::move(wb.future_ret);
+                finished.store(wb.finished.load());
+                loaded = wb.loaded;
+            }
+            return *this;
+        }
     virtual void execute() override
     {
         if (!finished.exchange(true)) {
