@@ -30,7 +30,7 @@ class StableBlockVector {
         N < 32,
         "N should be between 0 and 31 data will allocated in block 2^N");
     static_assert(
-        std::is_default_constructible<X>::value,
+        std::is_default_constructible_v<X>,
         " used type must be default constructible");
 
   public:
@@ -47,7 +47,7 @@ class StableBlockVector {
 
     /** construct with a specified size*/
     explicit StableBlockVector(size_t startSize, const X& init = X{}) noexcept(
-        std::is_nothrow_copy_constructible<X>::value) :
+        std::is_nothrow_copy_constructible_v<X>) :
         csize(startSize),
         dataptr(new X*[std::max((startSize >> N) + 1, size_t{64})]),
         dataSlotsAvailable(std::max(static_cast<int>(startSize >> N) + 1, 64)),
@@ -135,21 +135,21 @@ class StableBlockVector {
     }
 
     void push_back(const X& val) noexcept(
-        std::is_nothrow_copy_constructible<X>::value)
+        std::is_nothrow_copy_constructible_v<X>)
     {
         blockCheck();
         new (&(dataptr[dataSlotIndex][bsize++])) X{val};
         ++csize;
     }
     void push_back(X&& val) noexcept(
-        std::is_nothrow_move_constructible<X>::value)
+        std::is_nothrow_move_constructible_v<X>)
     {
         blockCheck();
         new (&(dataptr[dataSlotIndex][bsize++])) X{std::move(val)};
         ++csize;
     }
 
-    void pop_back() noexcept(std::is_nothrow_destructible<X>::value)
+    void pop_back() noexcept(std::is_nothrow_destructible_v<X>)
     {
         if (csize == 0) {
             return;
@@ -206,7 +206,7 @@ class StableBlockVector {
         }
     }
 
-    void clear() noexcept(std::is_nothrow_destructible<X>::value)
+    void clear() noexcept(std::is_nothrow_destructible_v<X>)
     {
         if (dataSlotsAvailable <= 0) {
             return;

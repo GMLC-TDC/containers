@@ -80,7 +80,7 @@ class WorkBlock : public BasicWorkBlock {
     WorkBlock(Func&& newWork) : task(std::forward<Func>(newWork)), loaded(true)
     {
         static_assert(
-            std::is_same<decltype(newWork()), retType>::value,
+            std::is_same_v<decltype(newWork()), retType>,
             "work does not match type");
         reset();
         }
@@ -112,7 +112,7 @@ class WorkBlock : public BasicWorkBlock {
     void updateWorkFunction(Func&& newWork)  // forwarding reference
     {
         static_assert(
-            std::is_same<decltype(newWork()), retType>::value,
+            std::is_same_v<decltype(newWork()), retType>,
             "work does not match type");
         loaded = false;
         task = std::packaged_task<retType()>(std::forward<Func>(newWork));
@@ -170,7 +170,7 @@ class WorkBlock<void> : public BasicWorkBlock {
     WorkBlock(Func&& newWork) : task(std::forward<Func>(newWork)), loaded(true)
     {
         static_assert(
-            std::is_same<decltype(newWork()), void>::value,
+            std::is_same_v<decltype(newWork()), void>,
             "work does not match type");
         reset();
     }
@@ -206,7 +206,7 @@ class WorkBlock<void> : public BasicWorkBlock {
     void updateWorkFunction(Func&& newWork)
     {
         static_assert(
-            std::is_same<decltype(newWork()), void>::value,
+            std::is_same_v<decltype(newWork()), void>,
             "work does not match type");
         loaded = false;
         task = std::packaged_task<void()>(std::forward<Func>(newWork));

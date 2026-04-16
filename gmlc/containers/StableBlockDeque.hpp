@@ -30,7 +30,7 @@ class StableBlockDeque {
         N < 32,
         "N should be between 0 and 31 data will allocated in block 2^N");
     static_assert(
-        std::is_default_constructible<X>::value,
+        std::is_default_constructible_v<X>,
         " used type must be default constructible");
 
   public:
@@ -311,7 +311,7 @@ class StableBlockDeque {
         }
     }
 
-    void clear() noexcept(std::is_nothrow_destructible<X>::value)
+    void clear() noexcept(std::is_nothrow_destructible_v<X>)
     {
         if (dataSlotsAvailable == 0 || csize == 0) {
             return;

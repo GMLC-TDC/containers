@@ -218,7 +218,7 @@ contain a value
 @details only available for copy assignable objects
 @return an optional object with an object of type T if available
 */
-    template<typename = std::enable_if<std::is_copy_assignable<X>::value>>
+    template<typename = std::enable_if_t<std::is_copy_assignable_v<X>>>
     std::optional<X> peek() const
     {
         std::lock_guard<MUTEX> lock(m_pullLock);

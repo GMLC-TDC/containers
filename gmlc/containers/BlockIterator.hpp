@@ -25,15 +25,16 @@ class BlockIterator {
     using iterator_category = std::bidirectional_iterator_tag;
     using value_type = X;
     using difference_type = X;
-    using pointer = const typename std::remove_const<X>::type*;
-    using reference = const typename std::remove_const<X>::type&;
-    using constref = const typename std::remove_const<X>::type;
+    using pointer = std::add_pointer_t<std::add_const_t<std::remove_const_t<X>>>;
+    using reference = std::add_lvalue_reference_t<
+        std::add_const_t<std::remove_const_t<X>>>;
+    using constref = std::add_const_t<std::remove_const_t<X>>;
 
     BlockIterator(OUTER& it, int startoffset) :
         vec{it}, ptr{&((*it)[startoffset])}, offset{startoffset}
     {
         static_assert(
-            std::is_same<std::remove_reference_t<decltype(*(*it))>, X>::value,
+            std::is_same_v<std::remove_reference_t<decltype(*(*it))>, X>,
             "OUTER *it must be dereferenceable to a type matching X");
     }
 
@@ -57,8 +58,7 @@ class BlockIterator {
     bool operator==(const BlockIterator<X2, BLOCKSIZE, OUT2>& it) const
     {
         static_assert(
-            std::is_same<std::remove_const_t<X2>, std::remove_const_t<X>>::
-                value,
+            std::is_same_v<std::remove_const_t<X2>, std::remove_const_t<X>>,
             "iterators must point to the same type");
         return it.checkEquivalence(vec, offset);
     }

@@ -34,7 +34,7 @@ template<
 class DualStringMappedVector {
   public:
     static_assert(
-        !std::is_same<std::string, searchType2>::value,
+        !std::is_same_v<std::string, searchType2>,
         "searchType1 and searchType2 cannot be the same type");
 
     /** insert a new element into the vector
@@ -428,7 +428,7 @@ F must be a function with signature like void VType(const VType &a);*/
     /// storage for string information
     StableBlockVector<std::string, BLOCK_ORDER> names;
     std::conditional_t<
-        is_easily_hashable<searchType2>::value,
+        is_easily_hashable_v<searchType2>,
         std::unordered_map<searchType2, size_t>,
         std::map<searchType2, size_t>>
         lookup2;  //!< map to lookup the index
