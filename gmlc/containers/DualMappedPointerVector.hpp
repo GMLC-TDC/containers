@@ -20,6 +20,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <stdexcept>
 
 namespace gmlc::containers {
 /** class merging a vector of pointer with a map that can be used to lookup
@@ -47,12 +48,10 @@ class DualMappedPointerVector {
         const searchType2& searchValue2,
         std::unique_ptr<VType>&& ptr)
     {
-        auto fnd = lookup1.find(searchValue1);
-        if (fnd != lookup1.end()) {
-            auto fnd2 = lookup2.find(searchValue2);
-            if (fnd2 != lookup2.end()) {
-                return std::nullopt;
-            }
+        auto fnd1 = lookup1.find(searchValue1);
+        auto fnd2 = lookup2.find(searchValue2);
+        if (fnd1 != lookup1.end() || fnd2 != lookup2.end()) {
+            return std::nullopt;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(std::move(ptr));
@@ -67,12 +66,10 @@ class DualMappedPointerVector {
         const searchType2& searchValue2,
         Us&&... data)
     {
-        auto fnd = lookup1.find(searchValue1);
-        if (fnd != lookup1.end()) {
-            auto fnd2 = lookup2.find(searchValue2);
-            if (fnd2 != lookup2.end()) {
-                return std::nullopt;
-            }
+        auto fnd1 = lookup1.find(searchValue1);
+        auto fnd2 = lookup2.find(searchValue2);
+        if (fnd1 != lookup1.end() || fnd2 != lookup2.end()) {
+            return std::nullopt;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(
@@ -125,15 +122,27 @@ class DualMappedPointerVector {
         const searchType2& searchValue2,
         std::unique_ptr<VType>&& ptr)
     {
-        auto fnd = lookup1.find(searchValue1);
-        if (fnd != lookup1.end()) {
-            auto fnd2 = lookup2.find(searchValue2);
-            if (fnd2 != lookup2.end()) {
-                if (fnd2->second == fnd->second) {
-                    dataStorage[fnd->second] = std::move(ptr);
-                    return fnd->second;
-                }
+        auto fnd1 = lookup1.find(searchValue1);
+        auto fnd2 = lookup2.find(searchValue2);
+        if (fnd1 != lookup1.end() && fnd2 != lookup2.end()) {
+            if (fnd1->second != fnd2->second) {
+                throw std::invalid_argument(
+                    "search keys already refer to different entries");
             }
+            dataStorage[fnd1->second] = std::move(ptr);
+            return fnd1->second;
+        }
+        if (fnd1 != lookup1.end()) {
+            dataStorage[fnd1->second] = std::move(ptr);
+            removeIndexTerms(lookup2, fnd1->second);
+            lookup2[searchValue2] = fnd1->second;
+            return fnd1->second;
+        }
+        if (fnd2 != lookup2.end()) {
+            dataStorage[fnd2->second] = std::move(ptr);
+            removeIndexTerms(lookup1, fnd2->second);
+            lookup1[searchValue1] = fnd2->second;
+            return fnd2->second;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(std::move(ptr));
@@ -148,16 +157,30 @@ class DualMappedPointerVector {
         const searchType2& searchValue2,
         Us&&... data)
     {
-        auto fnd = lookup1.find(searchValue1);
-        if (fnd != lookup1.end()) {
-            auto fnd2 = lookup2.find(searchValue2);
-            if (fnd2 != lookup2.end()) {
-                if (fnd2->second == fnd->second) {
-                    dataStorage[fnd->second] =
-                        std::make_unique<VType>(std::forward<Us>(data)...);
-                    return fnd->second;
-                }
+        auto fnd1 = lookup1.find(searchValue1);
+        auto fnd2 = lookup2.find(searchValue2);
+        if (fnd1 != lookup1.end() && fnd2 != lookup2.end()) {
+            if (fnd1->second != fnd2->second) {
+                throw std::invalid_argument(
+                    "search keys already refer to different entries");
             }
+            dataStorage[fnd1->second] =
+                std::make_unique<VType>(std::forward<Us>(data)...);
+            return fnd1->second;
+        }
+        if (fnd1 != lookup1.end()) {
+            dataStorage[fnd1->second] =
+                std::make_unique<VType>(std::forward<Us>(data)...);
+            removeIndexTerms(lookup2, fnd1->second);
+            lookup2[searchValue2] = fnd1->second;
+            return fnd1->second;
+        }
+        if (fnd2 != lookup2.end()) {
+            dataStorage[fnd2->second] =
+                std::make_unique<VType>(std::forward<Us>(data)...);
+            removeIndexTerms(lookup1, fnd2->second);
+            lookup1[searchValue1] = fnd2->second;
+            return fnd2->second;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(
@@ -365,6 +388,18 @@ class DualMappedPointerVector {
     }
 
   private:
+    template<class SearchMap>
+    static void removeIndexTerms(SearchMap& searchMap, size_t index)
+    {
+        for (auto it = searchMap.begin(); it != searchMap.end();) {
+            if (it->second == index) {
+                it = searchMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     std::vector<std::unique_ptr<VType>> dataStorage;  //!< storage for the
                                                       //!< pointers
     std::conditional_t<

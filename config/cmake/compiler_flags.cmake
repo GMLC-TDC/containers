@@ -97,13 +97,10 @@ if(${PROJECT_NAME}_ENABLE_EXTRA_COMPILER_WARNINGS)
     target_compile_options(
         compile_flags_target
         INTERFACE $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wcast-align
-                  -Wlogical-op>>
+                  -Wlogical-op -Wstrict-overflow=5>>
     )
     # target_compile_options(compile_flags_target INTERFACE
     # $<$<COMPILE_LANGUAGE:CXX>:-Wredundant-decls>)
-    # target_compile_options(compile_flags_target INTERFACE
-    # $<$<COMPILE_LANGUAGE:CXX>:-Wstrict-overflow=5>)
-
     # this option produces a number of warnings in third party libraries
     # target_compile_options(compile_flags_target INTERFACE
     # $<$<COMPILE_LANGUAGE:CXX>:$<$<CXX_COMPILER_ID:GNU>:-Wold-style-cast>>) this

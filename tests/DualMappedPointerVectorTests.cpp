@@ -109,3 +109,29 @@ TEST(dual_mapped_pointer_vector_tests, remove_tests)
     MV3.clear();
     EXPECT_EQ(MV3.size(), 0);
 }
+
+TEST(dual_mapped_pointer_vector_tests, dual_key_collision_tests)
+{
+    DualMappedPointerVector<double, std::string, int64_t> Mvec;
+
+    ASSERT_TRUE(Mvec.insert("el1", 1, 1.0));
+    ASSERT_TRUE(Mvec.insert("el2", 2, 2.0));
+
+    EXPECT_FALSE(Mvec.insert("el1", 3, 11.0));
+    EXPECT_FALSE(Mvec.insert("el3", 2, 22.0));
+    EXPECT_EQ(Mvec.size(), 2u);
+    ASSERT_NE(Mvec.find("el1"), nullptr);
+    ASSERT_NE(Mvec.find(2), nullptr);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 1.0);
+    EXPECT_DOUBLE_EQ(*Mvec.find(2), 2.0);
+
+    auto updated = Mvec.insert_or_assign("el1", 3, 5.0);
+    EXPECT_EQ(updated, 0u);
+    EXPECT_EQ(Mvec.find(1), nullptr);
+    ASSERT_NE(Mvec.find(3), nullptr);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 5.0);
+
+    EXPECT_THROW(Mvec.insert_or_assign("el1", 2, 6.0), std::invalid_argument);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 5.0);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el2"), 2.0);
+}
