@@ -6,17 +6,16 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include <future>
+#include <chrono>
 #include <memory>
 #include <string>
 #include <thread>
-#include <utility>
 /** these test cases test data_block and data_view objects
  */
 
 #include "AirLock.hpp"
 
 #include "gtest/gtest.h"
-#include <iostream>
 
 using gmlc::containers::AirLock;
 
@@ -64,11 +63,13 @@ TEST(airlock_tests, move_only_tests)
 
     EXPECT_TRUE(alock.isLoaded());
 
-    auto b = alock.try_unload();
-    EXPECT_EQ(**b, 4534.23);
+    auto unload_res = alock.try_unload();
+    ASSERT_TRUE(unload_res);
+    ASSERT_TRUE(*unload_res);
+    EXPECT_EQ(**unload_res, 4534.23);
 
-    b = alock.try_unload();
-    EXPECT_TRUE(!(b));
+    unload_res = alock.try_unload();
+    EXPECT_FALSE(unload_res);
     EXPECT_TRUE(!alock.isLoaded());
 }
 
@@ -88,8 +89,9 @@ TEST(airlock_tests, move_mthread_tests)
         return alock.load("load 2");
     });
     std::this_thread::yield();
-    auto b = alock.try_unload();
-    EXPECT_EQ(*b, "load 1");
+    auto unload_res = alock.try_unload();
+    ASSERT_TRUE(unload_res);
+    EXPECT_EQ(*unload_res, "load 1");
     int chk = 0;
     while (!alock.isLoaded()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -97,9 +99,9 @@ TEST(airlock_tests, move_mthread_tests)
             break;
         }
     }
-    b = alock.try_unload();
-    ASSERT_TRUE(b);
-    EXPECT_EQ(*b, "load 2");
+    unload_res = alock.try_unload();
+    ASSERT_TRUE(unload_res);
+    EXPECT_EQ(*unload_res, "load 2");
     EXPECT_TRUE(fut.get());
     EXPECT_TRUE(fut2.get());
     EXPECT_TRUE(alock.isLoaded());
