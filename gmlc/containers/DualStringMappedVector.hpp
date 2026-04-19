@@ -319,6 +319,12 @@ this function does not override existing values*/
         return dataStorage.end();
     }
 
+    /** remove an element by its index
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through either indexed lookup.
+    */
     void removeIndex(size_t index)
     {
         if (index >= dataStorage.size()) {
@@ -358,6 +364,12 @@ this function does not override existing values*/
         }
     }
 
+    /** remove an element by a string search term
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through either indexed lookup.
+    */
     void remove(std::string_view search)
     {
         auto el = lookup1.find(search);
@@ -368,6 +380,12 @@ this function does not override existing values*/
         removeIndex(index);
     }
 
+    /** remove an element by a secondary search term
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through either indexed lookup.
+    */
     void remove(const searchType2& search)
     {
         auto el = lookup2.find(search);

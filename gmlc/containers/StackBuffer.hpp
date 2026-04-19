@@ -138,9 +138,15 @@ class StackBufferRaw {
  * convenience functions */
 class StackBuffer {
   public:
+    static int invalid_size()
+    {
+        throw(std::invalid_argument("size must be positive"));
+    }
+
     StackBuffer() noexcept : stack() {}
     explicit StackBuffer(int size) :
-        data(new unsigned char[size]), statedSize{size}, actualCapacity{size},
+        data(new unsigned char[size > 0 ? size : invalid_size()]),
+        statedSize{size}, actualCapacity{size},
         stack(data, size)
     {
     }
@@ -213,8 +219,8 @@ class StackBuffer {
 
     bool resize(int newsize)
     {
-        if (newsize < 0) {
-            return false;
+        if (newsize <= 0) {
+            throw(std::invalid_argument("size must be positive"));
         }
         if (newsize == stack.dataSize) {
             return true;

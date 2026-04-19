@@ -260,7 +260,7 @@ class DualMappedPointerVector {
                                               nullptr;
     }
 
-    VType* at(size_t index) const { return dataStorage.at(index); }
+    VType* at(size_t index) const { return dataStorage.at(index).get(); }
 
     /** get a pointer to the last element inserted*/
     VType* back() { return dataStorage.back().get(); }
@@ -272,30 +272,8 @@ class DualMappedPointerVector {
             return;
         }
         dataStorage.erase(dataStorage.begin() + index);
-        searchType1 ind1;
-        searchType2 ind2;
-        for (auto& el2 : lookup1) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            } else if (el2.second == index) {
-                ind1 = el2.first;
-            }
-        }
-        for (auto& el2 : lookup2) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            } else if (el2.second == index) {
-                ind2 = el2.first;
-            }
-        }
-        auto fnd1 = lookup1.find(ind1);
-        if (fnd1 != lookup1.end()) {
-            lookup1.erase(fnd1);
-        }
-        auto fnd2 = lookup2.find(ind2);
-        if (fnd2 != lookup2.end()) {
-            lookup2.erase(fnd2);
-        }
+        updateLookupAfterErase(lookup1, index);
+        updateLookupAfterErase(lookup2, index);
     }
 
     void remove(const searchType1& search)
@@ -306,24 +284,8 @@ class DualMappedPointerVector {
         }
         auto index = el->second;
         dataStorage.erase(dataStorage.begin() + index);
-        for (auto& el2 : lookup1) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            }
-        }
-        lookup1.erase(el);
-        searchType2 ind2;
-        for (auto& el2 : lookup2) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            } else if (el2.second == index) {
-                ind2 = el2.first;
-            }
-        }
-        auto fnd2 = lookup2.find(ind2);
-        if (fnd2 != lookup2.end()) {
-            lookup2.erase(fnd2);
-        }
+        updateLookupAfterErase(lookup1, index);
+        updateLookupAfterErase(lookup2, index);
     }
 
     void remove(const searchType2& search)
@@ -334,24 +296,8 @@ class DualMappedPointerVector {
         }
         auto index = el->second;
         dataStorage.erase(dataStorage.begin() + index);
-        for (auto& el2 : lookup2) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            }
-        }
-        lookup2.erase(el);
-        searchType1 ind1;
-        for (auto& el2 : lookup1) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            } else if (el2.second == index) {
-                ind1 = el2.first;
-            }
-        }
-        auto fnd1 = lookup1.find(ind1);
-        if (fnd1 != lookup1.end()) {
-            lookup1.erase(fnd1);
-        }
+        updateLookupAfterErase(lookup1, index);
+        updateLookupAfterErase(lookup2, index);
     }
 
     /** apply a function to all the values
@@ -388,6 +334,21 @@ class DualMappedPointerVector {
     }
 
   private:
+    template<class SearchMap>
+    static void updateLookupAfterErase(SearchMap& searchMap, size_t index)
+    {
+        for (auto it = searchMap.begin(); it != searchMap.end();) {
+            if (it->second == index) {
+                it = searchMap.erase(it);
+            } else {
+                if (it->second > index) {
+                    --(it->second);
+                }
+                ++it;
+            }
+        }
+    }
+
     template<class SearchMap>
     static void removeIndexTerms(SearchMap& searchMap, size_t index)
     {

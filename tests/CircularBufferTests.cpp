@@ -461,3 +461,17 @@ TEST(CircBuff, odd_conditions)
     CircularBuffer buf5(buf4);
     EXPECT_TRUE(buf5.empty());
 }
+
+TEST(CircBuff, invalid_constructor_sizes)
+{
+    EXPECT_THROW(CircularBuffer(0), std::invalid_argument);
+    EXPECT_THROW(CircularBuffer(-10), std::invalid_argument);
+}
+
+TEST(CircBuff, invalid_resize_sizes)
+{
+    CircularBuffer buf(1024);
+
+    EXPECT_THROW(buf.resize(0), std::invalid_argument);
+    EXPECT_THROW(buf.resize(-10), std::invalid_argument);
+}

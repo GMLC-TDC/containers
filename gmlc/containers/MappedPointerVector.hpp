@@ -137,18 +137,7 @@ class MappedPointerVector {
             return;
         }
         dataStorage.erase(dataStorage.begin() + index);
-        searchType ind;
-        for (auto& el2 : lookup) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            } else if (el2.second == index) {
-                ind = el2.first;
-            }
-        }
-        auto fnd = lookup.find(ind);
-        if (fnd != lookup.end()) {
-            lookup.erase(fnd);
-        }
+        updateLookupAfterErase(index);
     }
     /** remove an element based on the lookup index*/
     void remove(const searchType& search)
@@ -159,12 +148,7 @@ class MappedPointerVector {
         }
         auto index = el->second;
         dataStorage.erase(dataStorage.begin() + index);
-        for (auto& el2 : lookup) {
-            if (el2.second > index) {
-                el2.second -= 1;
-            }
-        }
-        lookup.erase(el);
+        updateLookupAfterErase(index);
     }
 
     /** apply a function to all the values
@@ -200,6 +184,20 @@ class MappedPointerVector {
     }
 
   private:
+    void updateLookupAfterErase(size_t index)
+    {
+        for (auto it = lookup.begin(); it != lookup.end();) {
+            if (it->second == index) {
+                it = lookup.erase(it);
+            } else {
+                if (it->second > index) {
+                    --(it->second);
+                }
+                ++it;
+            }
+        }
+    }
+
     std::vector<std::unique_ptr<VType>> dataStorage;  //!< storage for the
                                                       //!< pointers
     std::conditional_t<
