@@ -8,7 +8,6 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "StackBuffer.hpp"
 
 #include "gtest/gtest.h"
-#include <iostream>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -26,8 +25,7 @@ TEST(stackBuffer, stack_bufferraw_simple)
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, '\0');
     res = stack.pop(testData.data(), 265);
     EXPECT_LT(res, 0);
@@ -50,14 +48,13 @@ TEST(stackBuffer, stack_bufferraw_3_push)
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, 'b');
-    pushed = stack.push(testData.data(), 249);
-    EXPECT_TRUE(pushed);
+
+    EXPECT_TRUE(stack.push(testData.data(), 249));
     testData.assign(1024, 'c');
-    pushed = stack.push(testData.data(), 393);
-    EXPECT_TRUE(pushed);
+
+    EXPECT_TRUE(stack.push(testData.data(), 393));
     res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 393);
     EXPECT_EQ(testData[0], 'c');
@@ -203,11 +200,9 @@ TEST(stackBuffer, stack_buffer_swap)
     StackBuffer stack2(1092);
     std::vector<unsigned char> testData(1024, 'a');
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, '\0');
-    pushed = stack.push(testData.data(), 245);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 245));
 
     stack2.push(testData.data(), 125);
     stack.swap(stack2);
@@ -227,8 +222,7 @@ TEST(stackBuffer, stack_buffer_simple)
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, '\0');
 
     res = stack.pop(testData.data(), 1024);
