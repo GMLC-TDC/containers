@@ -5,8 +5,8 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
-#include "MappedVector.hpp"
 #include "MapTraits.hpp"
+#include "MappedVector.hpp"
 
 #include "gtest/gtest.h"
 #include <string>
