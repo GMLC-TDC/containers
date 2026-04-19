@@ -18,14 +18,14 @@ using gmlc::containers::StackBuffer;
 
 TEST(stackBuffer, stack_bufferraw_simple)
 {
-    unsigned char* block = new unsigned char[4096];
+    auto* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
 
     std::vector<unsigned char> testData(1024, 'a');
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
+    const bool pushed = stack.push(testData.data(), 571);
     EXPECT_TRUE(pushed);
     testData.assign(1024, '\0');
     res = stack.pop(testData.data(), 265);
