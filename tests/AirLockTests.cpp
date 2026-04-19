@@ -30,8 +30,9 @@ TEST(airlock_tests, basic_tests)
     EXPECT_TRUE(alock.isLoaded());
     auto res = alock.try_unload();
     ASSERT_TRUE(res.has_value());
+    const auto value = std::move(res).value();
 
-    EXPECT_EQ(res.value(), 45);
+    EXPECT_EQ(value, 45);
     EXPECT_TRUE(!alock.isLoaded());
     EXPECT_TRUE(alock.try_load(54));
 }
@@ -48,8 +49,9 @@ TEST(airlock_tests, empty_load_test)
 
     auto res = alock.try_unload();
     ASSERT_TRUE(res.has_value());
+    const auto value = std::move(res).value();
 
-    EXPECT_EQ(res.value(), 45);
+    EXPECT_EQ(value, 45);
     EXPECT_TRUE(!alock.isLoaded());
     EXPECT_TRUE(alock.try_load(54));
 }
@@ -65,8 +67,9 @@ TEST(airlock_tests, move_only_tests)
 
     auto unload_res = alock.try_unload();
     ASSERT_TRUE(unload_res.has_value());
-    ASSERT_NE(unload_res.value(), nullptr);
-    EXPECT_EQ(*unload_res.value(), 4534.23);
+    auto unloaded_value = std::move(unload_res).value();
+    ASSERT_NE(unloaded_value, nullptr);
+    EXPECT_EQ(*unloaded_value, 4534.23);
 
     unload_res = alock.try_unload();
     EXPECT_FALSE(unload_res);
@@ -91,7 +94,8 @@ TEST(airlock_tests, move_mthread_tests)
     std::this_thread::yield();
     auto unload_res = alock.try_unload();
     ASSERT_TRUE(unload_res.has_value());
-    EXPECT_EQ(unload_res.value(), "load 1");
+    const auto first_value = std::move(unload_res).value();
+    EXPECT_EQ(first_value, "load 1");
     int chk = 0;
     while (!alock.isLoaded()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -101,7 +105,8 @@ TEST(airlock_tests, move_mthread_tests)
     }
     unload_res = alock.try_unload();
     ASSERT_TRUE(unload_res.has_value());
-    EXPECT_EQ(unload_res.value(), "load 2");
+    const auto second_value = std::move(unload_res).value();
+    EXPECT_EQ(second_value, "load 2");
     EXPECT_TRUE(fut.get());
     EXPECT_TRUE(fut2.get());
     EXPECT_TRUE(alock.isLoaded());
@@ -120,7 +125,8 @@ TEST(airlock_tests, close_prevents_new_loads_but_allows_drain)
 
     auto res = alock.try_unload();
     ASSERT_TRUE(res.has_value());
-    EXPECT_EQ(res.value(), 45);
+    const auto value = std::move(res).value();
+    EXPECT_EQ(value, 45);
     EXPECT_FALSE(alock.try_unload().has_value());
 }
 
@@ -138,6 +144,7 @@ TEST(airlock_tests, close_wakes_waiting_loader)
     EXPECT_FALSE(fut.get());
     auto res = alock.try_unload();
     ASSERT_TRUE(res.has_value());
-    EXPECT_EQ(res.value(), 10);
+    const auto value = std::move(res).value();
+    EXPECT_EQ(value, 10);
     EXPECT_FALSE(alock.try_unload().has_value());
 }
