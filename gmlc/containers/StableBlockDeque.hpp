@@ -569,34 +569,33 @@ class StableBlockDeque {
         return freeblocks[--freeIndex];
     }
 
+    static void destroyRange(X* block, int startIndex, int endIndex)
+    {
+        for (int jj = startIndex; jj < endIndex; ++jj) {
+            block[jj].~X();
+        }
+    }
+
     void freeAll()
     {
         if (dataptr != nullptr) {
             Allocator a;
             if (dataSlotBack == dataSlotFront) {
-                for (int jj = bsize - 1; jj > fsize;
-                     --jj) {  // call destructors on the last block
-                    dataptr[dataSlotBack][jj].~X();
-                }
+                destroyRange(dataptr[dataSlotBack], fsize + 1, bsize);
                 a.deallocate(dataptr[dataSlotFront], blockSize);
             } else {
-                for (int jj = bsize - 1; jj >= 0;
-                     --jj) {  // call destructors on the last block
-                    dataptr[dataSlotBack][jj].~X();
-                }
+                destroyRange(dataptr[dataSlotBack], 0, bsize);
                 a.deallocate(dataptr[dataSlotBack], blockSize);
                 // don't go into the front slot yet
-                for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii) {
-                    for (int jj = blockSize - 1; jj >= 0;
-                         --jj) {  // call destructors on the middle blocks
-                        dataptr[ii][jj].~X();
-                    }
+                for (int ii = dataSlotFront + 1; ii < dataSlotBack; ++ii) {
+                    destroyRange(
+                        dataptr[ii], 0, static_cast<int>(blockSize));
                     a.deallocate(dataptr[ii], blockSize);
                 }
-                for (int jj = blockSize - 1; jj > fsize;
-                     --jj) {  // call destructors on the first block
-                    dataptr[dataSlotFront][jj].~X();
-                }
+                destroyRange(
+                    dataptr[dataSlotFront],
+                    fsize + 1,
+                    static_cast<int>(blockSize));
                 a.deallocate(dataptr[dataSlotFront], blockSize);
             }
             for (int ii = 0; ii < freeIndex; ++ii) {
