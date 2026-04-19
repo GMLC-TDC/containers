@@ -76,12 +76,13 @@ TEST(CircBuff, circularbuffraw_loop_around)
     delete[] block;
 }
 
-TEST(CircBuff, circularbuffraw_loop_around_repeat)  // NOLINT(readability-function-cognitive-complexity)
+TEST(
+    CircBuff,
+    circularbuffraw_loop_around_repeat)  // NOLINT(readability-function-cognitive-complexity)
 {
-    auto* block =
-        new unsigned char[1520];  // 3x504+4  otherwise there is a potential
-                                  // scenario in which 2 500byte messages cannot
-                                  // fit
+    auto* block = new unsigned char[1520];  // 3x504+4  otherwise there is a
+                                            // potential scenario in which 2
+                                            // 500byte messages cannot fit
     CircularBufferRaw buf(block, 1520);
 
     std::vector<unsigned char> testData(500, 'a');
@@ -151,7 +152,9 @@ TEST(CircBuff, circularbuff_loop_around)
     EXPECT_TRUE(buf.empty());
 }
 
-TEST(CircBuff, circularbuff_loop_around_repeat)  // NOLINT(readability-function-cognitive-complexity)
+TEST(
+    CircBuff,
+    circularbuff_loop_around_repeat)  // NOLINT(readability-function-cognitive-complexity)
 {
     CircularBuffer buf(1520);
 
@@ -406,7 +409,9 @@ TEST(CircBuff, circularbuff_resize_wrap)
     EXPECT_EQ(buf.capacity(), 512);
 }
 
-TEST(CircBuff, circularbuff_loop_around_repeat_resize)  // NOLINT(readability-function-cognitive-complexity)
+TEST(
+    CircBuff,
+    circularbuff_loop_around_repeat_resize)  // NOLINT(readability-function-cognitive-complexity)
 {
     CircularBuffer buf(45);
 
