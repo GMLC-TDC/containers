@@ -76,9 +76,7 @@ TEST(CircBuff, circularbuffraw_loop_around)
     delete[] block;
 }
 
-TEST(
-    CircBuff,
-    circularbuffraw_loop_around_repeat)
+TEST(CircBuff, circularbuffraw_loop_around_repeat)
 {
     auto* block = new unsigned char[1520];  // 3x504+4  otherwise there is a
                                             // potential scenario in which 2
@@ -152,9 +150,7 @@ TEST(CircBuff, circularbuff_loop_around)
     EXPECT_TRUE(buf.empty());
 }
 
-TEST(
-    CircBuff,
-    circularbuff_loop_around_repeat)
+TEST(CircBuff, circularbuff_loop_around_repeat)
 {
     CircularBuffer buf(1520);
 
@@ -409,9 +405,7 @@ TEST(CircBuff, circularbuff_resize_wrap)
     EXPECT_EQ(buf.capacity(), 512);
 }
 
-TEST(
-    CircBuff,
-    circularbuff_loop_around_repeat_resize)
+TEST(CircBuff, circularbuff_loop_around_repeat_resize)
 {
     CircularBuffer buf(45);
 
