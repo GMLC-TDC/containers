@@ -588,8 +588,7 @@ class StableBlockDeque {
                 a.deallocate(dataptr[dataSlotBack], blockSize);
                 // don't go into the front slot yet
                 for (int ii = dataSlotFront + 1; ii < dataSlotBack; ++ii) {
-                    destroyRange(
-                        dataptr[ii], 0, static_cast<int>(blockSize));
+                    destroyRange(dataptr[ii], 0, static_cast<int>(blockSize));
                     a.deallocate(dataptr[ii], blockSize);
                 }
                 destroyRange(
