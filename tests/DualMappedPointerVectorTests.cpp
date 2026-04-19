@@ -74,6 +74,23 @@ TEST(dual_mapped_pointer_vector_tests, iterator_tests)
     EXPECT_EQ(*Mvec[2], 9.7 + 1.0);
 }
 
+TEST(dual_mapped_pointer_vector_tests, at_tests)
+{
+    DualMappedPointerVector<double, std::string, int64_t> Mvec;
+
+    ASSERT_TRUE(Mvec.insert("s1", 64, 3.2));
+    ASSERT_TRUE(Mvec.insert("s2", 63, 4.3));
+
+    auto* val = Mvec.at(1);
+    ASSERT_NE(val, nullptr);
+    EXPECT_DOUBLE_EQ(*val, 4.3);
+
+    *Mvec.at(0) = 7.1;
+    EXPECT_DOUBLE_EQ(*Mvec.find("s1"), 7.1);
+
+    EXPECT_THROW(static_cast<void>(Mvec.at(5)), std::out_of_range);
+}
+
 TEST(dual_mapped_pointer_vector_tests, remove_tests)
 {
     DualMappedPointerVector<double, std::string, int64_t> Mvec;
@@ -108,4 +125,49 @@ TEST(dual_mapped_pointer_vector_tests, remove_tests)
     EXPECT_EQ(MV3.size(), 1);
     MV3.clear();
     EXPECT_EQ(MV3.size(), 0);
+}
+
+TEST(dual_mapped_pointer_vector_tests, dual_key_collision_tests)
+{
+    DualMappedPointerVector<double, std::string, int64_t> Mvec;
+
+    ASSERT_TRUE(Mvec.insert("el1", 1, 1.0));
+    ASSERT_TRUE(Mvec.insert("el2", 2, 2.0));
+
+    EXPECT_FALSE(Mvec.insert("el1", 3, 11.0));
+    EXPECT_FALSE(Mvec.insert("el3", 2, 22.0));
+    EXPECT_EQ(Mvec.size(), 2u);
+    ASSERT_NE(Mvec.find("el1"), nullptr);
+    ASSERT_NE(Mvec.find(2), nullptr);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 1.0);
+    EXPECT_DOUBLE_EQ(*Mvec.find(2), 2.0);
+
+    auto updated = Mvec.insert_or_assign("el1", 3, 5.0);
+    EXPECT_EQ(updated, 0u);
+    EXPECT_EQ(Mvec.find(1), nullptr);
+    ASSERT_NE(Mvec.find(3), nullptr);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 5.0);
+
+    EXPECT_THROW(Mvec.insert_or_assign("el1", 2, 6.0), std::invalid_argument);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 5.0);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el2"), 2.0);
+}
+
+TEST(dual_mapped_pointer_vector_tests, remove_default_valued_keys)
+{
+    DualMappedPointerVector<double, int, int64_t> Mvec;
+
+    ASSERT_TRUE(Mvec.insert(0, 100, 1.0));
+    ASSERT_TRUE(Mvec.insert(5, static_cast<int64_t>(0), 2.0));
+
+    Mvec.remove(5);
+
+    EXPECT_EQ(Mvec.size(), 1u);
+    ASSERT_NE(Mvec.find(0), nullptr);
+    EXPECT_DOUBLE_EQ(*Mvec.find(0), 1.0);
+    EXPECT_EQ(Mvec.find(static_cast<int64_t>(0)), nullptr);
+
+    Mvec.remove(static_cast<int64_t>(100));
+    EXPECT_EQ(Mvec.size(), 0u);
+    EXPECT_EQ(Mvec.find(0), nullptr);
 }

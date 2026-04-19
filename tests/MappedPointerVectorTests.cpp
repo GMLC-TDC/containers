@@ -127,3 +127,20 @@ TEST(mapped_pointer_vector, remove)
     MV2.clear();
     EXPECT_EQ(MV2.size(), 0);
 }
+
+TEST(mapped_pointer_vector, remove_alias_and_default_key)
+{
+    MappedPointerVector<double, int> Mvec;
+
+    ASSERT_TRUE(Mvec.insert(0, 3.2));
+    ASSERT_TRUE(Mvec.insert(5, 4.3));
+    ASSERT_TRUE(Mvec.addSearchTermForIndex(7, 1));
+
+    Mvec.remove(5);
+
+    EXPECT_EQ(Mvec.size(), 1);
+    EXPECT_NE(Mvec.find(0), nullptr);
+    EXPECT_DOUBLE_EQ(*Mvec.find(0), 3.2);
+    EXPECT_EQ(Mvec.find(5), nullptr);
+    EXPECT_EQ(Mvec.find(7), nullptr);
+}

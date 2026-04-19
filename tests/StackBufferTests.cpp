@@ -563,7 +563,7 @@ TEST(stackBuffer, stack_buffer_resize)
     EXPECT_EQ(stack.capacity(), 2048);
     EXPECT_EQ(stack.rawBlockCapacity(), 4096);
 
-    EXPECT_FALSE(stack.resize(-262354));  // this should do nothing
+    EXPECT_THROW(stack.resize(-262354), std::invalid_argument);
 }
 
 TEST(stackBuffer, odd_conditions)
@@ -597,4 +597,18 @@ TEST(stackBuffer, odd_conditions)
     EXPECT_TRUE(buf4.empty());
     StackBuffer buf5(buf4);
     EXPECT_TRUE(buf5.empty());
+}
+
+TEST(stackBuffer, invalid_constructor_sizes)
+{
+    EXPECT_THROW(StackBuffer(0), std::invalid_argument);
+    EXPECT_THROW(StackBuffer(-10), std::invalid_argument);
+}
+
+TEST(stackBuffer, invalid_resize_sizes)
+{
+    StackBuffer buf(1024);
+
+    EXPECT_THROW(buf.resize(0), std::invalid_argument);
+    EXPECT_THROW(buf.resize(-10), std::invalid_argument);
 }

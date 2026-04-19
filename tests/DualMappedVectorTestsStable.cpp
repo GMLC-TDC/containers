@@ -131,6 +131,31 @@ TEST(dual_mapped_vector_tests_stable, assign_tests2)
     EXPECT_EQ(Mvec[loc5], 14.7);
 }
 
+TEST(dual_mapped_vector_tests_stable, dual_key_collision_tests)
+{
+    DualMappedVector<double, std::string, int64_t, reference_stability::stable>
+        Mvec;
+
+    ASSERT_TRUE(Mvec.insert("el1", 1, 1.0));
+    ASSERT_TRUE(Mvec.insert("el2", 2, 2.0));
+
+    EXPECT_FALSE(Mvec.insert("el1", 3, 11.0));
+    EXPECT_FALSE(Mvec.insert("el3", 2, 22.0));
+    EXPECT_EQ(Mvec.size(), 2u);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 1.0);
+    EXPECT_DOUBLE_EQ(*Mvec.find(2), 2.0);
+
+    auto updated = Mvec.insert_or_assign("el1", 3, 5.0);
+    EXPECT_EQ(updated, 0u);
+    EXPECT_EQ(Mvec.find(1), Mvec.end());
+    EXPECT_NE(Mvec.find(3), Mvec.end());
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 5.0);
+
+    EXPECT_THROW(Mvec.insert_or_assign("el1", 2, 6.0), std::invalid_argument);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el1"), 5.0);
+    EXPECT_DOUBLE_EQ(*Mvec.find("el2"), 2.0);
+}
+
 TEST(dual_mapped_vector_tests_stable, additional_searchTerm_tests)
 {
     DualMappedVector<double, std::string, int64_t, reference_stability::stable>

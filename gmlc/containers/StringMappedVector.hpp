@@ -112,7 +112,12 @@ searchType object
 
     /** get a const reference to the last element of the vector*/
     const VType& back() const { return dataStorage.back(); }
-    /** remove an element by its index*/
+    /** remove an element by its index
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through indexed lookup.
+    */
     void removeIndex(size_t index)
     {
         if (index >= dataStorage.size()) {
@@ -133,6 +138,12 @@ searchType object
         }
     }
 
+    /** remove an element by one of its search terms
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through indexed lookup.
+    */
     void remove(std::string_view search)
     {
         auto el = lookup.find(search);

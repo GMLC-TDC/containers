@@ -42,7 +42,7 @@ TEST(airlock_tests, empty_load_test)
 {
     AirLock<int> alock;
 
-    alock.load(45);
+    EXPECT_TRUE(alock.load(45));
     EXPECT_TRUE(!alock.try_load(54));
 
     EXPECT_TRUE(alock.isLoaded());
@@ -81,10 +81,12 @@ TEST(airlock_tests, move_mthread_tests)
 
     EXPECT_TRUE(alock.isLoaded());
 
-    auto fut =
-        std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
-    auto fut2 =
-        std::async(std::launch::async, [&alock]() { alock.load("load 2"); });
+    auto fut = std::async(std::launch::async, [&alock]() {
+        return alock.load("load 2");
+    });
+    auto fut2 = std::async(std::launch::async, [&alock]() {
+        return alock.load("load 2");
+    });
     std::this_thread::yield();
     auto b = alock.try_unload();
     EXPECT_EQ(*b, "load 1");
@@ -98,7 +100,42 @@ TEST(airlock_tests, move_mthread_tests)
     b = alock.try_unload();
     ASSERT_TRUE(b);
     EXPECT_EQ(*b, "load 2");
-    fut.get();
-    fut2.get();
+    EXPECT_TRUE(fut.get());
+    EXPECT_TRUE(fut2.get());
     EXPECT_TRUE(alock.isLoaded());
+}
+
+TEST(airlock_tests, close_prevents_new_loads_but_allows_drain)
+{
+    AirLock<int> alock;
+
+    EXPECT_TRUE(alock.try_load(45));
+    alock.close();
+
+    EXPECT_TRUE(alock.isClosed());
+    EXPECT_FALSE(alock.try_load(54));
+    EXPECT_FALSE(alock.load(55));
+
+    auto res = alock.try_unload();
+    ASSERT_TRUE(res);
+    EXPECT_EQ(*res, 45);
+    EXPECT_FALSE(alock.try_unload().has_value());
+}
+
+TEST(airlock_tests, close_wakes_waiting_loader)
+{
+    AirLock<int> alock;
+    ASSERT_TRUE(alock.try_load(10));
+
+    auto fut =
+        std::async(std::launch::async, [&alock]() { return alock.load(20); });
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    alock.close();
+
+    EXPECT_FALSE(fut.get());
+    auto res = alock.try_unload();
+    ASSERT_TRUE(res);
+    EXPECT_EQ(*res, 10);
+    EXPECT_FALSE(alock.try_unload().has_value());
 }
