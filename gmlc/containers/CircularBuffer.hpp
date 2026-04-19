@@ -133,18 +133,22 @@ class CircularBufferRaw {
 /** class implementing a circular buffer with raw memory
  */
 class CircularBuffer {
-    private: 
-    static int invalid_size(){
+  private:
+    static int invalid_size()
+    {
         throw(std::invalid_argument("size must be positive"));
     }
+
   public:
     CircularBuffer() noexcept : buffer(nullptr, 0) {}
     explicit CircularBuffer(int size) :
-        data(new unsigned char[size>0?size:invalid_size()]), actualSize{size}, actualCapacity{size},
-        buffer(data, size){}
+        data(new unsigned char[size > 0 ? size : invalid_size()]),
+        actualSize{size}, actualCapacity{size}, buffer(data, size)
+    {
+    }
     ~CircularBuffer()
     {
-        if (data!= nullptr) {
+        if (data != nullptr) {
             delete[] data;
         }
     }
@@ -215,7 +219,7 @@ class CircularBuffer {
 
     void resize(int newsize)
     {
-        if (newsize <=0) {
+        if (newsize <= 0) {
             throw(std::invalid_argument("size must be positive"));
         }
         if (newsize == buffer.capacity_) {

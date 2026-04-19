@@ -146,8 +146,7 @@ class StackBuffer {
     StackBuffer() noexcept : stack() {}
     explicit StackBuffer(int size) :
         data(new unsigned char[size > 0 ? size : invalid_size()]),
-        statedSize{size}, actualCapacity{size},
-        stack(data, size)
+        statedSize{size}, actualCapacity{size}, stack(data, size)
     {
     }
 

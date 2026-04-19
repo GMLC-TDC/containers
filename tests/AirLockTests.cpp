@@ -81,10 +81,12 @@ TEST(airlock_tests, move_mthread_tests)
 
     EXPECT_TRUE(alock.isLoaded());
 
-    auto fut =
-        std::async(std::launch::async, [&alock]() { return alock.load("load 2"); });
-    auto fut2 =
-        std::async(std::launch::async, [&alock]() { return alock.load("load 2"); });
+    auto fut = std::async(std::launch::async, [&alock]() {
+        return alock.load("load 2");
+    });
+    auto fut2 = std::async(std::launch::async, [&alock]() {
+        return alock.load("load 2");
+    });
     std::this_thread::yield();
     auto b = alock.try_unload();
     EXPECT_EQ(*b, "load 1");
@@ -125,7 +127,8 @@ TEST(airlock_tests, close_wakes_waiting_loader)
     AirLock<int> alock;
     ASSERT_TRUE(alock.try_load(10));
 
-    auto fut = std::async(std::launch::async, [&alock]() { return alock.load(20); });
+    auto fut =
+        std::async(std::launch::async, [&alock]() { return alock.load(20); });
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
     alock.close();

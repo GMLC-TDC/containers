@@ -14,13 +14,13 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <stdexcept>
 
 namespace gmlc::containers {
 /** class to create a searchable vector by defined unique indices.

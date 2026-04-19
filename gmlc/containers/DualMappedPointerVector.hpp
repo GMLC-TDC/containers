@@ -15,12 +15,12 @@ SPDX-License-Identifier: BSD-3-Clause
 #include <functional>
 #include <map>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
-#include <stdexcept>
 
 namespace gmlc::containers {
 /** class merging a vector of pointer with a map that can be used to lookup
