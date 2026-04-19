@@ -92,7 +92,7 @@ class StableBlockDeque {
                     new (&dataptr[dataSlotFront][jj]) X{init};
                 }
             }
-            for (int ii = dataSlotFront + 1; ii <= dataSlotBack - 1; ++ii) {
+            for (int ii = dataSlotFront + 1; ii < dataSlotBack; ++ii) {
                 dataptr[ii] = a.allocate(blockSize);
                 for (int jj = 0; jj < static_cast<int>(blockSize); ++jj) {
                     new (&dataptr[ii][jj]) X{init};
@@ -316,25 +316,17 @@ class StableBlockDeque {
         if (dataSlotsAvailable == 0 || csize == 0) {
             return;
         }
-        for (int jj = bsize - 1; jj >= 0;
-             --jj) {  // call destructors on the last block
-            dataptr[dataSlotBack][jj].~X();
-        }
+        destroyRange(dataptr[dataSlotBack], 0, bsize);
         // don't go into the front slot yet
-        for (int ii = dataSlotBack - 1; ii >= dataSlotFront + 1; --ii) {
-            for (int jj = blockSize - 1; jj >= 0;
-                 --jj) {  // call destructors on the middle blocks
-                dataptr[ii][jj].~X();
-            }
+        for (int ii = dataSlotFront + 1; ii < dataSlotBack; ++ii) {
+            destroyRange(dataptr[ii], 0, static_cast<int>(blockSize));
             moveBlocktoAvailable(dataptr[ii]);
         }
         if (dataSlotFront < dataSlotBack) {
             moveBlocktoAvailable(dataptr[dataSlotBack]);
 
-            for (int jj = blockSize - 1; jj > fsize;
-                 --jj) {  // call destructors on the first block
-                dataptr[dataSlotFront][jj].~X();
-            }
+            destroyRange(
+                dataptr[dataSlotFront], fsize + 1, static_cast<int>(blockSize));
         }
         csize = 0;
         auto nindex = dataSlotsAvailable / 2;

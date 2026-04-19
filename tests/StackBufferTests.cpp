@@ -9,6 +9,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "gtest/gtest.h"
 #include <iostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -25,7 +26,7 @@ TEST(stackBuffer, stack_bufferraw_simple)
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    const bool pushed = stack.push(testData.data(), 571);
+    bool pushed = stack.push(testData.data(), 571);
     EXPECT_TRUE(pushed);
     testData.assign(1024, '\0');
     res = stack.pop(testData.data(), 265);
@@ -42,7 +43,7 @@ TEST(stackBuffer, stack_bufferraw_simple)
 
 TEST(stackBuffer, stack_bufferraw_3_push)
 {
-    unsigned char* block = new unsigned char[4096];
+    auto* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
 
     std::vector<unsigned char> testData(1024, 'a');
@@ -82,7 +83,7 @@ TEST(stackBuffer, stack_bufferraw_3_push)
 
 TEST(stackBuffer, stack_bufferraw_push_full)
 {
-    unsigned char* block = new unsigned char[1024];
+    auto* block = new unsigned char[1024];
     StackBufferRaw stack(block, 1024);
 
     std::vector<unsigned char> testData(1024, 'a');
@@ -139,7 +140,7 @@ TEST(stackBuffer, stack_bufferraw_push_full)
 
 TEST(stackBuffer, stack_bufferraw_reverse)
 {
-    unsigned char* block = new unsigned char[4096];
+    auto* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
 
     std::vector<unsigned char> testData(1024, 'a');
