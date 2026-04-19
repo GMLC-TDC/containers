@@ -593,9 +593,10 @@ TEST(stackBuffer, odd_conditions)
     buf3.resize(1024);
     EXPECT_EQ(buf3.capacity(), 1024);
 
-    StackBuffer buf4;
+    const StackBuffer buf4;
     EXPECT_TRUE(buf4.empty());
-    StackBuffer buf5(buf4);
+    StackBuffer buf5;
+    buf5 = buf4;
     EXPECT_TRUE(buf5.empty());
 }
 
