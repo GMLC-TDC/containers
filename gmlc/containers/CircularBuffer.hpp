@@ -34,8 +34,7 @@ class CircularBufferRaw {
             static_cast<std::ptrdiff_t>(sz) + header_size;
         if (next_write >= next_read) {
             const auto remaining_to_end =
-                static_cast<std::ptrdiff_t>(capacity_) -
-                (next_write - origin);
+                static_cast<std::ptrdiff_t>(capacity_) - (next_write - origin);
             if (remaining_to_end >= required_space) {
                 return true;
             }
@@ -59,8 +58,7 @@ class CircularBufferRaw {
             static_cast<std::ptrdiff_t>(blockSize) + header_size;
         if (next_write >= next_read) {
             const auto remaining_to_end =
-                static_cast<std::ptrdiff_t>(capacity_) -
-                (next_write - origin);
+                static_cast<std::ptrdiff_t>(capacity_) - (next_write - origin);
             if (remaining_to_end >= required_space) {
                 memcpy(next_write, &blockSize, sizeof(int));
                 // *(reinterpret_cast<int *>(next_write)) = blockSize;
@@ -69,8 +67,7 @@ class CircularBufferRaw {
                 // loop around if there isn't really space for another block
                 // of at least 4 bytes and the next_read>origin
                 if (((static_cast<std::ptrdiff_t>(capacity_) -
-                      (next_write - origin)) <
-                     (2 * header_size)) &&
+                      (next_write - origin)) < (2 * header_size)) &&
                     (next_read > origin)) {
                     next_write = origin;
                 }
@@ -120,8 +117,7 @@ class CircularBufferRaw {
             memcpy(data, next_read + sizeof(int), size);
             next_read += static_cast<size_t>(size) + sizeof(int);
             if ((static_cast<std::ptrdiff_t>(capacity_) -
-                 (next_read - origin)) <
-                (2 * header_size)) {
+                 (next_read - origin)) < (2 * header_size)) {
                 next_read = origin;
             }
             return size;
