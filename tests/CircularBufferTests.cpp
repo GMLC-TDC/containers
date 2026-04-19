@@ -78,7 +78,7 @@ TEST(CircBuff, circularbuffraw_loop_around)
 
 TEST(
     CircBuff,
-    circularbuffraw_loop_around_repeat)  // NOLINT(readability-function-cognitive-complexity)
+    circularbuffraw_loop_around_repeat)
 {
     auto* block = new unsigned char[1520];  // 3x504+4  otherwise there is a
                                             // potential scenario in which 2
@@ -142,7 +142,7 @@ TEST(CircBuff, circularbuff_loop_around)
     EXPECT_FALSE(pushed);
 
     EXPECT_TRUE(!buf.isSpaceAvailable(20));
-    int res = buf.pop(testData.data(), 1024);
+    const int res = buf.pop(testData.data(), 1024);
     EXPECT_EQ(res, 200);
     EXPECT_TRUE(buf.isSpaceAvailable(20));
     pushed = buf.push(testData.data(), 200);
@@ -154,7 +154,7 @@ TEST(CircBuff, circularbuff_loop_around)
 
 TEST(
     CircBuff,
-    circularbuff_loop_around_repeat)  // NOLINT(readability-function-cognitive-complexity)
+    circularbuff_loop_around_repeat)
 {
     CircularBuffer buf(1520);
 
@@ -270,7 +270,7 @@ TEST(CircBuff, circularbuff_simple_copy_assignment)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_TRUE(!buf.empty());
@@ -411,7 +411,7 @@ TEST(CircBuff, circularbuff_resize_wrap)
 
 TEST(
     CircBuff,
-    circularbuff_loop_around_repeat_resize)  // NOLINT(readability-function-cognitive-complexity)
+    circularbuff_loop_around_repeat_resize)
 {
     CircularBuffer buf(45);
 

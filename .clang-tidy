@@ -181,6 +181,8 @@ CheckOptions:
     value: "4294967295"
   - key: readability-function-size.StatementThreshold
     value: "800"
+  - key: readability-function-cognitive-complexity.Threshold
+    value: "100"
   - key: readability-identifier-naming.AbstractClassCase
     value: CamelCase
   - key: readability-identifier-naming.AbstractClassPrefix
