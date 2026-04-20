@@ -26,7 +26,8 @@ void bmBufferPushPop(benchmark::State& state)
     std::vector<unsigned char> read_block(static_cast<std::size_t>(read_size));
     for (int index = 0; index < read_size; ++index) {
         data_block[static_cast<std::size_t>(index)] =
-            static_cast<unsigned char>(static_cast<std::uint32_t>(index) & 0xFFU);
+            static_cast<unsigned char>(
+                static_cast<std::uint32_t>(index) & 0xFFU);
     }
     buffer.push(data_block.data(), read_size);
     buffer.pop(read_block.data(), read_size);
@@ -45,7 +46,8 @@ void bmBufferPushPopWrap(benchmark::State& state)
     std::vector<unsigned char> read_block(static_cast<std::size_t>(read_size));
     for (int index = 0; index < read_size; ++index) {
         data_block[static_cast<std::size_t>(index)] =
-            static_cast<unsigned char>(static_cast<std::uint32_t>(index) & 0xFFU);
+            static_cast<unsigned char>(
+                static_cast<std::uint32_t>(index) & 0xFFU);
     }
     buffer.push(data_block.data(), read_size);
     buffer.pop(read_block.data(), read_size);
