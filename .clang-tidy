@@ -305,6 +305,8 @@ CheckOptions:
     value: ""
   - key: readability-identifier-naming.LocalVariableCase
     value: aNy_CasE
+  - key: readability-identifier-naming.LocalVariableIgnoredRegexp
+    value: "^(_|ii|jj|kk)$"
   - key: readability-identifier-naming.LocalVariablePrefix
     value: ""
   - key: readability-identifier-naming.LocalVariableSuffix
@@ -435,6 +437,8 @@ CheckOptions:
     value: ""
   - key: readability-identifier-naming.VariableSuffix
     value: ""
+  - key: readability-identifier-length.IgnoredLoopCounterNames
+    value: "^(_|ii|jj|kk)$"
   - key: readability-identifier-naming.VirtualMethodCase
     value: aNy_CasE
   - key: readability-identifier-naming.VirtualMethodPrefix
