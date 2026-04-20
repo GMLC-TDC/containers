@@ -58,7 +58,8 @@ TEST(mapped_pointer_vector, insertion_no_search)
     MappedPointerVector<std::vector<double>> mapped_vector;
     mapped_vector.insert("el1", 3, 1.7);
     EXPECT_EQ(mapped_vector.size(), 1);
-    auto result = mapped_vector.insert(::no_search_type(), std::vector<double>(45));
+    auto result =
+        mapped_vector.insert(::no_search_type(), std::vector<double>(45));
     EXPECT_EQ(mapped_vector.size(), 2);
     EXPECT_TRUE(result);
     auto* first_vector = mapped_vector[0];
