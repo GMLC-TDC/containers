@@ -127,8 +127,8 @@ TEST(blocking_queue, multithreaded)
         while (result) {
             ++count;
             result = queue.try_pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.try_pop();
             }
@@ -199,8 +199,8 @@ TEST(blocking_queue, multithreaded2)
         while (result) {
             ++count;
             result = queue.try_pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.try_pop();
             }
@@ -244,8 +244,8 @@ TEST(blocking_queue, multithreaded3)
         while (result) {
             ++count;
             result = queue.try_pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 const std::lock_guard<std::mutex> print_lock(printer);
                 std::cout << "sleeping " << count << '\n';
