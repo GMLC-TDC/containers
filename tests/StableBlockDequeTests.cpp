@@ -309,7 +309,8 @@ TEST(stableBlockDequeTest, move_construct)
     for (auto& value : *stable_block_deque) {
         value = index++;
     }
-    StableBlockDeque<size_t, 4> stable_block_deque2(std::move(*stable_block_deque));
+    StableBlockDeque<size_t, 4> stable_block_deque2(
+        std::move(*stable_block_deque));
     delete stable_block_deque;
     EXPECT_EQ(stable_block_deque2.size(), 200);
     for (index = 0; index < 100; ++index) {
@@ -379,7 +380,8 @@ TEST(stableBlockDequeTest, move_assign)
 TEST(stableBlockDequeTest, assign_move)
 {
     std::vector<std::string> vector1(200, std::string(200, 'a'));
-    StableBlockDeque<std::string, 5> stable_block_deque2(100, std::string(100, 'b'));
+    StableBlockDeque<std::string, 5> stable_block_deque2(
+        100, std::string(100, 'b'));
 
     stable_block_deque2.move_assign(vector1.begin(), vector1.end());
     EXPECT_EQ(stable_block_deque2.size(), 200);
@@ -411,7 +413,8 @@ TEST(stableBlockDequeTest, assign_move_to_empty)
 TEST(stableBlockDequeTest, assign_move_to_bigger)
 {
     std::vector<std::string> vector1(200, std::string(200, 'a'));
-    StableBlockDeque<std::string, 5> stable_block_deque2(500, std::string(100, 'b'));
+    StableBlockDeque<std::string, 5> stable_block_deque2(
+        500, std::string(100, 'b'));
 
     stable_block_deque2.move_assign(vector1.begin(), vector1.end());
     EXPECT_EQ(stable_block_deque2.size(), 200);
@@ -533,7 +536,8 @@ TEST(stableBlockDequeTest, iterators)
     StableBlockDeque<size_t, 3> stable_block_deque;
     EXPECT_TRUE(stable_block_deque.begin() == stable_block_deque.end());
     const auto& stable_block_deque_const = stable_block_deque;
-    EXPECT_TRUE(stable_block_deque_const.begin() == stable_block_deque_const.end());
+    EXPECT_TRUE(
+        stable_block_deque_const.begin() == stable_block_deque_const.end());
     for (size_t index = 0; index < 70; ++index) {
         stable_block_deque.push_back(index);
         size_t count = 0;
