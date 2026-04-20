@@ -8,8 +8,10 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "StableBlockVector.hpp"
 
 #include "gtest/gtest.h"
-#include <algorithm>
 #include <atomic>
+#include <cstddef>
+#include <cstdlib>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -18,539 +20,545 @@ using gmlc::containers::StableBlockVector;
 
 TEST(stableBlockVectorTest, test_lookup)
 {
-    StableBlockVector<std::string, 2> sbv;
-    EXPECT_TRUE(sbv.empty());
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    sbv.emplace_back("bob5");
-    EXPECT_EQ(sbv.size(), 5);
-    EXPECT_EQ(sbv[0], "bob");
-    EXPECT_EQ(sbv[1], "bob2");
-    sbv[1] = "bob2_mod";
-    EXPECT_EQ(sbv[1], "bob2_mod");
-    EXPECT_EQ(sbv[2], "bob3");
-    EXPECT_EQ(sbv[3], "bob4");
-    EXPECT_EQ(sbv[4], "bob5");
+    StableBlockVector<std::string, 2> stable_block_vector;
+    EXPECT_TRUE(stable_block_vector.empty());
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    stable_block_vector.emplace_back("bob5");
+    EXPECT_EQ(stable_block_vector.size(), 5);
+    EXPECT_EQ(stable_block_vector[0], "bob");
+    EXPECT_EQ(stable_block_vector[1], "bob2");
+    stable_block_vector[1] = "bob2_mod";
+    EXPECT_EQ(stable_block_vector[1], "bob2_mod");
+    EXPECT_EQ(stable_block_vector[2], "bob3");
+    EXPECT_EQ(stable_block_vector[3], "bob4");
+    EXPECT_EQ(stable_block_vector[4], "bob5");
 
-    EXPECT_EQ(sbv.at(0), "bob");
-    EXPECT_EQ(sbv.at(1), "bob2_mod");
-    sbv.at(1) = "bob2_mod2";
-    EXPECT_EQ(sbv.at(1), "bob2_mod2");
-    EXPECT_EQ(sbv.at(2), "bob3");
-    EXPECT_EQ(sbv.at(3), "bob4");
-    EXPECT_EQ(sbv.at(4), "bob5");
-    EXPECT_FALSE(sbv.empty());
-    EXPECT_THROW(sbv.at(10), std::out_of_range);
+    EXPECT_EQ(stable_block_vector.at(0), "bob");
+    EXPECT_EQ(stable_block_vector.at(1), "bob2_mod");
+    stable_block_vector.at(1) = "bob2_mod2";
+    EXPECT_EQ(stable_block_vector.at(1), "bob2_mod2");
+    EXPECT_EQ(stable_block_vector.at(2), "bob3");
+    EXPECT_EQ(stable_block_vector.at(3), "bob4");
+    EXPECT_EQ(stable_block_vector.at(4), "bob5");
+    EXPECT_FALSE(stable_block_vector.empty());
+    EXPECT_THROW(stable_block_vector.at(10), std::out_of_range);
 }
 
 TEST(stableBlockVectorTest, test_const_lookup)
 {
-    StableBlockVector<std::string, 2> sbv;
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    sbv.push_back("bob5");
-    const auto& sbvc = sbv;
-    EXPECT_EQ(sbvc.size(), 5);
-    EXPECT_EQ(sbvc[0], "bob");
-    EXPECT_EQ(sbvc[1], "bob2");
-    sbv[1] = "bob2_mod";
-    EXPECT_EQ(sbvc[1], "bob2_mod");
-    EXPECT_EQ(sbvc[2], "bob3");
-    EXPECT_EQ(sbvc[3], "bob4");
-    EXPECT_EQ(sbvc[4], "bob5");
-    EXPECT_FALSE(sbvc.empty());
+    StableBlockVector<std::string, 2> stable_block_vector;
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    stable_block_vector.push_back("bob5");
+    const auto& stable_block_vector_const = stable_block_vector;
+    EXPECT_EQ(stable_block_vector_const.size(), 5);
+    EXPECT_EQ(stable_block_vector_const[0], "bob");
+    EXPECT_EQ(stable_block_vector_const[1], "bob2");
+    stable_block_vector[1] = "bob2_mod";
+    EXPECT_EQ(stable_block_vector_const[1], "bob2_mod");
+    EXPECT_EQ(stable_block_vector_const[2], "bob3");
+    EXPECT_EQ(stable_block_vector_const[3], "bob4");
+    EXPECT_EQ(stable_block_vector_const[4], "bob5");
+    EXPECT_FALSE(stable_block_vector_const.empty());
 
-    EXPECT_EQ(sbvc.at(1), "bob2_mod");
-    EXPECT_EQ(sbvc.at(2), "bob3");
-    EXPECT_EQ(sbvc.at(3), "bob4");
-    EXPECT_EQ(sbvc.at(4), "bob5");
+    EXPECT_EQ(stable_block_vector_const.at(1), "bob2_mod");
+    EXPECT_EQ(stable_block_vector_const.at(2), "bob3");
+    EXPECT_EQ(stable_block_vector_const.at(3), "bob4");
+    EXPECT_EQ(stable_block_vector_const.at(4), "bob5");
 
-    EXPECT_THROW(sbvc.at(10), std::out_of_range);
+    EXPECT_THROW(stable_block_vector_const.at(10), std::out_of_range);
 }
 
 TEST(stableBlockVectorTest, test_iterator)
 {
-    StableBlockVector<std::string, 2> sbv;
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    sbv.emplace_back("bob5");
-    EXPECT_EQ(sbv.size(), 5);
-    auto it = sbv.begin();
-    EXPECT_EQ(*it, "bob");
-    ++it;
-    EXPECT_EQ(*it, "bob2");
-    it++;
-    EXPECT_EQ(*it, "bob3");
-    --it;
-    EXPECT_EQ(*it, "bob2");
-    it += 1;
-    EXPECT_EQ(*it, "bob3");
-    it += 2;
-    EXPECT_EQ(*it, "bob5");
-    it -= 1;
-    EXPECT_EQ(*it--, "bob4");
-    EXPECT_EQ(*it, "bob3");
-    it -= 2;
-    EXPECT_EQ(*it, "bob");
-    int ii = 0;
-    while (it != sbv.end()) {
-        ++ii;
-        ++it;
+    StableBlockVector<std::string, 2> stable_block_vector;
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    stable_block_vector.emplace_back("bob5");
+    EXPECT_EQ(stable_block_vector.size(), 5);
+    auto iterator = stable_block_vector.begin();
+    EXPECT_EQ(*iterator, "bob");
+    ++iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator++;
+    EXPECT_EQ(*iterator, "bob3");
+    --iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator += 1;
+    EXPECT_EQ(*iterator, "bob3");
+    iterator += 2;
+    EXPECT_EQ(*iterator, "bob5");
+    iterator -= 1;
+    EXPECT_EQ(*iterator--, "bob4");
+    EXPECT_EQ(*iterator, "bob3");
+    iterator -= 2;
+    EXPECT_EQ(*iterator, "bob");
+    int index = 0;
+    while (iterator != stable_block_vector.end()) {
+        ++index;
+        ++iterator;
     }
-    EXPECT_EQ(ii, 5);
+    EXPECT_EQ(index, 5);
 }
 
 TEST(stableBlockVectorTest, test_iterator2)
 {
-    StableBlockVector<std::string, 2> sbv;
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    EXPECT_EQ(sbv.size(), 4);
-    auto it = sbv.begin();
-    EXPECT_EQ(*it, "bob");
-    ++it;
-    EXPECT_EQ(*it, "bob2");
-    it++;
-    EXPECT_EQ(*it, "bob3");
-    --it;
-    EXPECT_EQ(*it, "bob2");
-    it += 2;
-    EXPECT_EQ(*it--, "bob4");
-    EXPECT_EQ(*it, "bob3");
-    it -= 2;
-    EXPECT_EQ(*it, "bob");
-    int ii = 0;
-    while (it != sbv.end()) {
-        ++ii;
-        ++it;
+    StableBlockVector<std::string, 2> stable_block_vector;
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    EXPECT_EQ(stable_block_vector.size(), 4);
+    auto iterator = stable_block_vector.begin();
+    EXPECT_EQ(*iterator, "bob");
+    ++iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator++;
+    EXPECT_EQ(*iterator, "bob3");
+    --iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator += 2;
+    EXPECT_EQ(*iterator--, "bob4");
+    EXPECT_EQ(*iterator, "bob3");
+    iterator -= 2;
+    EXPECT_EQ(*iterator, "bob");
+    int index = 0;
+    while (iterator != stable_block_vector.end()) {
+        ++index;
+        ++iterator;
     }
-    EXPECT_EQ(ii, 4);
+    EXPECT_EQ(index, 4);
 }
 
 TEST(stableBlockVectorTest, test_const_iterator)
 {
-    StableBlockVector<std::string, 2> sbv;
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    sbv.emplace_back("bob5");
+    StableBlockVector<std::string, 2> stable_block_vector;
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    stable_block_vector.emplace_back("bob5");
 
-    const auto& sbvc = sbv;
-    EXPECT_EQ(sbvc.size(), 5);
-    auto it = sbvc.begin();
-    EXPECT_EQ(*it, "bob");
-    ++it;
-    EXPECT_EQ(*it, "bob2");
-    it++;
-    EXPECT_EQ(*it, "bob3");
-    --it;
-    EXPECT_EQ(*it, "bob2");
-    it += 1;
-    EXPECT_EQ(*it, "bob3");
-    it += 2;
-    EXPECT_EQ(*it, "bob5");
-    it -= 1;
-    EXPECT_EQ(*it--, "bob4");
-    EXPECT_EQ(*it, "bob3");
-    it -= 2;
-    EXPECT_EQ(*it, "bob");
-    int ii = 0;
-    while (it != sbvc.end()) {
-        ++ii;
-        ++it;
+    const auto& stable_block_vector_const = stable_block_vector;
+    EXPECT_EQ(stable_block_vector_const.size(), 5);
+    auto iterator = stable_block_vector_const.begin();
+    EXPECT_EQ(*iterator, "bob");
+    ++iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator++;
+    EXPECT_EQ(*iterator, "bob3");
+    --iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator += 1;
+    EXPECT_EQ(*iterator, "bob3");
+    iterator += 2;
+    EXPECT_EQ(*iterator, "bob5");
+    iterator -= 1;
+    EXPECT_EQ(*iterator--, "bob4");
+    EXPECT_EQ(*iterator, "bob3");
+    iterator -= 2;
+    EXPECT_EQ(*iterator, "bob");
+    int index = 0;
+    while (iterator != stable_block_vector_const.end()) {
+        ++index;
+        ++iterator;
     }
-    EXPECT_EQ(ii, 5);
+    EXPECT_EQ(index, 5);
 }
 
 TEST(stableBlockVectorTest, test_const_iterator2)
 {
-    StableBlockVector<std::string, 2> sbv;
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    const auto& sbvc = sbv;
-    EXPECT_EQ(sbvc.size(), 4);
-    EXPECT_EQ(sbvc.back(), "bob4");
-    auto it = sbvc.begin();
-    EXPECT_EQ(*it, "bob");
-    ++it;
-    EXPECT_EQ(*it, "bob2");
-    it++;
-    EXPECT_EQ(*it, "bob3");
-    --it;
-    EXPECT_EQ(*it, "bob2");
-    it += 2;
-    EXPECT_EQ(*it--, "bob4");
-    EXPECT_EQ(*it, "bob3");
-    it -= 2;
-    EXPECT_EQ(*it, "bob");
-    int ii = 0;
-    while (it != sbvc.end()) {
-        ++ii;
-        ++it;
+    StableBlockVector<std::string, 2> stable_block_vector;
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    const auto& stable_block_vector_const = stable_block_vector;
+    EXPECT_EQ(stable_block_vector_const.size(), 4);
+    EXPECT_EQ(stable_block_vector_const.back(), "bob4");
+    auto iterator = stable_block_vector_const.begin();
+    EXPECT_EQ(*iterator, "bob");
+    ++iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator++;
+    EXPECT_EQ(*iterator, "bob3");
+    --iterator;
+    EXPECT_EQ(*iterator, "bob2");
+    iterator += 2;
+    EXPECT_EQ(*iterator--, "bob4");
+    EXPECT_EQ(*iterator, "bob3");
+    iterator -= 2;
+    EXPECT_EQ(*iterator, "bob");
+    int index = 0;
+    while (iterator != stable_block_vector_const.end()) {
+        ++index;
+        ++iterator;
     }
-    EXPECT_EQ(ii, 4);
-    EXPECT_FALSE(sbvc.empty());
-    EXPECT_FALSE(sbv.empty());
+    EXPECT_EQ(index, 4);
+    EXPECT_FALSE(stable_block_vector_const.empty());
+    EXPECT_FALSE(stable_block_vector.empty());
 }
 
 TEST(stableBlockVectorTest, test_simple)
 {
-    StableBlockVector<std::string, 2> sbv;
-    std::string bb{"bob7"};
-    sbv.push_back("bob");
-    sbv.emplace_back("bob2");
-    sbv.emplace_back("bob3");
-    sbv.emplace_back("bob4");
-    sbv.emplace_back("bob5");
-    sbv.emplace_back("bob6");
-    sbv.push_back(bb);
-    EXPECT_EQ(sbv.back(), "bob7");
-    sbv.emplace_back("bob8");
-    sbv.emplace_back("bob9");
-    sbv.emplace_back("bob10");
-    sbv.push_back("bob11");
-    sbv.emplace_back("bob12");
-    sbv.emplace_back("bob13");
-    sbv.emplace_back("bob14");
-    int ii = 0;
-    std::vector<std::string> act;
-    for (const auto& el : sbv) {
-        act.push_back(el);
-        ++ii;
+    StableBlockVector<std::string, 2> stable_block_vector;
+    const std::string bob7{"bob7"};
+    stable_block_vector.push_back("bob");
+    stable_block_vector.emplace_back("bob2");
+    stable_block_vector.emplace_back("bob3");
+    stable_block_vector.emplace_back("bob4");
+    stable_block_vector.emplace_back("bob5");
+    stable_block_vector.emplace_back("bob6");
+    stable_block_vector.push_back(bob7);
+    EXPECT_EQ(stable_block_vector.back(), "bob7");
+    stable_block_vector.emplace_back("bob8");
+    stable_block_vector.emplace_back("bob9");
+    stable_block_vector.emplace_back("bob10");
+    stable_block_vector.push_back("bob11");
+    stable_block_vector.emplace_back("bob12");
+    stable_block_vector.emplace_back("bob13");
+    stable_block_vector.emplace_back("bob14");
+    int index = 0;
+    std::vector<std::string> actual;
+    for (const auto& element : stable_block_vector) {
+        actual.push_back(element);
+        ++index;
     }
-    EXPECT_EQ(sbv.size(), 14);
-    EXPECT_EQ(ii, 14);
+    EXPECT_EQ(stable_block_vector.size(), 14);
+    EXPECT_EQ(index, 14);
 
-    sbv.pop_back();
-    sbv.pop_back();
-    sbv.pop_back();
-    sbv.pop_back();
-    auto& sb2 = sbv;
-    ii = 0;
-    for (const auto& el : sb2) {
-        (void)(el);
-        ++ii;
+    stable_block_vector.pop_back();
+    stable_block_vector.pop_back();
+    stable_block_vector.pop_back();
+    stable_block_vector.pop_back();
+    auto& stable_block_vector_alias = stable_block_vector;
+    index = 0;
+    for (const auto& element : stable_block_vector_alias) {
+        (void)(element);
+        ++index;
     }
-    EXPECT_EQ(sbv.size(), 10);
-    EXPECT_EQ(sb2.size(), 10);
-    EXPECT_EQ(ii, 10);
+    EXPECT_EQ(stable_block_vector.size(), 10);
+    EXPECT_EQ(stable_block_vector_alias.size(), 10);
+    EXPECT_EQ(index, 10);
 }
 
 TEST(stableBlockVectorTest, iterator_check)
 {
-    for (size_t sz = 1; sz < 120; ++sz) {
-        StableBlockVector<std::string, 4> sbd(sz);
-        const auto& sbdcopy = sbd;
-        auto it = sbd.begin();
-        size_t ii = 0;
-        while (it != sbd.end()) {
-            *it = std::to_string(ii);
-            ++it;
-            ++ii;
+    for (size_t size = 1; size < 120; ++size) {
+        StableBlockVector<std::string, 4> stable_block_vector(size);
+        const auto& stable_block_vector_copy = stable_block_vector;
+        auto iterator = stable_block_vector.begin();
+        size_t index = 0;
+        while (iterator != stable_block_vector.end()) {
+            *iterator = std::to_string(index);
+            ++iterator;
+            ++index;
         }
-        EXPECT_EQ(ii, sz);
-        for (ii = 0; ii < sz; ++ii) {
-            auto tstr = std::to_string(ii);
-            auto res = sbd[ii];
-            EXPECT_EQ(tstr, res);
-            EXPECT_EQ(tstr, sbdcopy[ii]);
+        EXPECT_EQ(index, size);
+        for (index = 0; index < size; ++index) {
+            const auto text = std::to_string(index);
+            const auto& result = stable_block_vector[index];
+            EXPECT_EQ(text, result);
+            EXPECT_EQ(text, stable_block_vector_copy[index]);
         }
     }
 }
 
 TEST(stableBlockVectorTest, test_back)
 {
-    StableBlockVector<size_t, 4> sbd(100);
-    const auto& sbdcopy = sbd;
-    size_t ii = 0;
-    for (auto& val : sbd) {
-        val = ii++;
+    StableBlockVector<size_t, 4> stable_block_vector(100);
+    const auto& stable_block_vector_copy = stable_block_vector;
+    size_t index = 0;
+    for (auto& value : stable_block_vector) {
+        value = index++;
     }
-    EXPECT_EQ(sbdcopy.back(), 99U);
-    for (int jj = 99; jj >= 0; --jj) {
-        EXPECT_EQ(sbd.back(), static_cast<size_t>(jj));
-        EXPECT_EQ(sbdcopy.back(), static_cast<size_t>(jj));
-        EXPECT_EQ(*sbdcopy.begin(), 0U);
+    EXPECT_EQ(stable_block_vector_copy.back(), 99U);
+    for (int reverse_index = 99; reverse_index >= 0; --reverse_index) {
+        EXPECT_EQ(stable_block_vector.back(), static_cast<size_t>(reverse_index));
+        EXPECT_EQ(stable_block_vector_copy.back(), static_cast<size_t>(reverse_index));
+        EXPECT_EQ(*stable_block_vector_copy.begin(), 0U);
 
-        sbd.pop_back();
+        stable_block_vector.pop_back();
     }
 
-    EXPECT_NO_THROW(sbd.pop_back());
+    EXPECT_NO_THROW(stable_block_vector.pop_back());
 }
 
 TEST(stableBlockVectorTest, constructor1)
 {
-    StableBlockVector<std::string, 7> sbv{
-        15, "this is an exciting long string"};
-    EXPECT_EQ(sbv.size(), 15);
-    for (size_t ii = 0; ii < 15; ++ii) {
-        EXPECT_EQ(sbv[ii], "this is an exciting long string");
+    StableBlockVector<std::string, 7> stable_block_vector{
+        15,
+        "this is an exciting long string"};
+    EXPECT_EQ(stable_block_vector.size(), 15);
+    for (size_t index = 0; index < 15; ++index) {
+        EXPECT_EQ(stable_block_vector[index], "this is an exciting long string");
     }
 }
 
 TEST(stableBlockVectorTest, constructor0)
 {
-    StableBlockVector<std::string, 7> sbv{0, "this is an exciting long string"};
-    EXPECT_TRUE(sbv.empty());
-    EXPECT_EQ(sbv.size(), 0);
+    const StableBlockVector<std::string, 7> stable_block_vector{
+        0,
+        "this is an exciting long string"};
+    EXPECT_TRUE(stable_block_vector.empty());
+    EXPECT_EQ(stable_block_vector.size(), 0);
 }
 
 TEST(stableBlockVectorTest, copy_constructor)
 {
-    StableBlockVector<std::string, 7> sbv{
-        15, "this is an exciting long string"};
-    auto sbv2 = sbv;
-    EXPECT_EQ(sbv2.size(), 15);
-    for (size_t ii = 0; ii < 15; ++ii) {
-        EXPECT_EQ(sbv2[ii], "this is an exciting long string");
+    const StableBlockVector<std::string, 7> stable_block_vector{
+        15,
+        "this is an exciting long string"};
+    const auto& stable_block_vector_copy = stable_block_vector;
+    EXPECT_EQ(stable_block_vector_copy.size(), 15);
+    for (size_t index = 0; index < 15; ++index) {
+        EXPECT_EQ(stable_block_vector_copy[index], "this is an exciting long string");
     }
 
-    StableBlockVector<std::string, 4> sbv_s;
-    auto sbvd = sbv_s;
-    EXPECT_TRUE(sbvd.empty());
+    const StableBlockVector<std::string, 4> stable_block_vector_source;
+    const auto& stable_block_vector_default = stable_block_vector_source;
+    EXPECT_TRUE(stable_block_vector_default.empty());
 }
 
 TEST(stableBlockVectorTest, copy_construct_empty)
 {
-    StableBlockVector<size_t, 4> sbd;
-    EXPECT_TRUE(sbd.empty());
-    sbd.clear();  // just test this doesn't blow up or something
-    EXPECT_TRUE(sbd.empty());
-    StableBlockVector<size_t, 4> sbd2(sbd);
+    StableBlockVector<size_t, 4> stable_block_vector;
+    EXPECT_TRUE(stable_block_vector.empty());
+    stable_block_vector.clear();
+    EXPECT_TRUE(stable_block_vector.empty());
+    StableBlockVector<size_t, 4> stable_block_vector2(stable_block_vector);
 
-    EXPECT_EQ(sbd2.size(), sbd.size());
-    EXPECT_EQ(sbd2.size(), 0);
-    sbd2.clear();
-    EXPECT_EQ(sbd2.size(), sbd.size());
-    EXPECT_EQ(sbd2.size(), 0);
+    EXPECT_EQ(stable_block_vector2.size(), stable_block_vector.size());
+    EXPECT_EQ(stable_block_vector2.size(), 0);
+    stable_block_vector2.clear();
+    EXPECT_EQ(stable_block_vector2.size(), stable_block_vector.size());
+    EXPECT_EQ(stable_block_vector2.size(), 0);
 }
 
 TEST(stableBlockVectorTest, move_constructor)
 {
-    StableBlockVector<std::string, 7> sbv{
-        15, "this is an exciting long string"};
-    auto sbv2 = std::move(sbv);
-    EXPECT_EQ(sbv2.size(), 15);
-    for (size_t ii = 0; ii < 15; ++ii) {
-        EXPECT_EQ(sbv2[ii], "this is an exciting long string");
+    StableBlockVector<std::string, 7> stable_block_vector{
+        15,
+        "this is an exciting long string"};
+    auto stable_block_vector2 = std::move(stable_block_vector);
+    EXPECT_EQ(stable_block_vector2.size(), 15);
+    for (size_t index = 0; index < 15; ++index) {
+        EXPECT_EQ(stable_block_vector2[index], "this is an exciting long string");
     }
-    EXPECT_TRUE(sbv.empty());
 }
 
 TEST(stableBlockVectorTest, move_assign)
 {
-    StableBlockVector<size_t, 4> sbd2(100);
+    StableBlockVector<size_t, 4> stable_block_vector2(100);
     {
-        StableBlockVector<size_t, 4> sbd(200);
-        size_t ii = 0;
-        for (auto& val : sbd) {
-            val = ii++;
+        StableBlockVector<size_t, 4> stable_block_vector(200);
+        size_t index = 0;
+        for (auto& value : stable_block_vector) {
+            value = index++;
         }
-        sbd2 = std::move(sbd);
+        stable_block_vector2 = std::move(stable_block_vector);
     }
-    EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
-        EXPECT_EQ(sbd2.front(), 0);
-        EXPECT_EQ(sbd2.back(), 199 - ii);
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (size_t index = 0; index < 200; ++index) {
+        EXPECT_EQ(stable_block_vector2.front(), 0U);
+        EXPECT_EQ(stable_block_vector2.back(), 199 - index);
 
-        sbd2.pop_back();
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, assign_move)
 {
-    std::vector<std::string> vec1(200, std::string(200, 'a'));
-    StableBlockVector<std::string, 5> sbd2(100, std::string(100, 'b'));
+    std::vector<std::string> vector1(200, std::string(200, 'a'));
+    StableBlockVector<std::string, 5> stable_block_vector2(100, std::string(100, 'b'));
 
-    sbd2.move_assign(vec1.begin(), vec1.end());
-    EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200U; ++ii) {
-        EXPECT_EQ(sbd2.back(), std::string(200, 'a'));
-
-        sbd2.pop_back();
+    stable_block_vector2.move_assign(vector1.begin(), vector1.end());
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (size_t index = 0; index < 200U; ++index) {
+        EXPECT_EQ(stable_block_vector2.back(), std::string(200, 'a'));
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, assign_move_to_empty)
 {
-    std::vector<std::string> vec1(200, std::string(200, 'a'));
-    StableBlockVector<std::string, 5> sbd2;
+    std::vector<std::string> vector1(200, std::string(200, 'a'));
+    StableBlockVector<std::string, 5> stable_block_vector2;
 
-    sbd2.move_assign(vec1.begin(), vec1.end());
-    EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
-        EXPECT_EQ(sbd2.back(), std::string(200, 'a'));
-
-        sbd2.pop_back();
+    stable_block_vector2.move_assign(vector1.begin(), vector1.end());
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (size_t index = 0; index < 200; ++index) {
+        EXPECT_EQ(stable_block_vector2.back(), std::string(200, 'a'));
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, assign_move_to_bigger)
 {
-    std::vector<std::string> vec1(200, std::string(200, 'a'));
-    StableBlockVector<std::string, 5> sbd2(500, std::string(100, 'b'));
+    std::vector<std::string> vector1(200, std::string(200, 'a'));
+    StableBlockVector<std::string, 5> stable_block_vector2(500, std::string(100, 'b'));
 
-    sbd2.move_assign(vec1.begin(), vec1.end());
-    EXPECT_EQ(sbd2.size(), 200);
-    for (size_t ii = 0; ii < 200; ++ii) {
-        EXPECT_EQ(sbd2.front(), std::string(200, 'a'));
-        EXPECT_EQ(sbd2.back(), std::string(200, 'a'));
+    stable_block_vector2.move_assign(vector1.begin(), vector1.end());
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (size_t index = 0; index < 200; ++index) {
+        EXPECT_EQ(stable_block_vector2.front(), std::string(200, 'a'));
+        EXPECT_EQ(stable_block_vector2.back(), std::string(200, 'a'));
 
-        sbd2.pop_back();
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, copy_assign)
 {
-    StableBlockVector<size_t, 4> sbd2(100);
+    StableBlockVector<size_t, 4> stable_block_vector2(100);
 
-    StableBlockVector<size_t, 4> sbd(200);
-    size_t ii = 0;
-    for (auto& val : sbd) {
-        val = ii++;
+    StableBlockVector<size_t, 4> stable_block_vector(200);
+    size_t index = 0;
+    for (auto& value : stable_block_vector) {
+        value = index++;
     }
-    sbd2 = sbd;
+    stable_block_vector2 = stable_block_vector;
 
-    EXPECT_EQ(sbd2.size(), 200);
-    for (ii = 0; ii < 200; ++ii) {
-        EXPECT_EQ(sbd2.front(), 0U);
-        EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (index = 0; index < 200; ++index) {
+        EXPECT_EQ(stable_block_vector2.front(), 0U);
+        EXPECT_EQ(stable_block_vector2.back(), stable_block_vector[199 - index]);
 
-        sbd2.pop_back();
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, copy_assign_from_empty)
 {
-    StableBlockVector<size_t, 4> sbd2;
+    StableBlockVector<size_t, 4> stable_block_vector2;
 
-    StableBlockVector<size_t, 4> sbd(200);
-    size_t ii = 0;
-    for (auto& val : sbd) {
-        val = ii++;
+    StableBlockVector<size_t, 4> stable_block_vector(200);
+    size_t index = 0;
+    for (auto& value : stable_block_vector) {
+        value = index++;
     }
-    sbd2 = sbd;
+    stable_block_vector2 = stable_block_vector;
 
-    EXPECT_EQ(sbd2.size(), 200);
-    for (ii = 0; ii < 200; ++ii) {
-        EXPECT_EQ(sbd2.front(), sbd[0]);
-        EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (index = 0; index < 200; ++index) {
+        EXPECT_EQ(stable_block_vector2.front(), stable_block_vector[0]);
+        EXPECT_EQ(stable_block_vector2.back(), stable_block_vector[199 - index]);
 
-        sbd2.pop_back();
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, copy_assign_to_bigger)
 {
-    StableBlockVector<size_t, 4> sbd2(400, 5);
+    StableBlockVector<size_t, 4> stable_block_vector2(400, 5);
 
-    StableBlockVector<size_t, 4> sbd(200);
-    size_t ii = 0;
-    for (auto& val : sbd) {
-        val = ii++;
+    StableBlockVector<size_t, 4> stable_block_vector(200);
+    size_t index = 0;
+    for (auto& value : stable_block_vector) {
+        value = index++;
     }
-    sbd2 = sbd;
+    stable_block_vector2 = stable_block_vector;
 
-    EXPECT_EQ(sbd2.size(), 200);
-    for (ii = 0; ii < 200; ++ii) {
-        EXPECT_EQ(sbd2.front(), sbd[0]);
-        EXPECT_EQ(sbd2.back(), sbd[199 - ii]);
+    EXPECT_EQ(stable_block_vector2.size(), 200);
+    for (index = 0; index < 200; ++index) {
+        EXPECT_EQ(stable_block_vector2.front(), stable_block_vector[0]);
+        EXPECT_EQ(stable_block_vector2.back(), stable_block_vector[199 - index]);
 
-        sbd2.pop_back();
+        stable_block_vector2.pop_back();
     }
 }
 
 TEST(stableBlockVectorTest, clear_and_fill)
 {
-    StableBlockVector<size_t, 4> sbd(200);
-    EXPECT_EQ(sbd.size(), 200U);
-    sbd.clear();
-    EXPECT_EQ(sbd.size(), 0U);
-    for (size_t ii = 0; ii < 400; ++ii) {
-        sbd.push_back(ii);
+    StableBlockVector<size_t, 4> stable_block_vector(200);
+    EXPECT_EQ(stable_block_vector.size(), 200U);
+    stable_block_vector.clear();
+    EXPECT_EQ(stable_block_vector.size(), 0U);
+    for (size_t index = 0; index < 400; ++index) {
+        stable_block_vector.push_back(index);
     }
-    EXPECT_EQ(sbd.size(), 400U);
+    EXPECT_EQ(stable_block_vector.size(), 400U);
 }
 
 TEST(stableBlockVectorTest, fill_large_back)
 {
-    StableBlockVector<size_t, 4> sbd(200, 999999999UL);
-    for (int ii = 0; ii < 10000; ++ii) {
-        sbd.push_back(ii);
+    StableBlockVector<size_t, 4> stable_block_vector(200, 999999999UL);
+    for (int index = 0; index < 10000; ++index) {
+        stable_block_vector.push_back(static_cast<size_t>(index));
     }
 
-    EXPECT_EQ(sbd.size(), 10200);
-    for (int ii = 0; ii < 10000; ++ii) {
-        sbd.pop_back();
+    EXPECT_EQ(stable_block_vector.size(), 10200);
+    for (int index = 0; index < 10000; ++index) {
+        stable_block_vector.pop_back();
     }
-    EXPECT_EQ(sbd.size(), 200);
+    EXPECT_EQ(stable_block_vector.size(), 200);
 }
 
 TEST(stableBlockVectorTest, iterators)
 {
-    StableBlockVector<size_t, 3> sbd;
-    EXPECT_TRUE(sbd.begin() == sbd.end());
-    const auto& csbd = sbd;
-    EXPECT_TRUE(csbd.begin() == csbd.end());
-    for (size_t ii = 0; ii < 70; ++ii) {
-        sbd.push_back(ii);
-        size_t cnt = 0;
-        for (auto& el : sbd) {
-            ++cnt;
-            (void)(el);
+    StableBlockVector<size_t, 3> stable_block_vector;
+    EXPECT_TRUE(stable_block_vector.begin() == stable_block_vector.end());
+    const auto& stable_block_vector_const = stable_block_vector;
+    EXPECT_TRUE(stable_block_vector_const.begin() == stable_block_vector_const.end());
+    for (size_t index = 0; index < 70; ++index) {
+        stable_block_vector.push_back(index);
+        size_t count = 0;
+        for (auto& element : stable_block_vector) {
+            ++count;
+            (void)(element);
         }
-        EXPECT_EQ(cnt, ii + 1);
-        cnt = 0;
-        for (const auto& el : csbd) {
-            ++cnt;
-            (void)(el);
+        EXPECT_EQ(count, index + 1);
+        count = 0;
+        for (const auto& element : stable_block_vector_const) {
+            ++count;
+            (void)(element);
         }
-        EXPECT_EQ(cnt, ii + 1);
+        EXPECT_EQ(count, index + 1);
     }
 }
 
+namespace {
 std::atomic<size_t> open_allocs;
+}  // namespace
 
-/// allocation class that just counts the number of open memory allocations
 template<typename T>
-class BlockAllocator {
+class BlockVectorAllocator {
   public:
     using pointer = T*;
-    // Allocate memory
+
     pointer allocate(size_t count)
     {
         ++open_allocs;
-        return static_cast<pointer>(malloc(count * sizeof(T)));
+        // NOLINTNEXTLINE(hicpp-no-malloc)
+        return static_cast<pointer>(std::malloc(count * sizeof(T)));
     }
 
-    // Delete memory
     void deallocate(pointer ptr, size_t /* count */)
     {
         --open_allocs;
-        free(ptr);
+        // NOLINTNEXTLINE(hicpp-no-malloc)
+        std::free(ptr);
     }
 };
 
 TEST(stableBlockVectorTest, shrink_to_fit)
 {
     {
-        StableBlockVector<size_t, 3, BlockAllocator<size_t>> sbd(500, 999999U);
+        StableBlockVector<size_t, 3, BlockVectorAllocator<size_t>> stable_block_vector(
+            500,
+            999999U);
         EXPECT_GT(open_allocs.load(), 500 / 8);
-        auto current = open_allocs.load();
-        sbd.clear();
-        EXPECT_EQ(open_allocs.load(), current);
-        sbd.shrink_to_fit();
+        const auto current_allocations = open_allocs.load();
+        stable_block_vector.clear();
+        EXPECT_EQ(open_allocs.load(), current_allocations);
+        stable_block_vector.shrink_to_fit();
         EXPECT_EQ(open_allocs.load(), 1U);
     }
     EXPECT_EQ(open_allocs.load(), 0U);
@@ -558,30 +566,31 @@ TEST(stableBlockVectorTest, shrink_to_fit)
 
 TEST(stableBlockVectorTest, iterator_tests)
 {
-    StableBlockVector<std::string, 3> sbd(20);
+    StableBlockVector<std::string, 3> stable_block_vector(20);
 
-    for (int ii = 0; ii < 20; ++ii) {
-        sbd[ii] = std::string(30, 'a' + static_cast<char>(ii));
+    for (int index = 0; index < 20; ++index) {
+        stable_block_vector[static_cast<size_t>(index)] =
+            std::string(30, 'a' + static_cast<char>(index));
     }
 
-    auto const& sbd2 = sbd;
-    auto it = sbd.begin();
-    it = it + 2;
-    EXPECT_EQ((*it).front(), 'c');
+    const auto& stable_block_vector_const = stable_block_vector;
+    auto iterator = stable_block_vector.begin();
+    iterator = iterator + 2;
+    EXPECT_EQ((*iterator).front(), 'c');
 
-    auto itc = sbd2.begin();
-    itc = itc + 2;
-    EXPECT_EQ((*itc).front(), 'c');
+    auto const_iterator = stable_block_vector_const.begin();
+    const_iterator = const_iterator + 2;
+    EXPECT_EQ((*const_iterator).front(), 'c');
 
-    it += 7;
-    itc += 7;
-    EXPECT_EQ(it->front(), 'j');
-    EXPECT_EQ(itc->front(), 'j');
+    iterator += 7;
+    const_iterator += 7;
+    EXPECT_EQ(iterator->front(), 'j');
+    EXPECT_EQ(const_iterator->front(), 'j');
 
-    it = it - 4;
-    itc = itc - 4;
-    EXPECT_EQ(it->front(), 'f');
-    EXPECT_EQ(itc->front(), 'f');
-    EXPECT_TRUE(it);
-    EXPECT_TRUE(itc);
+    iterator = iterator - 4;
+    const_iterator = const_iterator - 4;
+    EXPECT_EQ(iterator->front(), 'f');
+    EXPECT_EQ(const_iterator->front(), 'f');
+    EXPECT_TRUE(iterator);
+    EXPECT_TRUE(const_iterator);
 }
