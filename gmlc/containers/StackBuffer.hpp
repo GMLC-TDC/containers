@@ -203,16 +203,11 @@ class StackBuffer {
     }
     StackBuffer& operator=(const StackBuffer& sq)
     {
-        stack = sq.stack;
-        resizeMemory(sq.statedSize, false);
-        std::memcpy(data, sq.data, sq.statedSize);
-
-        auto offset = stack.next - stack.origin;
-        stack.origin = data;
-        stack.next = stack.origin + offset;
-        stack.nextIndex = reinterpret_cast<dataIndex*>(
-            stack.origin + stack.dataSize - diSize);
-        stack.nextIndex -= stack.dataCount;
+        if (this == &sq) {
+            return *this;
+        }
+        StackBuffer copy(sq);
+        swap(copy);
         return *this;
     }
 
