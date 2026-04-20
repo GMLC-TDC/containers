@@ -53,16 +53,19 @@ TEST(work_queue, WorkQueue_test1)
     constexpr std::size_t block_count{20};
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
     EXPECT_EQ(work_queue2.getWorkerCount(), 4);
-    std::vector<decltype(make_shared_workBlock(work_function))> blocks(block_count);
+    std::vector<decltype(make_shared_workBlock(work_function))> blocks(
+        block_count);
     std::vector<std::shared_ptr<BasicWorkBlock>> basic_blocks(block_count);
-    for (std::size_t block_index = 0; block_index < block_count; ++block_index) {
+    for (std::size_t block_index = 0; block_index < block_count;
+         ++block_index) {
         blocks[block_index] = make_shared_workBlock(work_function);
         basic_blocks[block_index] = blocks[block_index];
     }
     work_queue2.addWorkBlock(basic_blocks);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     std::vector<decltype(work_function())> results(block_count);
-    for (std::size_t block_index = 0; block_index < block_count; ++block_index) {
+    for (std::size_t block_index = 0; block_index < block_count;
+         ++block_index) {
         results[block_index] = blocks[block_index]->getReturnVal();
     }
     std::sort(results.begin(), results.end());
@@ -91,7 +94,9 @@ TEST(work_queue, WorkQueue_test2)
     elapsed_time = stop_time - start_time;
     EXPECT_LT(elapsed_time.count(), 0.05);
 
-    work_function = [] { std::this_thread::sleep_for(std::chrono::milliseconds(130)); };
+    work_function = [] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(130));
+    };
     block1->updateWorkFunction(work_function);
 
     start_time = std::chrono::high_resolution_clock::now();
@@ -137,22 +142,36 @@ TEST(work_queue, WorkQueue_test3)
     work_queue.setPriorityRatio(3);
     work_queue.addWorkBlock(std::move(block1), WorkQueue::WorkPriority::high);
 
-    work_queue.addWorkBlock(make_workBlock(low_priority), WorkQueue::WorkPriority::low);
-    work_queue.addWorkBlock(make_workBlock(low_priority), WorkQueue::WorkPriority::low);
-    work_queue.addWorkBlock(make_workBlock(low_priority), WorkQueue::WorkPriority::low);
+    work_queue.addWorkBlock(
+        make_workBlock(low_priority), WorkQueue::WorkPriority::low);
+    work_queue.addWorkBlock(
+        make_workBlock(low_priority), WorkQueue::WorkPriority::low);
+    work_queue.addWorkBlock(
+        make_workBlock(low_priority), WorkQueue::WorkPriority::low);
 
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        make_workBlock(medium_priority), WorkQueue::WorkPriority::medium);
 
-    work_queue.addWorkBlock(make_workBlock(high_priority), WorkQueue::WorkPriority::high);
-    work_queue.addWorkBlock(make_workBlock(high_priority), WorkQueue::WorkPriority::high);
+    work_queue.addWorkBlock(
+        make_workBlock(high_priority), WorkQueue::WorkPriority::high);
+    work_queue.addWorkBlock(
+        make_workBlock(high_priority), WorkQueue::WorkPriority::high);
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
     while (!work_queue.isEmpty()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -170,7 +189,8 @@ TEST(work_queue, WorkQueue_test3)
 
     std::vector<int> correct_order = {1, 1, 2, 2, 2, 3, 2, 2, 2, 3, 2, 2, 2, 3};
     int difference_count = 0;
-    for (std::size_t block_index = 0; block_index < order.size(); ++block_index) {
+    for (std::size_t block_index = 0; block_index < order.size();
+         ++block_index) {
         if (order[block_index] != correct_order[block_index]) {
             ++difference_count;
         }
@@ -222,8 +242,10 @@ TEST(work_queue, WorkQueue_test3_vector)
     work_queue.addWorkBlock(std::move(block1), WorkQueue::WorkPriority::high);
 
     work_queue.addWorkBlock(low_priority_vector, WorkQueue::WorkPriority::low);
-    work_queue.addWorkBlock(medium_priority_vector, WorkQueue::WorkPriority::medium);
-    work_queue.addWorkBlock(high_priority_vector, WorkQueue::WorkPriority::high);
+    work_queue.addWorkBlock(
+        medium_priority_vector, WorkQueue::WorkPriority::medium);
+    work_queue.addWorkBlock(
+        high_priority_vector, WorkQueue::WorkPriority::high);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(350));
 
