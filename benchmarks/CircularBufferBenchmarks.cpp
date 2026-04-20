@@ -7,51 +7,63 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 
 #include "CircularBuffer.hpp"
 
-#include <benchmark/benchmark.h>
+#include <benchmark/registration.h>
+#include <benchmark/state.h>
+
+#include <cstddef>
+#include <cstdint>
+#include <vector>
 
 using gmlc::containers::CircularBuffer;
 
-static void BM_BufferPushPop(benchmark::State& state)
-{
-    CircularBuffer buf(static_cast<int>(state.range(0)));
-    int rsize = static_cast<int>(state.range(0) / 4);
-    unsigned char* dblock = new unsigned char[rsize];
-    unsigned char* rblock = new unsigned char[rsize];
-    for (int ii = 0; ii < rsize; ++ii) {
-        dblock[ii] = (unsigned char)(ii & 0xFF);
-    }
-    buf.push(dblock, rsize);
-    buf.pop(rblock, rsize);
-    for (auto _ : state) {
-        buf.push(dblock, rsize - 2);
-        buf.pop(rblock, rsize);
-    }
-}
-// Register the function as a benchmark
-BENCHMARK(BM_BufferPushPop)->Range(128, 8 << 20);
+namespace {
 
-static void BM_BufferPushPopWrap(benchmark::State& state)
+void bmBufferPushPop(benchmark::State& state)
 {
-    int rsize = static_cast<int>(state.range(0) / 4);
-    CircularBuffer buf(static_cast<int>(state.range(0)));
-    unsigned char* dblock = new unsigned char[rsize];
-    unsigned char* rblock = new unsigned char[rsize];
-    for (int ii = 0; ii < rsize; ++ii) {
-        dblock[ii] = (unsigned char)(ii & 0xFF);
+    CircularBuffer buffer(static_cast<int>(state.range(0)));
+    const int read_size = static_cast<int>(state.range(0) / 4);
+    std::vector<unsigned char> data_block(static_cast<std::size_t>(read_size));
+    std::vector<unsigned char> read_block(static_cast<std::size_t>(read_size));
+    for (int index = 0; index < read_size; ++index) {
+        data_block[static_cast<std::size_t>(index)] =
+            static_cast<unsigned char>(static_cast<std::uint32_t>(index) & 0xFFU);
     }
-    buf.push(dblock, rsize);
-    buf.pop(rblock, rsize);
-    buf.push(dblock, rsize);
-    buf.pop(rblock, rsize);
-    buf.push(dblock, rsize);
-    buf.pop(rblock, rsize);
-    for (auto _ : state) {
-        buf.push(dblock, rsize - 2);
-        buf.pop(rblock, rsize);
+    buffer.push(data_block.data(), read_size);
+    buffer.pop(read_block.data(), read_size);
+    for (auto state_iterator = state.begin(); state_iterator != state.end();
+         ++state_iterator) {
+        buffer.push(data_block.data(), read_size - 2);
+        buffer.pop(read_block.data(), read_size);
     }
 }
-// Register the function as a benchmark
-BENCHMARK(BM_BufferPushPopWrap)->Range(128, 8 << 20);
+
+void bmBufferPushPopWrap(benchmark::State& state)
+{
+    const int read_size = static_cast<int>(state.range(0) / 4);
+    CircularBuffer buffer(static_cast<int>(state.range(0)));
+    std::vector<unsigned char> data_block(static_cast<std::size_t>(read_size));
+    std::vector<unsigned char> read_block(static_cast<std::size_t>(read_size));
+    for (int index = 0; index < read_size; ++index) {
+        data_block[static_cast<std::size_t>(index)] =
+            static_cast<unsigned char>(static_cast<std::uint32_t>(index) & 0xFFU);
+    }
+    buffer.push(data_block.data(), read_size);
+    buffer.pop(read_block.data(), read_size);
+    buffer.push(data_block.data(), read_size);
+    buffer.pop(read_block.data(), read_size);
+    buffer.push(data_block.data(), read_size);
+    buffer.pop(read_block.data(), read_size);
+    for (auto state_iterator = state.begin(); state_iterator != state.end();
+         ++state_iterator) {
+        buffer.push(data_block.data(), read_size - 2);
+        buffer.pop(read_block.data(), read_size);
+    }
+}
+
+}  // namespace
+
+BENCHMARK(bmBufferPushPop)->Range(128, 8U << 20U);
+BENCHMARK(bmBufferPushPopWrap)->Range(128, 8U << 20U);
 
 /*
 TEST (CircBuff_tests, test_circularbuffraw_simple)
