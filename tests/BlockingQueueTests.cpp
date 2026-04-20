@@ -6,6 +6,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <future>
 #include <iostream>
 #include <memory>
@@ -139,8 +140,8 @@ TEST(blocking_queue, multithreaded)
     auto res = std::async(std::launch::async, cons);
 
     ret.wait();
-    auto V = res.get();
-    EXPECT_EQ(V, 1'010'000);
+    auto consumed_count = res.get();
+    EXPECT_EQ(consumed_count, 1'010'000);
 }
 
 /** test with single consumer / single producer */
@@ -180,8 +181,8 @@ TEST(blocking_queue, pop)
     auto res = std::async(std::launch::async, cons);
 
     ret.wait();
-    auto V = res.get();
-    EXPECT_EQ(V, 1'000'000);
+    auto consumed_count = res.get();
+    EXPECT_EQ(consumed_count, 1'000'000);
 }
 
 /** test with multiple consumer/single producer*/
@@ -219,11 +220,11 @@ TEST(blocking_queue, multithreaded2)
     auto res2 = std::async(std::launch::async, cons);
     auto res3 = std::async(std::launch::async, cons);
     ret.wait();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
-    auto V3 = res3.get();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
+    auto third_count = res3.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 1'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 1'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
@@ -276,14 +277,14 @@ TEST(blocking_queue, multithreaded3)
     printlock.lock();
     std::cout << "production complete" << std::endl;
     printlock.unlock();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
     printlock.lock();
     std::cout << "got2" << std::endl;
     printlock.unlock();
-    auto V3 = res3.get();
+    auto third_count = res3.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 3'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
@@ -319,11 +320,11 @@ TEST(blocking_queue, multithreaded_tests3_pop)
     ret1.wait();
     ret2.wait();
     ret3.wait();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
-    auto V3 = res3.get();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
+    auto third_count = res3.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'000'000);
+    EXPECT_EQ(first_count + second_count + third_count, 3'000'000);
 }
 
 /** test with multiple producer/multiple consumer*/

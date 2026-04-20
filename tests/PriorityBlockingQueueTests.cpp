@@ -6,6 +6,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <future>
 #include <iostream>
 #include <memory>
@@ -247,8 +248,8 @@ TEST(blocking_priority_queue, multithreaded_tests)
 
     auto prodthread = std::thread(prod1);
 
-    auto V = cons();
-    EXPECT_EQ(V, 1'010'000);
+    auto consumed_count = cons();
+    EXPECT_EQ(consumed_count, 1'010'000);
     prodthread.join();
 }
 
@@ -285,8 +286,8 @@ TEST(blocking_priority_queue, pop_tests)
     };
 
     auto prodthread = std::thread(prod1);
-    auto V = cons();
-    EXPECT_EQ(V, 1'000'000);
+    auto consumed_count = cons();
+    EXPECT_EQ(consumed_count, 1'000'000);
     prodthread.join();
 }
 
@@ -327,11 +328,11 @@ TEST(blocking_priority_queue, multithreaded_tests2)
     auto c1thread = std::thread(std::move(c1));
     auto c2thread = std::thread(std::move(c2));
     auto prodthread = std::thread(prod1);
-    auto V3 = cons();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    auto third_count = cons();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 1'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 1'010'000);
     prodthread.join();
     c1thread.join();
     c2thread.join();
@@ -377,11 +378,11 @@ TEST(blocking_priority_queue, multithreaded_tests3)
     auto prodthread2 = std::thread(prod1);
     auto prodthread3 = std::thread(prod1);
 
-    auto V3 = cons();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    auto third_count = cons();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 3'010'000);
 
     prodthread1.join();
     prodthread2.join();
@@ -422,16 +423,16 @@ TEST(blocking_priority_queue, multithreaded_tests3_pop)
     auto prodthread1 = std::thread(prod1);
     auto prodthread2 = std::thread(prod1);
     auto prodthread3 = std::thread(prod1);
-    auto V3 = cons();
+    auto third_count = cons();
 
     prodthread1.join();
     prodthread2.join();
     prodthread3.join();
 
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'000'003);
+    EXPECT_EQ(first_count + second_count + third_count, 3'000'003);
 
     std::cout << "production complete" << std::endl;
     c1thread.join();

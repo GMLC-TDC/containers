@@ -10,7 +10,6 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <atomic>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>

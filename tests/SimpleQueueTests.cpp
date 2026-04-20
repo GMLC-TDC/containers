@@ -5,8 +5,8 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 #include "gtest/gtest.h"
+#include <cstdio>
 #include <future>
-#include <iostream>
 #include <memory>
 #include <thread>
 #include <utility>
@@ -150,8 +150,8 @@ TEST(simple_queue_tests, multithreaded_tests)
     auto res = std::async(std::launch::async, cons);
 
     ret.wait();
-    auto V = res.get();
-    EXPECT_EQ(V, 1'010'000);
+    auto consumed_count = res.get();
+    EXPECT_EQ(consumed_count, 1'010'000);
 }
 
 /** test with multiple consumer/single producer*/
@@ -189,11 +189,11 @@ TEST(simple_queue_tests, multithreaded_tests2)
     auto res2 = std::async(std::launch::async, cons);
     auto res3 = std::async(std::launch::async, cons);
     ret.wait();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
-    auto V3 = res3.get();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
+    auto third_count = res3.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 2'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 2'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
@@ -235,11 +235,11 @@ TEST(simple_queue_tests, multithreaded_tests3)
     ret1.wait();
     ret2.wait();
     ret3.wait();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
-    auto V3 = res3.get();
+    auto first_count = res1.get();
+    auto second_count = res2.get();
+    auto third_count = res3.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 3'010'000);
 }
 
 /** test with multiple producer/multiple consumer*/
