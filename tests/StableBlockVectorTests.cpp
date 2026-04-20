@@ -281,8 +281,11 @@ TEST(stableBlockVectorTest, test_back)
     }
     EXPECT_EQ(stable_block_vector_copy.back(), 99U);
     for (int reverse_index = 99; reverse_index >= 0; --reverse_index) {
-        EXPECT_EQ(stable_block_vector.back(), static_cast<size_t>(reverse_index));
-        EXPECT_EQ(stable_block_vector_copy.back(), static_cast<size_t>(reverse_index));
+        EXPECT_EQ(
+            stable_block_vector.back(), static_cast<size_t>(reverse_index));
+        EXPECT_EQ(
+            stable_block_vector_copy.back(),
+            static_cast<size_t>(reverse_index));
         EXPECT_EQ(*stable_block_vector_copy.begin(), 0U);
 
         stable_block_vector.pop_back();
@@ -294,19 +297,18 @@ TEST(stableBlockVectorTest, test_back)
 TEST(stableBlockVectorTest, constructor1)
 {
     StableBlockVector<std::string, 7> stable_block_vector{
-        15,
-        "this is an exciting long string"};
+        15, "this is an exciting long string"};
     EXPECT_EQ(stable_block_vector.size(), 15);
     for (size_t index = 0; index < 15; ++index) {
-        EXPECT_EQ(stable_block_vector[index], "this is an exciting long string");
+        EXPECT_EQ(
+            stable_block_vector[index], "this is an exciting long string");
     }
 }
 
 TEST(stableBlockVectorTest, constructor0)
 {
     const StableBlockVector<std::string, 7> stable_block_vector{
-        0,
-        "this is an exciting long string"};
+        0, "this is an exciting long string"};
     EXPECT_TRUE(stable_block_vector.empty());
     EXPECT_EQ(stable_block_vector.size(), 0);
 }
@@ -314,12 +316,12 @@ TEST(stableBlockVectorTest, constructor0)
 TEST(stableBlockVectorTest, copy_constructor)
 {
     const StableBlockVector<std::string, 7> stable_block_vector{
-        15,
-        "this is an exciting long string"};
+        15, "this is an exciting long string"};
     const auto& stable_block_vector_copy = stable_block_vector;
     EXPECT_EQ(stable_block_vector_copy.size(), 15);
     for (size_t index = 0; index < 15; ++index) {
-        EXPECT_EQ(stable_block_vector_copy[index], "this is an exciting long string");
+        EXPECT_EQ(
+            stable_block_vector_copy[index], "this is an exciting long string");
     }
 
     const StableBlockVector<std::string, 4> stable_block_vector_source;
@@ -345,12 +347,12 @@ TEST(stableBlockVectorTest, copy_construct_empty)
 TEST(stableBlockVectorTest, move_constructor)
 {
     StableBlockVector<std::string, 7> stable_block_vector{
-        15,
-        "this is an exciting long string"};
+        15, "this is an exciting long string"};
     auto stable_block_vector2 = std::move(stable_block_vector);
     EXPECT_EQ(stable_block_vector2.size(), 15);
     for (size_t index = 0; index < 15; ++index) {
-        EXPECT_EQ(stable_block_vector2[index], "this is an exciting long string");
+        EXPECT_EQ(
+            stable_block_vector2[index], "this is an exciting long string");
     }
 }
 
@@ -377,7 +379,8 @@ TEST(stableBlockVectorTest, move_assign)
 TEST(stableBlockVectorTest, assign_move)
 {
     std::vector<std::string> vector1(200, std::string(200, 'a'));
-    StableBlockVector<std::string, 5> stable_block_vector2(100, std::string(100, 'b'));
+    StableBlockVector<std::string, 5> stable_block_vector2(
+        100, std::string(100, 'b'));
 
     stable_block_vector2.move_assign(vector1.begin(), vector1.end());
     EXPECT_EQ(stable_block_vector2.size(), 200);
@@ -403,7 +406,8 @@ TEST(stableBlockVectorTest, assign_move_to_empty)
 TEST(stableBlockVectorTest, assign_move_to_bigger)
 {
     std::vector<std::string> vector1(200, std::string(200, 'a'));
-    StableBlockVector<std::string, 5> stable_block_vector2(500, std::string(100, 'b'));
+    StableBlockVector<std::string, 5> stable_block_vector2(
+        500, std::string(100, 'b'));
 
     stable_block_vector2.move_assign(vector1.begin(), vector1.end());
     EXPECT_EQ(stable_block_vector2.size(), 200);
@@ -429,7 +433,8 @@ TEST(stableBlockVectorTest, copy_assign)
     EXPECT_EQ(stable_block_vector2.size(), 200);
     for (index = 0; index < 200; ++index) {
         EXPECT_EQ(stable_block_vector2.front(), 0U);
-        EXPECT_EQ(stable_block_vector2.back(), stable_block_vector[199 - index]);
+        EXPECT_EQ(
+            stable_block_vector2.back(), stable_block_vector[199 - index]);
 
         stable_block_vector2.pop_back();
     }
@@ -449,7 +454,8 @@ TEST(stableBlockVectorTest, copy_assign_from_empty)
     EXPECT_EQ(stable_block_vector2.size(), 200);
     for (index = 0; index < 200; ++index) {
         EXPECT_EQ(stable_block_vector2.front(), stable_block_vector[0]);
-        EXPECT_EQ(stable_block_vector2.back(), stable_block_vector[199 - index]);
+        EXPECT_EQ(
+            stable_block_vector2.back(), stable_block_vector[199 - index]);
 
         stable_block_vector2.pop_back();
     }
@@ -469,7 +475,8 @@ TEST(stableBlockVectorTest, copy_assign_to_bigger)
     EXPECT_EQ(stable_block_vector2.size(), 200);
     for (index = 0; index < 200; ++index) {
         EXPECT_EQ(stable_block_vector2.front(), stable_block_vector[0]);
-        EXPECT_EQ(stable_block_vector2.back(), stable_block_vector[199 - index]);
+        EXPECT_EQ(
+            stable_block_vector2.back(), stable_block_vector[199 - index]);
 
         stable_block_vector2.pop_back();
     }
@@ -506,7 +513,8 @@ TEST(stableBlockVectorTest, iterators)
     StableBlockVector<size_t, 3> stable_block_vector;
     EXPECT_TRUE(stable_block_vector.begin() == stable_block_vector.end());
     const auto& stable_block_vector_const = stable_block_vector;
-    EXPECT_TRUE(stable_block_vector_const.begin() == stable_block_vector_const.end());
+    EXPECT_TRUE(
+        stable_block_vector_const.begin() == stable_block_vector_const.end());
     for (size_t index = 0; index < 70; ++index) {
         stable_block_vector.push_back(index);
         size_t count = 0;
@@ -551,9 +559,8 @@ class BlockVectorAllocator {
 TEST(stableBlockVectorTest, shrink_to_fit)
 {
     {
-        StableBlockVector<size_t, 3, BlockVectorAllocator<size_t>> stable_block_vector(
-            500,
-            999999U);
+        StableBlockVector<size_t, 3, BlockVectorAllocator<size_t>>
+            stable_block_vector(500, 999999U);
         EXPECT_GT(open_allocs.load(), 500 / 8);
         const auto current_allocations = open_allocs.load();
         stable_block_vector.clear();
