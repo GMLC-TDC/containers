@@ -18,14 +18,16 @@ using gmlc::containers::MappedVector;
 /** test basic operations */
 TEST(stable_mapped_vector_tests, definition_tests)
 {
-    MappedVector<double, std::string, reference_stability::stable> mapped_double;
+    MappedVector<double, std::string, reference_stability::stable>
+        mapped_double;
     const MappedVector<std::string, std::string, reference_stability::stable>
         mapped_string;
     EXPECT_EQ(mapped_double.size(), 0U);
     EXPECT_EQ(mapped_string.size(), 0U);
-    const MappedVector<std::vector<std::string>,
-                       double,
-                       reference_stability::stable>
+    const MappedVector<
+        std::vector<std::string>,
+        double,
+        reference_stability::stable>
         mapped_vector;
 
     // test move and assignment operators
@@ -61,7 +63,8 @@ TEST(stable_mapped_vector_tests, insertion_tests)
 
 TEST(stable_mapped_vector_tests, iterator_tests)
 {
-    MappedVector<double, std::string, reference_stability::stable> mapped_vector;
+    MappedVector<double, std::string, reference_stability::stable>
+        mapped_vector;
 
     mapped_vector.insert("s1", 3.2);
     mapped_vector.insert("s2", 4.3);
@@ -79,7 +82,8 @@ TEST(stable_mapped_vector_tests, iterator_tests)
 
 TEST(stable_mapped_vector_tests, remove_tests)
 {
-    MappedVector<double, std::string, reference_stability::stable> mapped_vector;
+    MappedVector<double, std::string, reference_stability::stable>
+        mapped_vector;
 
     mapped_vector.insert("s1", 3.2);
     mapped_vector.insert("s2", 4.3);
@@ -115,7 +119,8 @@ TEST(stable_mapped_vector_tests, remove_tests)
 
 TEST(mapped_vector_tests_stable, empty_find)
 {
-    MappedVector<double, std::string, reference_stability::stable> mapped_vector;
+    MappedVector<double, std::string, reference_stability::stable>
+        mapped_vector;
     auto result = mapped_vector.find("string1");
     EXPECT_EQ(result, mapped_vector.end());
 }
