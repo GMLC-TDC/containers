@@ -5,8 +5,8 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
-#include "MapTraits.hpp"
 #include "DualStringMappedVector.hpp"
+#include "MapTraits.hpp"
 
 #include "gtest/gtest.h"
 #include <string>
@@ -22,7 +22,8 @@ TEST(dual_string_mapped_vector, definition)
     const DualStringMappedVector<std::string, double> mapped_string;
     EXPECT_EQ(mapped_double.size(), 0U);
     EXPECT_EQ(mapped_string.size(), 0U);
-    const DualStringMappedVector<std::vector<std::string>, double> mapped_vector;
+    const DualStringMappedVector<std::vector<std::string>, double>
+        mapped_vector;
 
     // test move and assignment operators
     decltype(mapped_double) target_vector;
@@ -96,8 +97,7 @@ TEST(dual_string_mapped_vector, assign_tests2)
     auto updated_location = mapped_vector.insert_or_assign("el2", 1, 22.22);
     EXPECT_EQ(updated_location, *inserted_location);
 
-    updated_location =
-        mapped_vector.insert_or_assign("el3", ::no_search, 5.1);
+    updated_location = mapped_vector.insert_or_assign("el3", ::no_search, 5.1);
 
     auto second_updated_location =
         mapped_vector.insert_or_assign("el3", ::no_search, 9.8);

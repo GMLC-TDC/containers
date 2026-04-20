@@ -5,8 +5,8 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
-#include "MapTraits.hpp"
 #include "DualMappedVector.hpp"
+#include "MapTraits.hpp"
 
 #include "gtest/gtest.h"
 #include <string>
@@ -20,17 +20,19 @@ TEST(dual_mapped_vector_tests_stable, definition_tests)
 {
     DualMappedVector<double, std::string, int64_t, reference_stability::stable>
         mapped_double;
-    const DualMappedVector<std::string,
-                           std::string,
-                           double,
-                           reference_stability::stable>
+    const DualMappedVector<
+        std::string,
+        std::string,
+        double,
+        reference_stability::stable>
         mapped_string;
     EXPECT_EQ(mapped_double.size(), 0U);
     EXPECT_EQ(mapped_string.size(), 0U);
-    const DualMappedVector<std::vector<std::string>,
-                           double,
-                           std::string,
-                           reference_stability::stable>
+    const DualMappedVector<
+        std::vector<std::string>,
+        double,
+        std::string,
+        reference_stability::stable>
         mapped_vector;
 
     // test move and assignment operators
@@ -43,10 +45,11 @@ TEST(dual_mapped_vector_tests_stable, definition_tests)
 
 TEST(dual_mapped_vector_tests_stable, insertion_tests)
 {
-    DualMappedVector<std::vector<double>,
-                     std::string,
-                     int64_t,
-                     reference_stability::stable>
+    DualMappedVector<
+        std::vector<double>,
+        std::string,
+        int64_t,
+        reference_stability::stable>
         mapped_vector;
     mapped_vector.insert("el1", 41, 3, 1.7);
     EXPECT_EQ(mapped_vector.size(), 1U);
@@ -108,15 +111,13 @@ TEST(dual_mapped_vector_tests_stable, assign_tests2)
 
     auto inserted_location = mapped_vector.insert_or_assign("el2", 1, 3.4);
 
-    auto updated_location =
-        mapped_vector.insert_or_assign("el2", 1, 22.22);
+    auto updated_location = mapped_vector.insert_or_assign("el2", 1, 22.22);
     EXPECT_EQ(updated_location, inserted_location);
 
     updated_location = mapped_vector.insert_or_assign("el2", 4, 22.22);
     EXPECT_EQ(updated_location, inserted_location);
 
-    updated_location =
-        mapped_vector.insert_or_assign("el3", ::no_search, 5.1);
+    updated_location = mapped_vector.insert_or_assign("el3", ::no_search, 5.1);
 
     auto second_updated_location =
         mapped_vector.insert_or_assign("el3", ::no_search, 9.8);
