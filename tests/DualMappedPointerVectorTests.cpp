@@ -24,9 +24,7 @@ TEST(dual_mapped_pointer_vector_tests, definition_tests)
         mapped_string;
     EXPECT_EQ(mapped_double.size(), 0U);
     EXPECT_EQ(mapped_string.size(), 0U);
-    const DualMappedPointerVector<std::vector<std::string>,
-                                  double,
-                                  std::string>
+    const DualMappedPointerVector<std::vector<std::string>, double, std::string>
         mapped_vector;
 
     // test move operators
