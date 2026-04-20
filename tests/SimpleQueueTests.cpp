@@ -125,8 +125,8 @@ TEST(simple_queue_tests, multithreaded_tests)
         int64_t count = 1;
         while (result) {
             auto next_result = queue.pop();
-            if (!next_result) {  // make an additional sleep period so the producer can
-                                 // catch up
+            if (!next_result) {  // make an additional sleep period so the
+                                 // producer can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 next_result = queue.pop();
             }
@@ -171,8 +171,8 @@ TEST(simple_queue_tests, multithreaded_tests2)
         while (result) {
             ++count;
             result = queue.pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.pop();
             }
@@ -213,8 +213,8 @@ TEST(simple_queue_tests, multithreaded_tests3)
         while (result) {
             ++count;
             result = queue.pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.pop();
             }
