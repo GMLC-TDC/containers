@@ -150,7 +150,8 @@ TEST(blocking_priority_queue, multithreaded_tests_wait)
         int iteration = 0;
         std::random_device device;
         std::mt19937 generator(device());
-        std::uniform_int_distribution<std::mt19937::result_type> distribution(1, 10);
+        std::uniform_int_distribution<std::mt19937::result_type> distribution(
+            1, 10);
         const std::pair<int64_t, int64_t> element{10, 10};
         while (iteration < 500) {
             ++iteration;
@@ -164,7 +165,8 @@ TEST(blocking_priority_queue, multithreaded_tests_wait)
                     break;
                 case 3:
                     if (result) {
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        std::this_thread::sleep_for(
+                            std::chrono::milliseconds(10));
                     }
                     [[fallthrough]];
                 default:
@@ -177,7 +179,8 @@ TEST(blocking_priority_queue, multithreaded_tests_wait)
         int iteration = 0;
         std::random_device device;
         std::mt19937 generator(device());
-        std::uniform_int_distribution<std::mt19937::result_type> distribution(1, 10);
+        std::uniform_int_distribution<std::mt19937::result_type> distribution(
+            1, 10);
         while (iteration < 500) {
             ++iteration;
             auto result = queue.pop();
@@ -235,8 +238,8 @@ TEST(blocking_priority_queue, multithreaded_tests)
         while (result) {
             ++count;
             result = queue.try_pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.try_pop();
             }
@@ -304,8 +307,8 @@ TEST(blocking_priority_queue, multithreaded_tests2)
         while (result) {
             ++count;
             result = queue.try_pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.try_pop();
             }
@@ -350,8 +353,8 @@ TEST(blocking_priority_queue, multithreaded_tests3)
         while (result) {
             ++count;
             result = queue.try_pop();
-            if (!result) {  // make an additional sleep period so the producer can
-                            // catch up
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 result = queue.try_pop();
             }
