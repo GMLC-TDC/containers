@@ -551,10 +551,12 @@ TEST(stableBlockDequeTest, iterators)
     }
 }
 
-static std::atomic<size_t> open_allocs;
+namespace {
+std::atomic<size_t> open_allocs;
+}  // namespace
 
 template<typename T>
-class BlockAllocator {
+class BlockDequeAllocator {
   public:
     using pointer = T*;
 
@@ -576,7 +578,9 @@ class BlockAllocator {
 TEST(stableBlockDequeTest, shrink_to_fit)
 {
     {
-        StableBlockDeque<size_t, 3, BlockAllocator<size_t>> stable_block_deque(500, 999999U);
+        StableBlockDeque<size_t, 3, BlockDequeAllocator<size_t>> stable_block_deque(
+            500,
+            999999U);
         EXPECT_GT(open_allocs.load(), 500 / 8);
         const auto current_allocations = open_allocs.load();
         stable_block_deque.clear();
