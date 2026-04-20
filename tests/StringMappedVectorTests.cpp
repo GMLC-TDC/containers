@@ -25,7 +25,6 @@ TEST(string_mapped_vector, definition_tests)
     const StringMappedVector<std::vector<std::string>> mapped_vector;
 
     // test move and assignment operators
-    [[maybe_unused]] const auto mapped_vector_copy = mapped_vector;
     decltype(mapped_double) target_vector;
     target_vector = std::move(mapped_double);
 
