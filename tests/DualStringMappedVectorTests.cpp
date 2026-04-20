@@ -9,6 +9,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "MapTraits.hpp"
 
 #include "gtest/gtest.h"
+#include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -201,7 +203,7 @@ TEST(dual_string_mapped_vector, iterator_tests)
     EXPECT_EQ(mapped_vector[2], 9.7 + 1.0);
 
     double sum = 0.0;
-    for (auto& element : mapped_vector) {
+    for (const auto& element : mapped_vector) {
         sum += element;
     }
     EXPECT_EQ(sum, 4.2 + 5.3 + 10.7 + 12.4);
