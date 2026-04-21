@@ -9,13 +9,13 @@
 
 cmake_minimum_required(VERSION 3.22...4.2)
 
-project(GMLC_CONTAINERS VERSION 0.6.0)
+project(GMLC_CONTAINERS VERSION 0.7.0)
 
 # -----------------------------------------------------------------------------
 # GMLC CONTAINERS library Version number
 # -----------------------------------------------------------------------------
 set(GMLC_CONTAINERS_VERSION_BUILD)
-set(GMLC_CONTAINERS_DATE "2026-04-15")
+set(GMLC_CONTAINERS_DATE "2026-04-18")
 
 set(GMLC_CONTAINERS_VERSION_STRING
     "${GMLC_CONTAINERS_VERSION} (${GMLC_CONTAINERS_DATE})"

@@ -9,25 +9,30 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "warningDisable.h"
 
 #include <benchmark/benchmark.h>
-#include <future>
+#include <cstdint>
+#include <mutex>
+#include <optional>
+#include <queue>
+#include <thread>
 
 using gmlc::containers::SimpleQueue;
 
 template<class X>
-class sqFixture : public benchmark::Fixture {
+class SqFixture : public benchmark::Fixture {
   public:
     SimpleQueue<X> sq;
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(SqFixture, SProdSCons, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             sq.push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 sq.push(ii);
@@ -37,7 +42,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = sq.pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -48,26 +53,27 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(sqFixture, SProdSCons)
+
+BENCHMARK_REGISTER_F(SqFixture, SProdSCons)
     ->Threads(2)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(SqFixture, MProdSCons, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             sq.push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < state.threads() - 1) {
                 auto res = sq.pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -83,47 +89,46 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(sqFixture, MProdSCons)
+
+BENCHMARK_REGISTER_F(SqFixture, MProdSCons)
     ->ThreadRange(4, 8)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-#include <mutex>
-#include <queue>
 template<class X>
-class stdqFixture : public benchmark::Fixture {
+class StdqFixture : public benchmark::Fixture {
   public:
     std::queue<X> q;
     std::mutex prot;
 
     void push(const X& val)
     {
-        std::lock_guard<std::mutex> lk(prot);
+        const std::lock_guard<std::mutex> queue_lock(prot);
         q.push(val);
     }
 
     std::optional<X> pop()
     {
-        std::lock_guard<std::mutex> lk(prot);
+        const std::lock_guard<std::mutex> queue_lock(prot);
         if (q.empty()) {
             return std::nullopt;
         }
-        std::optional<X> v = q.front();
+        std::optional<X> value = q.front();
         q.pop();
-        return v;
+        return value;
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(StdqFixture, SProdSCons_std, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -133,7 +138,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -144,26 +149,27 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(stdqFixture, SProdSCons_std)
+
+BENCHMARK_REGISTER_F(StdqFixture, SProdSCons_std)
     ->Threads(2)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(StdqFixture, MProdSCons_std, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < 3) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -179,18 +185,20 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(stdqFixture, MProdSCons_std)
+
+BENCHMARK_REGISTER_F(StdqFixture, MProdSCons_std)
     ->ThreadRange(4, 8)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
 #ifdef ENABLE_BOOST_TYPES
+#include <boost/lockfree/policies.hpp>
 #include <boost/lockfree/queue.hpp>
+
 template<class X>
-class blfFixture : public benchmark::Fixture {
+class BlfFixture : public benchmark::Fixture {
   public:
-    blfFixture() : q(4096) {}
+    BlfFixture() : q(4096) {}
 
     boost::lockfree::queue<X> q;
 
@@ -210,15 +218,16 @@ class blfFixture : public benchmark::Fixture {
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(BlfFixture, SProdSCons_blf, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -228,7 +237,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -239,26 +248,27 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(blfFixture, SProdSCons_blf)
+
+BENCHMARK_REGISTER_F(BlfFixture, SProdSCons_blf)
     ->Threads(2)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(BlfFixture, MProdSCons_blf, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < state.threads() - 1) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -274,15 +284,16 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(blfFixture, MProdSCons_blf)
+
+BENCHMARK_REGISTER_F(BlfFixture, MProdSCons_blf)
     ->ThreadRange(4, 8)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
 #include <boost/lockfree/spsc_queue.hpp>
+
 template<class X>
-class bspscFixture : public benchmark::Fixture {
+class BspscFixture : public benchmark::Fixture {
   public:
     boost::lockfree::spsc_queue<X, boost::lockfree::capacity<4048>> q;
 
@@ -303,7 +314,7 @@ class bspscFixture : public benchmark::Fixture {
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
+BENCHMARK_TEMPLATE_DEFINE_F(BspscFixture, SProdSCons_bspsc, int64_t)
 (benchmark::State& state)
 {
     if (state.thread_index() == 0) {
@@ -311,7 +322,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -321,7 +333,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -332,13 +344,14 @@ BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(bspscFixture, SProdSCons_bspsc)
+
+BENCHMARK_REGISTER_F(BspscFixture, SProdSCons_bspsc)
     ->Threads(2)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
 #endif
+
 DISABLE_WARNING_PUSH
 
 DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER
@@ -350,7 +363,7 @@ DISABLE_WARNING_SHADOW
 DISABLE_WARNING_POP
 
 template<class X>
-class mcFixture : public benchmark::Fixture {
+class McFixture : public benchmark::Fixture {
   public:
     moodycamel::ConcurrentQueue<X> q;
 
@@ -358,23 +371,24 @@ class mcFixture : public benchmark::Fixture {
 
     std::optional<X> pop()
     {
-        X v;
-        if (q.try_dequeue(v)) {
-            return v;
+        X value;
+        if (q.try_dequeue(value)) {
+            return value;
         }
         return std::nullopt;
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(McFixture, SProdSCons_mc, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -384,7 +398,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)
             int cnt = 0;
             while (cnt == 0) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -395,21 +409,22 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(mcFixture, SProdSCons_mc)
+
+BENCHMARK_REGISTER_F(McFixture, SProdSCons_mc)
     ->Threads(2)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)
-(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(McFixture, MProdSCons_mc, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() != 0) {
             for (int64_t ii = 1'000; ii <= 101000; ++ii) {
                 push(ii);
@@ -419,7 +434,7 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)
             int cnt = 0;
             while (cnt < state.threads() - 1) {
                 auto res = pop();
-                if (!res) {  // yield so the producers can catch up
+                if (!res) {
                     std::this_thread::yield();
                     continue;
                 }
@@ -430,8 +445,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)
         }
     }
 }
-// Register the function as a benchmark
-BENCHMARK_REGISTER_F(mcFixture, MProdSCons_mc)
+
+BENCHMARK_REGISTER_F(McFixture, MProdSCons_mc)
     ->ThreadRange(4, 8)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);

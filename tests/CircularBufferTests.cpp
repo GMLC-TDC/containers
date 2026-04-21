@@ -10,7 +10,7 @@ SPDX-License-Identifier: BSD-3-Clause
 #include "CircularBuffer.hpp"
 
 #include "gtest/gtest.h"
-#include <iostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -19,7 +19,7 @@ using gmlc::containers::CircularBufferRaw;
 
 TEST(CircBuff, circularbuffraw_simple)
 {
-    unsigned char* block = new unsigned char[1024];
+    auto* block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
 
     EXPECT_TRUE(buf.isSpaceAvailable(256));
@@ -28,7 +28,7 @@ TEST(CircBuff, circularbuffraw_simple)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_FALSE(buf.empty());
@@ -50,7 +50,7 @@ TEST(CircBuff, circularbuffraw_simple)
 
 TEST(CircBuff, circularbuffraw_loop_around)
 {
-    unsigned char* block = new unsigned char[1024];
+    auto* block = new unsigned char[1024];
     CircularBufferRaw buf(block, 1024);
 
     std::vector<unsigned char> testData(256, 'a');
@@ -65,7 +65,7 @@ TEST(CircBuff, circularbuffraw_loop_around)
     EXPECT_FALSE(pushed);
 
     EXPECT_TRUE(!buf.isSpaceAvailable(20));
-    int res = buf.pop(testData.data(), 1024);
+    const int res = buf.pop(testData.data(), 1024);
     EXPECT_EQ(res, 200);
     EXPECT_TRUE(buf.isSpaceAvailable(20));
     pushed = buf.push(testData.data(), 200);
@@ -78,10 +78,9 @@ TEST(CircBuff, circularbuffraw_loop_around)
 
 TEST(CircBuff, circularbuffraw_loop_around_repeat)
 {
-    unsigned char* block =
-        new unsigned char[1520];  // 3x504+4  otherwise there is a potential
-                                  // scenario in which 2 500byte messages cannot
-                                  // fit
+    auto* block = new unsigned char[1520];  // 3x504+4  otherwise there is a
+                                            // potential scenario in which 2
+                                            // 500byte messages cannot fit
     CircularBufferRaw buf(block, 1520);
 
     std::vector<unsigned char> testData(500, 'a');
@@ -92,7 +91,7 @@ TEST(CircBuff, circularbuffraw_loop_around_repeat)
         EXPECT_TRUE(pushed);
         int res = buf.pop(testData.data(), 500);
         EXPECT_EQ(res, ii);
-        int nds = buf.nextDataSize();
+        const int nds = buf.nextDataSize();
         res = buf.pop(testData.data(), 500);
         EXPECT_EQ(res, ii);
         EXPECT_EQ(nds, ii);
@@ -111,7 +110,7 @@ TEST(CircBuff, circularbuff_simple)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_FALSE(buf.empty());
@@ -141,7 +140,7 @@ TEST(CircBuff, circularbuff_loop_around)
     EXPECT_FALSE(pushed);
 
     EXPECT_TRUE(!buf.isSpaceAvailable(20));
-    int res = buf.pop(testData.data(), 1024);
+    const int res = buf.pop(testData.data(), 1024);
     EXPECT_EQ(res, 200);
     EXPECT_TRUE(buf.isSpaceAvailable(20));
     pushed = buf.push(testData.data(), 200);
@@ -178,7 +177,7 @@ TEST(CircBuff, circularbuff_simple_move)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_FALSE(buf.empty());
@@ -203,7 +202,7 @@ TEST(CircBuff, circularbuff_simple_copy)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_FALSE(buf.empty());
@@ -238,7 +237,7 @@ TEST(CircBuff, circularbuff_simple_move_assignment)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_FALSE(buf.empty());
@@ -267,7 +266,7 @@ TEST(CircBuff, circularbuff_simple_copy_assignment)
     EXPECT_EQ(res, 0);
     EXPECT_TRUE(buf.empty());
 
-    bool pushed = buf.push(testData.data(), 200);
+    const bool pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
     testData.assign(256, '\0');
     EXPECT_TRUE(!buf.empty());
@@ -323,8 +322,8 @@ TEST(CircBuff, circularbuff_resize_smaller)
     buf.resize(450);
     auto pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(!pushed);
-    int sz = buf.pop(testData.data(), 256);
-    EXPECT_EQ(sz, 200);
+    const int pop_size = buf.pop(testData.data(), 256);
+    EXPECT_EQ(pop_size, 200);
     pushed = buf.push(testData.data(), 200);
     EXPECT_TRUE(pushed);
 
@@ -456,8 +455,23 @@ TEST(CircBuff, odd_conditions)
     buf3.resize(1024);
     EXPECT_EQ(buf3.capacity(), 1024);
 
-    CircularBuffer buf4;
+    const CircularBuffer buf4;
     EXPECT_TRUE(buf4.empty());
-    CircularBuffer buf5(buf4);
+    CircularBuffer buf5;
+    buf5 = buf4;
     EXPECT_TRUE(buf5.empty());
+}
+
+TEST(CircBuff, invalid_constructor_sizes)
+{
+    EXPECT_THROW(CircularBuffer(0), std::invalid_argument);
+    EXPECT_THROW(CircularBuffer(-10), std::invalid_argument);
+}
+
+TEST(CircBuff, invalid_resize_sizes)
+{
+    CircularBuffer buf(1024);
+
+    EXPECT_THROW(buf.resize(0), std::invalid_argument);
+    EXPECT_THROW(buf.resize(-10), std::invalid_argument);
 }

@@ -14,6 +14,7 @@ SPDX-License-Identifier: BSD-3-Clause
 
 #include <algorithm>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -50,12 +51,10 @@ if so contain the index of the insertion
         const searchType2& searchValue2,
         Us&&... data)
     {
-        auto fnd = lookup1.find(searchValue1);
-        if (fnd != lookup1.end()) {
-            auto fnd2 = lookup2.find(searchValue2);
-            if (fnd2 != lookup2.end()) {
-                return std::nullopt;
-            }
+        auto fnd1 = lookup1.find(searchValue1);
+        auto fnd2 = lookup2.find(searchValue2);
+        if (fnd1 != lookup1.end() || fnd2 != lookup2.end()) {
+            return std::nullopt;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(std::forward<Us>(data)...);
@@ -136,11 +135,28 @@ if so contain the index of the insertion*/
         const searchType2& searchValue2,
         Us&&... data)
     {
-        auto fnd = lookup1.find(searchValue1);
-        if (fnd != lookup1.end()) {
-            dataStorage[fnd->second] = VType(std::forward<Us>(data)...);
-            lookup2[searchValue2] = fnd->second;
-            return fnd->second;
+        auto fnd1 = lookup1.find(searchValue1);
+        auto fnd2 = lookup2.find(searchValue2);
+        if (fnd1 != lookup1.end() && fnd2 != lookup2.end()) {
+            if (fnd1->second != fnd2->second) {
+                throw std::invalid_argument(
+                    "search keys already refer to different entries");
+            }
+            dataStorage[fnd1->second] = VType(std::forward<Us>(data)...);
+            return fnd1->second;
+        }
+        if (fnd1 != lookup1.end()) {
+            dataStorage[fnd1->second] = VType(std::forward<Us>(data)...);
+            removeIndexTerms(lookup2, fnd1->second);
+            lookup2[searchValue2] = fnd1->second;
+            return fnd1->second;
+        }
+        if (fnd2 != lookup2.end()) {
+            dataStorage[fnd2->second] = VType(std::forward<Us>(data)...);
+            removeIndexTerms(lookup1, fnd2->second);
+            names.emplace_back(searchValue1);
+            lookup1[names.back()] = fnd2->second;
+            return fnd2->second;
         }
         auto index = dataStorage.size();
         dataStorage.emplace_back(std::forward<Us>(data)...);
@@ -303,6 +319,12 @@ this function does not override existing values*/
         return dataStorage.end();
     }
 
+    /** remove an element by its index
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through either indexed lookup.
+    */
     void removeIndex(size_t index)
     {
         if (index >= dataStorage.size()) {
@@ -342,6 +364,12 @@ this function does not override existing values*/
         }
     }
 
+    /** remove an element by a string search term
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through either indexed lookup.
+    */
     void remove(std::string_view search)
     {
         auto el = lookup1.find(search);
@@ -352,6 +380,12 @@ this function does not override existing values*/
         removeIndex(index);
     }
 
+    /** remove an element by a secondary search term
+    @details for stable storage configurations, removing a non-tail element
+    only removes its search terms. The underlying object remains in storage so
+    any existing references or pointers stay valid, but the element is no
+    longer reachable through either indexed lookup.
+    */
     void remove(const searchType2& search)
     {
         auto el = lookup2.find(search);
@@ -408,6 +442,18 @@ F must be a function with signature like void VType(const VType &a);*/
     }
 
   private:
+    template<class SearchMap>
+    static void removeIndexTerms(SearchMap& searchMap, size_t index)
+    {
+        for (auto it = searchMap.begin(); it != searchMap.end();) {
+            if (it->second == index) {
+                it = searchMap.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+
     bool localErase(StableBlockVector<VType, BLOCK_ORDER>& vect, size_t index)
     {
         if (index == vect.size() - 1) {

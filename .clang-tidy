@@ -8,7 +8,9 @@ Checks: "
   -google-runtime-references,
   -google-build-using-namespace,
   -google-default-arguments,
+  -google-readability-avoid-underscore-in-googletest-name,
   modernize*,
+  -modernize-use-ranges,
   -modernize-use-trailing-return-type,
   -modernize-use-override,
   -modernize-avoid-c-arrays,
@@ -23,6 +25,7 @@ Checks: "
   -hicpp-no-array-decay,
   clang-analyzer-*,
   bugprone-*,
+  -bugprone-unchecked-optional-access,
   -bugprone-narrowing-conversions,
   misc-*,
   -misc-non-private-member-variables-in-classes,
@@ -42,7 +45,9 @@ WarningsAsErrors: "
   -google-build-using-namespace,
   -google-default-arguments,
   -google-explicit-constructor,
+  -google-readability-avoid-underscore-in-googletest-name,
   modernize*,
+  -modernize-use-ranges,
   -modernize-use-trailing-return-type,
   -modernize-use-override,
   -modernize-use-using,
@@ -59,6 +64,7 @@ WarningsAsErrors: "
   clang-analyzer-*,
   -clang-analyzer-optin.cplusplus.VirtualCall,
   bugprone-*,
+  -bugprone-unchecked-optional-access,
   -bugprone-narrowing-conversions,
   misc-*,
   -misc-non-private-member-variables-in-classes,
@@ -74,7 +80,6 @@ WarningsAsErrors: "
 
 HeaderFilterRegex: "src/helics/*.hp?p?"
 
-AnalyzeTemporaryDtors: false
 CheckOptions:
   - key: cert-dcl59-cpp.HeaderFileExtensions
     value: h,hh,hpp,hxx
@@ -180,6 +185,8 @@ CheckOptions:
     value: "4294967295"
   - key: readability-function-size.StatementThreshold
     value: "800"
+  - key: readability-function-cognitive-complexity.Threshold
+    value: "100"
   - key: readability-identifier-naming.AbstractClassCase
     value: CamelCase
   - key: readability-identifier-naming.AbstractClassPrefix
@@ -298,6 +305,8 @@ CheckOptions:
     value: ""
   - key: readability-identifier-naming.LocalVariableCase
     value: aNy_CasE
+  - key: readability-identifier-naming.LocalVariableIgnoredRegexp
+    value: "^(_|ii|jj|kk)$"
   - key: readability-identifier-naming.LocalVariablePrefix
     value: ""
   - key: readability-identifier-naming.LocalVariableSuffix
@@ -428,6 +437,8 @@ CheckOptions:
     value: ""
   - key: readability-identifier-naming.VariableSuffix
     value: ""
+  - key: readability-identifier-length.IgnoredLoopCounterNames
+    value: "^(_|ii|jj|kk)$"
   - key: readability-identifier-naming.VirtualMethodCase
     value: aNy_CasE
   - key: readability-identifier-naming.VirtualMethodPrefix

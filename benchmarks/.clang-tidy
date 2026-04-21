@@ -1,0 +1,12 @@
+---
+InheritParentConfig: true
+
+Checks: "
+  -misc-include-cleaner,
+  -clang-analyzer-deadcode.DeadStores
+  "
+
+WarningsAsErrors: "
+  -misc-include-cleaner,
+  -clang-analyzer-deadcode.DeadStores
+  "

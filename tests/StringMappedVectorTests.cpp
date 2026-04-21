@@ -5,10 +5,10 @@ for Sustainable Energy, LLC.  See the top-level NOTICE for additional details.
 All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
+#include "MapTraits.hpp"
 #include "StringMappedVector.hpp"
 
 #include "gtest/gtest.h"
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -18,205 +18,206 @@ using gmlc::containers::StringMappedVector;
 /** test basic operations */
 TEST(string_mapped_vector, definition_tests)
 {
-    StringMappedVector<double> M;
-    StringMappedVector<std::string> S2;
-    EXPECT_EQ(M.size(), 0u);
-    EXPECT_EQ(S2.size(), 0u);
-    StringMappedVector<std::vector<std::string>> V2;
+    StringMappedVector<double> mapped_double;
+    const StringMappedVector<std::string> mapped_string;
+    EXPECT_EQ(mapped_double.size(), 0U);
+    EXPECT_EQ(mapped_string.size(), 0U);
+    const StringMappedVector<std::vector<std::string>> mapped_vector;
 
     // test move and assignment operators
-    auto V3 = V2;
-    decltype(M) TV2;
-    TV2 = std::move(M);
+    decltype(mapped_double) target_vector;
+    target_vector = std::move(mapped_double);
 
-    decltype(TV2) TV3;
-    TV3 = TV2;
+    decltype(target_vector) target_vector_copy;
+    target_vector_copy = target_vector;
 }
 
 TEST(string_mapped_vector, insertion_tests)
 {
-    StringMappedVector<std::vector<double>> Mvec;
-    Mvec.insert("el1", 3, 1.7);
-    EXPECT_EQ(Mvec.size(), 1u);
-    Mvec.insert("a2", std::vector<double>(45));
-    EXPECT_EQ(Mvec.size(), 2u);
-    auto& V = Mvec[0];
-    EXPECT_EQ(V.size(), 3u);
-    EXPECT_EQ(V[0], 1.7);
-    EXPECT_EQ(V[2], 1.7);
+    StringMappedVector<std::vector<double>> mapped_vector;
+    mapped_vector.insert("el1", 3, 1.7);
+    EXPECT_EQ(mapped_vector.size(), 1U);
+    mapped_vector.insert("a2", std::vector<double>(45));
+    EXPECT_EQ(mapped_vector.size(), 2U);
+    auto& first_vector = mapped_vector[0];
+    EXPECT_EQ(first_vector.size(), 3U);
+    EXPECT_EQ(first_vector[0], 1.7);
+    EXPECT_EQ(first_vector[2], 1.7);
 
-    auto& V2 = Mvec[1];
-    EXPECT_EQ(V2.size(), 45);
+    auto& second_vector = mapped_vector[1];
+    EXPECT_EQ(second_vector.size(), 45);
 
-    auto V3 = Mvec.find("el1");
-    EXPECT_EQ(V3->size(), 3);
+    auto first_search = mapped_vector.find("el1");
+    EXPECT_EQ(first_search->size(), 3);
 
-    auto V4 = Mvec.find("a2");
-    EXPECT_EQ(V4->size(), 45);
+    auto second_search = mapped_vector.find("a2");
+    EXPECT_EQ(second_search->size(), 45);
 
-    auto loc = Mvec.insert("a2", std::vector<double>(14));
+    auto loc = mapped_vector.insert("a2", std::vector<double>(14));
     EXPECT_FALSE(loc);
 
-    auto V5 = Mvec.find("not_available");
-    EXPECT_EQ(V5, Mvec.end());
+    auto missing_search = mapped_vector.find("not_available");
+    EXPECT_EQ(missing_search, mapped_vector.end());
 
-    const auto& Mvecc = Mvec;
-    auto V4c = Mvecc.find("a2");
-    EXPECT_EQ(V4c->size(), 45);
+    const auto& mapped_vector_const = mapped_vector;
+    auto second_search_const = mapped_vector_const.find("a2");
+    EXPECT_EQ(second_search_const->size(), 45);
 
-    auto V5c = Mvecc.find("not_available");
-    EXPECT_EQ(V5c, Mvecc.end());
+    auto missing_search_const = mapped_vector_const.find("not_available");
+    EXPECT_EQ(missing_search_const, mapped_vector_const.end());
 
-    auto& V2c = Mvecc[1];
-    EXPECT_EQ(V2c.size(), 45);
-    EXPECT_EQ(Mvecc.back().size(), 45);
+    const auto& second_vector_const = mapped_vector_const[1];
+    EXPECT_EQ(second_vector_const.size(), 45);
+    EXPECT_EQ(mapped_vector_const.back().size(), 45);
 }
 
 TEST(string_mapped_vector, insert_or_assign)
 {
-    StringMappedVector<std::vector<double>> Mvec;
-    Mvec.insert("el1", 3, 1.7);
-    EXPECT_EQ(Mvec.size(), 1u);
-    auto loca2 = Mvec.insert("a2", std::vector<double>(45));
-    EXPECT_TRUE(loca2);
-    EXPECT_EQ(Mvec.size(), 2u);
-    auto& V = Mvec[0];
-    EXPECT_EQ(V.size(), 3u);
-    EXPECT_EQ(V[0], 1.7);
-    EXPECT_EQ(V[2], 1.7);
+    StringMappedVector<std::vector<double>> mapped_vector;
+    mapped_vector.insert("el1", 3, 1.7);
+    EXPECT_EQ(mapped_vector.size(), 1U);
+    auto loc_a2 = mapped_vector.insert("a2", std::vector<double>(45));
+    EXPECT_TRUE(loc_a2);
+    EXPECT_EQ(mapped_vector.size(), 2U);
+    auto& first_vector = mapped_vector[0];
+    EXPECT_EQ(first_vector.size(), 3U);
+    EXPECT_EQ(first_vector[0], 1.7);
+    EXPECT_EQ(first_vector[2], 1.7);
 
-    auto& V2 = Mvec[1];
-    EXPECT_EQ(V2.size(), 45);
+    auto& second_vector = mapped_vector[1];
+    EXPECT_EQ(second_vector.size(), 45);
 
-    auto V3 = Mvec.find("el1");
-    EXPECT_EQ(V3->size(), 3);
+    auto first_search = mapped_vector.find("el1");
+    EXPECT_EQ(first_search->size(), 3);
 
-    auto V4 = Mvec.find("a2");
-    EXPECT_EQ(V4->size(), 45);
+    auto second_search = mapped_vector.find("a2");
+    EXPECT_EQ(second_search->size(), 45);
 
-    auto loc = Mvec.insert("a2", std::vector<double>(14));
+    auto loc = mapped_vector.insert("a2", std::vector<double>(14));
     EXPECT_FALSE(loc);
 
-    auto loca2i = Mvec.insert_or_assign("a2", std::vector<double>(14));
-    EXPECT_EQ(loca2i, *loca2);
-    auto V5 = Mvec.find("a2");
-    EXPECT_EQ(V5->size(), 14);
+    auto loc_a2_insert_or_assign =
+        mapped_vector.insert_or_assign("a2", std::vector<double>(14));
+    EXPECT_EQ(loc_a2_insert_or_assign, *loc_a2);
+    auto updated_search = mapped_vector.find("a2");
+    EXPECT_EQ(updated_search->size(), 14);
 
-    EXPECT_EQ(Mvec.back().size(), 14);
+    EXPECT_EQ(mapped_vector.back().size(), 14);
 
-    auto loca3i = Mvec.insert_or_assign("a3", std::vector<double>(16));
+    auto loc_a3_insert_or_assign =
+        mapped_vector.insert_or_assign("a3", std::vector<double>(16));
 
-    EXPECT_EQ(Mvec.back().size(), 16);
-    EXPECT_EQ(Mvec[loca3i].size(), 16);
-    EXPECT_EQ(loca3i, Mvec.size() - 1);
+    EXPECT_EQ(mapped_vector.back().size(), 16);
+    EXPECT_EQ(mapped_vector[loc_a3_insert_or_assign].size(), 16);
+    EXPECT_EQ(loc_a3_insert_or_assign, mapped_vector.size() - 1);
 }
 
 TEST(string_mapped_vector, insertion_tests_nomap)
 {
-    StringMappedVector<std::vector<double>> Mvec;
-    Mvec.insert("el1", 3, 1.7);
-    EXPECT_EQ(Mvec.size(), 1u);
-    Mvec.insert("a2", std::vector<double>(45));
-    EXPECT_EQ(Mvec.size(), 2u);
-    auto& V = Mvec[0];
-    EXPECT_EQ(V.size(), 3u);
-    EXPECT_EQ(V[0], 1.7);
-    EXPECT_EQ(V[2], 1.7);
+    StringMappedVector<std::vector<double>> mapped_vector;
+    mapped_vector.insert("el1", 3, 1.7);
+    EXPECT_EQ(mapped_vector.size(), 1U);
+    mapped_vector.insert("a2", std::vector<double>(45));
+    EXPECT_EQ(mapped_vector.size(), 2U);
+    auto& first_vector = mapped_vector[0];
+    EXPECT_EQ(first_vector.size(), 3U);
+    EXPECT_EQ(first_vector[0], 1.7);
+    EXPECT_EQ(first_vector[2], 1.7);
 
-    auto& V2 = Mvec[1];
-    EXPECT_EQ(V2.size(), 45);
+    auto& second_vector = mapped_vector[1];
+    EXPECT_EQ(second_vector.size(), 45);
 
-    auto loc = Mvec.insert(no_search, std::vector<double>(22));
+    auto loc = mapped_vector.insert(::no_search, std::vector<double>(22));
     EXPECT_TRUE(loc);
-    auto& V4 = Mvec[*loc];
-    EXPECT_EQ(V4.size(), 22);
+    auto& inserted_vector = mapped_vector[*loc];
+    EXPECT_EQ(inserted_vector.size(), 22);
 }
 
 TEST(string_mapped_vector, apply_tests)
 {
-    StringMappedVector<double> Mvec;
+    StringMappedVector<double> mapped_vector;
 
-    Mvec.insert("s1", 3.2);
-    Mvec.insert("s2", 4.3);
-    Mvec.insert("s3", 9.7);
-    Mvec.insert("s4", 11.4);
+    mapped_vector.insert("s1", 3.2);
+    mapped_vector.insert("s2", 4.3);
+    mapped_vector.insert("s3", 9.7);
+    mapped_vector.insert("s4", 11.4);
 
-    EXPECT_EQ(Mvec.size(), 4);
+    EXPECT_EQ(mapped_vector.size(), 4);
 
     double sum = 0;
     auto accum = [&sum](double val) { sum += val; };
 
-    Mvec.apply(accum);
+    mapped_vector.apply(accum);
     EXPECT_DOUBLE_EQ(sum, 3.2 + 4.3 + 9.7 + 11.4);
-    double sum1 = sum;
+    const double sum1 = sum;
     sum = 0.0;
-    Mvec.transform([](double val) { return val + 1; });
+    mapped_vector.transform([](double val) { return val + 1; });
 
-    EXPECT_EQ(Mvec[0], 3.2 + 1.0);
-    EXPECT_EQ(Mvec[1], 4.3 + 1.0);
-    EXPECT_EQ(Mvec[2], 9.7 + 1.0);
+    EXPECT_EQ(mapped_vector[0], 3.2 + 1.0);
+    EXPECT_EQ(mapped_vector[1], 4.3 + 1.0);
+    EXPECT_EQ(mapped_vector[2], 9.7 + 1.0);
 
-    Mvec.apply(accum);
+    mapped_vector.apply(accum);
     EXPECT_DOUBLE_EQ(sum, sum1 + 4.0);
 }
 
 TEST(mapped_vector_tests, modify_tests)
 {
-    StringMappedVector<double> Mvec;
+    StringMappedVector<double> mapped_vector;
 
-    Mvec.insert("s1", 3.2);
-    Mvec.insert("s2", 4.3);
-    Mvec.insert("s3", 9.7);
-    Mvec.insert("s4", 11.4);
+    mapped_vector.insert("s1", 3.2);
+    mapped_vector.insert("s2", 4.3);
+    mapped_vector.insert("s3", 9.7);
+    mapped_vector.insert("s4", 11.4);
 
-    EXPECT_EQ(Mvec.size(), 4);
+    EXPECT_EQ(mapped_vector.size(), 4);
 
-    Mvec.modify([](double& val) { ++val; });
+    mapped_vector.modify([](double& val) { ++val; });
 
-    EXPECT_EQ(Mvec[0], 3.2 + 1.0);
-    EXPECT_EQ(Mvec[1], 4.3 + 1.0);
-    EXPECT_EQ(Mvec[2], 9.7 + 1.0);
+    EXPECT_EQ(mapped_vector[0], 3.2 + 1.0);
+    EXPECT_EQ(mapped_vector[1], 4.3 + 1.0);
+    EXPECT_EQ(mapped_vector[2], 9.7 + 1.0);
 }
 
 TEST(string_mapped_vector, remove_tests)
 {
-    StringMappedVector<double> Mvec;
+    StringMappedVector<double> mapped_vector;
 
-    Mvec.insert("s1", 3.2);
-    Mvec.insert("s2", 4.3);
-    Mvec.insert("s3", 9.7);
-    Mvec.insert("s4", 11.4);
+    mapped_vector.insert("s1", 3.2);
+    mapped_vector.insert("s2", 4.3);
+    mapped_vector.insert("s3", 9.7);
+    mapped_vector.insert("s4", 11.4);
 
-    EXPECT_EQ(Mvec.size(), 4);
+    EXPECT_EQ(mapped_vector.size(), 4);
 
-    Mvec.removeIndex(1);
+    mapped_vector.removeIndex(1);
 
-    EXPECT_TRUE(Mvec.find("s2") == Mvec.end());
-    EXPECT_EQ(Mvec[1], 4.3);
-    EXPECT_EQ(*Mvec.find("s4"), 11.4);
+    EXPECT_TRUE(mapped_vector.find("s2") == mapped_vector.end());
+    EXPECT_EQ(mapped_vector[1], 4.3);
+    EXPECT_EQ(*mapped_vector.find("s4"), 11.4);
 
-    Mvec.removeIndex(3);
-    EXPECT_TRUE(Mvec.find("s4") == Mvec.end());
+    mapped_vector.removeIndex(3);
+    EXPECT_TRUE(mapped_vector.find("s4") == mapped_vector.end());
 
-    Mvec.remove("s1");
-    EXPECT_EQ(*Mvec.find("s3"), 9.7);
-    EXPECT_EQ(Mvec[0], 3.2);
+    mapped_vector.remove("s1");
+    EXPECT_EQ(*mapped_vector.find("s3"), 9.7);
+    EXPECT_EQ(mapped_vector[0], 3.2);
 
-    auto MV2 = std::move(Mvec);
-    EXPECT_EQ(MV2.size(), 3);
+    auto moved_vector = std::move(mapped_vector);
+    EXPECT_EQ(moved_vector.size(), 3);
 
-    auto MV3 = MV2;
-    EXPECT_EQ(MV2.size(), 3);
-    EXPECT_EQ(MV3.size(), 3);
+    auto copied_vector = moved_vector;
+    EXPECT_EQ(moved_vector.size(), 3);
+    EXPECT_EQ(copied_vector.size(), 3);
 
-    MV3.clear();
-    EXPECT_EQ(MV2.size(), 3);
-    EXPECT_EQ(MV3.size(), 0);
+    copied_vector.clear();
+    EXPECT_EQ(moved_vector.size(), 3);
+    EXPECT_EQ(copied_vector.size(), 0);
 }
 
 TEST(string_mapped_vector, empty_find)
 {
-    StringMappedVector<double> Mvec;
-    auto res = Mvec.find("string1");
-    EXPECT_EQ(res, Mvec.end());
+    StringMappedVector<double> mapped_vector;
+    auto result = mapped_vector.find("string1");
+    EXPECT_EQ(result, mapped_vector.end());
 }

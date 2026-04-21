@@ -19,6 +19,8 @@ namespace gmlc::containers {
 /** A circular buffer for raw data chunks */
 class CircularBufferRaw {
   public:
+    static constexpr std::ptrdiff_t header_size = sizeof(int);
+
     CircularBufferRaw(unsigned char* dataBlock, int blockSize) :
         origin(dataBlock), next_write(origin), next_read(origin),
         capacity_(blockSize)
@@ -28,17 +30,20 @@ class CircularBufferRaw {
     int capacity() const { return capacity_; }
     bool isSpaceAvailable(int sz) const
     {
+        const auto required_space =
+            static_cast<std::ptrdiff_t>(sz) + header_size;
         if (next_write >= next_read) {
-            if ((capacity_ - (next_write - origin)) >=
-                static_cast<ptrdiff_t>(sz) + 4) {
+            const auto remaining_to_end =
+                static_cast<std::ptrdiff_t>(capacity_) - (next_write - origin);
+            if (remaining_to_end >= required_space) {
                 return true;
             }
-            if ((next_read - origin) >= static_cast<ptrdiff_t>(sz) + 4) {
+            if ((next_read - origin) >= required_space) {
                 return true;
             }
             return false;
         }
-        if ((next_read - next_write) >= static_cast<ptrdiff_t>(sz) + 4) {
+        if ((next_read - next_write) >= required_space) {
             return true;
         }
         return false;
@@ -49,22 +54,25 @@ class CircularBufferRaw {
         if (blockSize <= 0 || data == nullptr) {
             return false;
         }
+        const auto required_space =
+            static_cast<std::ptrdiff_t>(blockSize) + header_size;
         if (next_write >= next_read) {
-            if ((capacity_ - (next_write - origin)) >=
-                static_cast<ptrdiff_t>(blockSize) + 4) {
+            const auto remaining_to_end =
+                static_cast<std::ptrdiff_t>(capacity_) - (next_write - origin);
+            if (remaining_to_end >= required_space) {
                 memcpy(next_write, &blockSize, sizeof(int));
                 // *(reinterpret_cast<int *>(next_write)) = blockSize;
                 memcpy(next_write + 4, data, blockSize);
-                next_write += static_cast<ptrdiff_t>(blockSize) + 4;
+                next_write += required_space;
                 // loop around if there isn't really space for another block
                 // of at least 4 bytes and the next_read>origin
-                if (((capacity_ - (next_write - origin)) < 8) &&
+                if (((static_cast<std::ptrdiff_t>(capacity_) -
+                      (next_write - origin)) < (2 * header_size)) &&
                     (next_read > origin)) {
                     next_write = origin;
                 }
                 return true;
-            } else if (
-                (next_read - origin) >= static_cast<ptrdiff_t>(blockSize) + 4) {
+            } else if ((next_read - origin) >= required_space) {
                 int loc = -1;
                 memcpy(next_write, &loc, sizeof(int));
                 memcpy(origin, &blockSize, sizeof(int));
@@ -72,11 +80,10 @@ class CircularBufferRaw {
                 next_write = origin + blockSize + 4;
                 return true;
             }
-        } else if (
-            (next_read - next_write) >= static_cast<ptrdiff_t>(blockSize) + 4) {
+        } else if ((next_read - next_write) >= required_space) {
             memcpy(next_write, &blockSize, sizeof(int));
             memcpy(next_write + 4, data, blockSize);
-            next_write += static_cast<ptrdiff_t>(blockSize) + 4;
+            next_write += required_space;
             return true;
         }
         return false;
@@ -109,7 +116,8 @@ class CircularBufferRaw {
         if (size <= maxSize) {
             memcpy(data, next_read + sizeof(int), size);
             next_read += static_cast<size_t>(size) + sizeof(int);
-            if ((capacity_ - (next_read - origin)) < 8) {
+            if ((static_cast<std::ptrdiff_t>(capacity_) -
+                 (next_read - origin)) < (2 * header_size)) {
                 next_read = origin;
             }
             return size;
@@ -133,16 +141,22 @@ class CircularBufferRaw {
 /** class implementing a circular buffer with raw memory
  */
 class CircularBuffer {
+  private:
+    static int invalid_size()
+    {
+        throw(std::invalid_argument("size must be positive"));
+    }
+
   public:
     CircularBuffer() noexcept : buffer(nullptr, 0) {}
     explicit CircularBuffer(int size) :
-        data(new unsigned char[size]), actualSize{size}, actualCapacity{size},
-        buffer(data, size)
+        data(new unsigned char[size > 0 ? size : invalid_size()]),
+        actualSize{size}, actualCapacity{size}, buffer(data, size)
     {
     }
     ~CircularBuffer()
     {
-        if (actualCapacity > 0) {
+        if (data != nullptr) {
             delete[] data;
         }
     }
@@ -213,6 +227,9 @@ class CircularBuffer {
 
     void resize(int newsize)
     {
+        if (newsize <= 0) {
+            throw(std::invalid_argument("size must be positive"));
+        }
         if (newsize == buffer.capacity_) {
             return;
         }

@@ -6,6 +6,8 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 */
 
 #include "gtest/gtest.h"
+#include <chrono>
+#include <cstdint>
 #include <future>
 #include <iostream>
 #include <memory>
@@ -21,444 +23,437 @@ using gmlc::containers::BlockingPriorityQueue;
 /** test basic operations */
 TEST(blocking_priority_queue, basic_tests)
 {
-    BlockingPriorityQueue<int> sq;
+    BlockingPriorityQueue<int> queue;
 
-    sq.push(45);
-    sq.push(54);
+    queue.push(45);
+    queue.push(54);
 
-    EXPECT_TRUE(!sq.empty());
+    EXPECT_FALSE(queue.empty());
 
-    auto b = sq.try_pop();
-    EXPECT_EQ(*b, 45);
-    b = sq.try_pop();
-    EXPECT_EQ(*b, 54);
+    auto popped_value = queue.try_pop();
+    EXPECT_EQ(*popped_value, 45);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(*popped_value, 54);
 
-    b = sq.try_pop();
-    EXPECT_FALSE(b);
-    EXPECT_TRUE(sq.empty());
+    popped_value = queue.try_pop();
+    EXPECT_FALSE(popped_value);
+    EXPECT_TRUE(queue.empty());
 
-    sq.push(45);
-    sq.push(54);
+    queue.push(45);
+    queue.push(54);
 
     // check the prioritization is working
-    sq.pushPriority(65);
+    queue.pushPriority(65);
 
-    b = sq.try_pop();
-    EXPECT_EQ(*b, 65);
-    b = sq.try_pop();
-    EXPECT_EQ(*b, 45);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(*popped_value, 65);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(*popped_value, 45);
 }
 
 /** test with a move only element*/
 TEST(blocking_priority_queue, move_only_tests)
 {
-    BlockingPriorityQueue<std::unique_ptr<double>> sq;
+    BlockingPriorityQueue<std::unique_ptr<double>> queue;
 
-    sq.push(std::make_unique<double>(4534.23));
+    queue.push(std::make_unique<double>(4534.23));
 
-    auto e2 = std::make_unique<double>(34.234);
-    sq.push(std::move(e2));
+    auto second_element = std::make_unique<double>(34.234);
+    queue.push(std::move(second_element));
 
-    EXPECT_TRUE(!sq.empty());
+    EXPECT_FALSE(queue.empty());
 
-    auto b = sq.try_pop();
-    EXPECT_EQ(**b, 4534.23);
-    b = sq.try_pop();
-    EXPECT_EQ(**b, 34.234);
-    e2 = std::make_unique<double>(29.785);
-    sq.pushPriority(std::move(e2));
+    auto popped_value = queue.try_pop();
+    EXPECT_EQ(**popped_value, 4534.23);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(**popped_value, 34.234);
+    second_element = std::make_unique<double>(29.785);
+    queue.pushPriority(std::move(second_element));
 
-    b = sq.try_pop();
-    EXPECT_EQ(**b, 29.785);
-    b = sq.try_pop();
-    EXPECT_TRUE(!(b));
-    EXPECT_TRUE(sq.empty());
+    popped_value = queue.try_pop();
+    EXPECT_EQ(**popped_value, 29.785);
+    popped_value = queue.try_pop();
+    EXPECT_FALSE(popped_value);
+    EXPECT_TRUE(queue.empty());
 }
 
 /** test the ordering with a larger number of inputs*/
-
 TEST(blocking_priority_queue, ordering_tests)
 {
-    BlockingPriorityQueue<int> sq;
+    BlockingPriorityQueue<int> queue;
 
-    for (int ii = 1; ii < 10; ++ii) {
-        sq.push(ii);
-    }
-
-    auto b = sq.try_pop();
-    EXPECT_EQ(*b, 1);
-    for (int ii = 2; ii < 7; ++ii) {
-        b = sq.try_pop();
-        EXPECT_EQ(*b, ii);
-    }
-    for (int ii = 10; ii < 20; ++ii) {
-        sq.push(ii);
-    }
-    sq.pushPriority(99);
-    b = sq.try_pop();
-    EXPECT_EQ(*b, 99);
-    for (int ii = 7; ii < 20; ++ii) {
-        b = sq.try_pop();
-        EXPECT_EQ(*b, ii);
+    for (int index = 1; index < 10; ++index) {
+        queue.push(index);
     }
 
-    EXPECT_TRUE(sq.empty());
+    auto popped_value = queue.try_pop();
+    EXPECT_EQ(*popped_value, 1);
+    for (int index = 2; index < 7; ++index) {
+        popped_value = queue.try_pop();
+        EXPECT_EQ(*popped_value, index);
+    }
+    for (int index = 10; index < 20; ++index) {
+        queue.push(index);
+    }
+    queue.pushPriority(99);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(*popped_value, 99);
+    for (int index = 7; index < 20; ++index) {
+        popped_value = queue.try_pop();
+        EXPECT_EQ(*popped_value, index);
+    }
+
+    EXPECT_TRUE(queue.empty());
 }
 
 TEST(blocking_priority_queue, emplace_tests)
 {
-    BlockingPriorityQueue<std::pair<int, double>> sq;
+    BlockingPriorityQueue<std::pair<int, double>> queue;
 
-    sq.emplace(10, 45.4);
-    sq.emplace(11, 34.1);
-    sq.emplace(12, 34.2);
-    sq.emplacePriority(14, 19.99);
+    queue.emplace(10, 45.4);
+    queue.emplace(11, 34.1);
+    queue.emplace(12, 34.2);
+    queue.emplacePriority(14, 19.99);
 
-    auto b = sq.try_pop();
-    EXPECT_EQ(b->first, 14);
-    EXPECT_EQ(b->second, 19.99);
+    auto popped_value = queue.try_pop();
+    EXPECT_EQ(popped_value->first, 14);
+    EXPECT_EQ(popped_value->second, 19.99);
 
-    b = sq.try_pop();
-    EXPECT_EQ(b->first, 10);
-    EXPECT_EQ(b->second, 45.4);
-    b = sq.try_pop();
-    EXPECT_EQ(b->first, 11);
-    EXPECT_EQ(b->second, 34.1);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(popped_value->first, 10);
+    EXPECT_EQ(popped_value->second, 45.4);
+    popped_value = queue.try_pop();
+    EXPECT_EQ(popped_value->first, 11);
+    EXPECT_EQ(popped_value->second, 34.1);
 }
 
 TEST(blocking_priority_queue, clear_tests)
 {
-    BlockingPriorityQueue<int64_t> sq;
-    sq.push(10);
-    sq.push(100);
-    sq.push(1000);
-    sq.pop();
-    sq.push(20);
-    sq.push(20);
-    sq.pushPriority(9);
-    sq.pushPriority(18);
-    EXPECT_FALSE(sq.empty());
-    sq.clear();
-    EXPECT_TRUE(sq.empty());
+    BlockingPriorityQueue<int64_t> queue;
+    queue.push(10);
+    queue.push(100);
+    queue.push(1000);
+    queue.pop();
+    queue.push(20);
+    queue.push(20);
+    queue.pushPriority(9);
+    queue.pushPriority(18);
+    EXPECT_FALSE(queue.empty());
+    queue.clear();
+    EXPECT_TRUE(queue.empty());
 }
 
 TEST(blocking_priority_queue, multithreaded_tests_wait)
 {
-    BlockingPriorityQueue<std::pair<int64_t, int64_t>> sq;
-    auto t1 = [&sq]() {
-        int ii = 0;
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(1, 10);
-        std::pair<int64_t, int64_t> el{10, 10};
-        while (ii < 500) {
-            ++ii;
-            auto res = sq.pop(std::chrono::milliseconds(10));
+    BlockingPriorityQueue<std::pair<int64_t, int64_t>> queue;
+    auto first_thread_body = [&queue]() {
+        int iteration = 0;
+        std::random_device device;
+        std::mt19937 generator(device());
+        std::uniform_int_distribution<std::mt19937::result_type> distribution(
+            1, 10);
+        const std::pair<int64_t, int64_t> element{10, 10};
+        while (iteration < 500) {
+            ++iteration;
+            auto result = queue.pop(std::chrono::milliseconds(10));
 
-            switch (dist(rng)) {
+            switch (distribution(generator)) {
                 case 1:
                     break;
                 case 2:
-                    sq.pushPriority(el);
+                    queue.pushPriority(element);
                     break;
                 case 3:
-                    if (res) {
+                    if (result) {
                         std::this_thread::sleep_for(
                             std::chrono::milliseconds(10));
                     }
                     [[fallthrough]];
                 default:
-                    sq.push(el);
+                    queue.push(element);
                     break;
             }
         }
     };
-    auto t2 = [&sq]() {
-        int ii = 0;
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(1, 10);
-        while (ii < 500) {
-            ++ii;
-            auto res = sq.pop();
-            (void)(res);
-            switch (dist(rng)) {
+    auto second_thread_body = [&queue]() {
+        int iteration = 0;
+        std::random_device device;
+        std::mt19937 generator(device());
+        std::uniform_int_distribution<std::mt19937::result_type> distribution(
+            1, 10);
+        while (iteration < 500) {
+            ++iteration;
+            auto result = queue.pop();
+            static_cast<void>(result);
+            switch (distribution(generator)) {
                 case 1:
-
                     break;
                 case 2:
-                    sq.emplacePriority(20, 20);
+                    queue.emplacePriority(20, 20);
                     break;
                 case 3:
                     std::this_thread::sleep_for(std::chrono::milliseconds(30));
                     [[fallthrough]];
                 default:
-                    sq.emplace(30, 30);
+                    queue.emplace(30, 30);
                     break;
             }
         }
     };
 
-    auto t3 = [&sq]() {
+    auto third_thread_body = [&queue]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(1200));
-        int ii = 0;
-        while (ii++ < 500) {
-            sq.emplace(80, 80);
+        int iteration = 0;
+        while (iteration++ < 500) {
+            queue.emplace(80, 80);
         }
     };
 
-    auto res1 = std::thread(t1);
-    auto res2 = std::thread(t2);
-    auto res3 = std::thread(t3);
+    auto first_thread = std::thread(first_thread_body);
+    auto second_thread = std::thread(second_thread_body);
+    auto third_thread = std::thread(third_thread_body);
     EXPECT_TRUE(true);
-    res1.join();
-    res2.join();
-    res3.join();
+    first_thread.join();
+    second_thread.join();
+    third_thread.join();
 }
+
 /** test with single consumer/single producer*/
 TEST(blocking_priority_queue, multithreaded_tests)
 {
-    BlockingPriorityQueue<int64_t> sq(1010000);
+    BlockingPriorityQueue<int64_t> queue(1010000);
 
-    for (int64_t ii = 0; ii < 10'000; ++ii) {
-        sq.push(ii);
+    for (int64_t index = 0; index < 10'000; ++index) {
+        queue.push(index);
     }
-    auto prod1 = [&]() {
-        for (int64_t ii = 10'000; ii < 1'010'000; ++ii) {
-            sq.push(ii);
+    auto producer = [&]() {
+        for (int64_t index = 10'000; index < 1'010'000; ++index) {
+            queue.push(index);
         }
     };
 
-    auto cons = [&]() {
-        auto res = sq.try_pop();
-        int64_t cnt = 0;
-        while ((res)) {
-            ++cnt;
-            res = sq.try_pop();
-            if (!res) {  // make an additional sleep period so the producer can
-                         // catch
-                // up
+    auto consumer = [&]() {
+        auto result = queue.try_pop();
+        int64_t count = 0;
+        while (result) {
+            ++count;
+            result = queue.try_pop();
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                res = sq.try_pop();
+                result = queue.try_pop();
             }
         }
-        return cnt;
+        return count;
     };
 
-    auto prodthread = std::thread(prod1);
+    auto producer_thread = std::thread(producer);
 
-    auto V = cons();
-    EXPECT_EQ(V, 1'010'000);
-    prodthread.join();
+    auto consumed_count = consumer();
+    EXPECT_EQ(consumed_count, 1'010'000);
+    producer_thread.join();
 }
 
 /** test with single consumer / single producer */
 TEST(blocking_priority_queue, pop_tests)
 {
-    BlockingPriorityQueue<int64_t> sq(1010000);
+    BlockingPriorityQueue<int64_t> queue(1010000);
 
-    auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
-            sq.push(ii);
+    auto producer = [&]() {
+        for (int64_t index = 0; index < 1'000'000; ++index) {
+            queue.push(index);
         }
-        sq.push(-1);
+        queue.push(-1);
     };
 
-    auto cons = [&]() {
-        auto res = sq.pop();
-        int64_t cnt = 1;
-        while (res >= 0) {
-            auto nres = sq.pop();
-            if (nres > res) {
-                ++cnt;
-            } else {
-                if (nres > 0) {
-                    printf(
-                        "%d came before %d\n",
-                        static_cast<int>(nres),
-                        static_cast<int>(res));
-                }
+    auto consumer = [&]() {
+        auto result = queue.pop();
+        int64_t count = 1;
+        while (result >= 0) {
+            auto next_result = queue.pop();
+            if (next_result > result) {
+                ++count;
+            } else if (next_result > 0) {
+                std::cout << next_result << " came before " << result << '\n';
             }
-            res = nres;
+            result = next_result;
         }
-        return cnt;
+        return count;
     };
 
-    auto prodthread = std::thread(prod1);
-    auto V = cons();
-    EXPECT_EQ(V, 1'000'000);
-    prodthread.join();
+    auto producer_thread = std::thread(producer);
+    auto consumed_count = consumer();
+    EXPECT_EQ(consumed_count, 1'000'000);
+    producer_thread.join();
 }
 
 /** test with multiple consumer/single producer*/
 TEST(blocking_priority_queue, multithreaded_tests2)
 {
-    BlockingPriorityQueue<int64_t> sq(1010000);
+    BlockingPriorityQueue<int64_t> queue(1010000);
 
-    for (int64_t ii = 0; ii < 10'000; ++ii) {
-        sq.push(ii);
+    for (int64_t index = 0; index < 10'000; ++index) {
+        queue.push(index);
     }
-    auto prod1 = [&]() {
-        for (int64_t ii = 10'000; ii < 1'010'000; ++ii) {
-            sq.push(ii);
+    auto producer = [&]() {
+        for (int64_t index = 10'000; index < 1'010'000; ++index) {
+            queue.push(index);
         }
     };
 
-    auto cons = [&]() {
-        auto res = sq.try_pop();
-        int64_t cnt = 0;
-        while ((res)) {
-            ++cnt;
-            res = sq.try_pop();
-            if (!res) {  // make an additional sleep period so the producer can
-                         // catch
-                // up
+    auto consumer = [&]() {
+        auto result = queue.try_pop();
+        int64_t count = 0;
+        while (result) {
+            ++count;
+            result = queue.try_pop();
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                res = sq.try_pop();
+                result = queue.try_pop();
             }
         }
-        return cnt;
+        return count;
     };
 
-    std::packaged_task<int64_t()> c1(cons);
-    std::packaged_task<int64_t()> c2(cons);
-    auto res1 = c1.get_future();
-    auto res2 = c2.get_future();
-    auto c1thread = std::thread(std::move(c1));
-    auto c2thread = std::thread(std::move(c2));
-    auto prodthread = std::thread(prod1);
-    auto V3 = cons();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    std::packaged_task<int64_t()> first_task(consumer);
+    std::packaged_task<int64_t()> second_task(consumer);
+    auto first_result = first_task.get_future();
+    auto second_result = second_task.get_future();
+    auto first_consumer_thread = std::thread(std::move(first_task));
+    auto second_consumer_thread = std::thread(std::move(second_task));
+    auto producer_thread = std::thread(producer);
+    auto third_count = consumer();
+    auto first_count = first_result.get();
+    auto second_count = second_result.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 1'010'000);
-    prodthread.join();
-    c1thread.join();
-    c2thread.join();
+    EXPECT_EQ(first_count + second_count + third_count, 1'010'000);
+    producer_thread.join();
+    first_consumer_thread.join();
+    second_consumer_thread.join();
 }
 
 /** test with multiple producer/multiple consumer*/
 TEST(blocking_priority_queue, multithreaded_tests3)
 {
-    BlockingPriorityQueue<int64_t> sq;
-    sq.reserve(3'010'000);
-    for (int64_t ii = 0; ii < 10'000; ++ii) {
-        sq.push(ii);
+    BlockingPriorityQueue<int64_t> queue;
+    queue.reserve(3'010'000);
+    for (int64_t index = 0; index < 10'000; ++index) {
+        queue.push(index);
     }
-    auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
-            sq.push(ii);
+    auto producer = [&]() {
+        for (int64_t index = 0; index < 1'000'000; ++index) {
+            queue.push(index);
         }
     };
 
-    auto cons = [&]() {
-        auto res = sq.try_pop();
-        int64_t cnt = 0;
-        while ((res)) {
-            ++cnt;
-            res = sq.try_pop();
-            if (!res) {  // make an additional sleep period so the producer can
-                         // catch
-                // up
+    auto consumer = [&]() {
+        auto result = queue.try_pop();
+        int64_t count = 0;
+        while (result) {
+            ++count;
+            result = queue.try_pop();
+            if (!result) {  // make an additional sleep period so the producer
+                            // can catch up
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                res = sq.try_pop();
+                result = queue.try_pop();
             }
         }
-        return cnt;
+        return count;
     };
 
-    std::packaged_task<int64_t()> c1(cons);
-    std::packaged_task<int64_t()> c2(cons);
-    auto res1 = c1.get_future();
-    auto res2 = c2.get_future();
-    auto c1thread = std::thread(std::move(c1));
-    auto c2thread = std::thread(std::move(c2));
-    auto prodthread1 = std::thread(prod1);
-    auto prodthread2 = std::thread(prod1);
-    auto prodthread3 = std::thread(prod1);
+    std::packaged_task<int64_t()> first_task(consumer);
+    std::packaged_task<int64_t()> second_task(consumer);
+    auto first_result = first_task.get_future();
+    auto second_result = second_task.get_future();
+    auto first_consumer_thread = std::thread(std::move(first_task));
+    auto second_consumer_thread = std::thread(std::move(second_task));
+    auto first_producer_thread = std::thread(producer);
+    auto second_producer_thread = std::thread(producer);
+    auto third_producer_thread = std::thread(producer);
 
-    auto V3 = cons();
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    auto third_count = consumer();
+    auto first_count = first_result.get();
+    auto second_count = second_result.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'010'000);
+    EXPECT_EQ(first_count + second_count + third_count, 3'010'000);
 
-    prodthread1.join();
-    prodthread2.join();
-    prodthread3.join();
-    c1thread.join();
-    c2thread.join();
+    first_producer_thread.join();
+    second_producer_thread.join();
+    third_producer_thread.join();
+    first_consumer_thread.join();
+    second_consumer_thread.join();
 }
 
 /** test with multiple producer/multiple consumer*/
 TEST(blocking_priority_queue, multithreaded_tests3_pop)
 {
-    BlockingPriorityQueue<int64_t> sq;
-    sq.reserve(3'010'000);
+    BlockingPriorityQueue<int64_t> queue;
+    queue.reserve(3'010'000);
 
-    auto prod1 = [&]() {
-        for (int64_t ii = 0; ii < 1'000'000; ++ii) {
-            sq.push(ii);
+    auto producer = [&]() {
+        for (int64_t index = 0; index < 1'000'000; ++index) {
+            queue.push(index);
         }
-        sq.push(-1);
+        queue.push(-1);
     };
 
-    auto cons = [&]() {
-        int64_t res{1};
-        int64_t cnt{0};
-        while (res >= 0) {
-            ++cnt;
-            res = sq.pop();
+    auto consumer = [&]() {
+        int64_t result{1};
+        int64_t count{0};
+        while (result >= 0) {
+            ++count;
+            result = queue.pop();
         }
-        return cnt;
+        return count;
     };
 
-    std::packaged_task<int64_t()> c1(cons);
-    std::packaged_task<int64_t()> c2(cons);
-    auto res1 = c1.get_future();
-    auto res2 = c2.get_future();
-    auto c1thread = std::thread(std::move(c1));
-    auto c2thread = std::thread(std::move(c2));
-    auto prodthread1 = std::thread(prod1);
-    auto prodthread2 = std::thread(prod1);
-    auto prodthread3 = std::thread(prod1);
-    auto V3 = cons();
+    std::packaged_task<int64_t()> first_task(consumer);
+    std::packaged_task<int64_t()> second_task(consumer);
+    auto first_result = first_task.get_future();
+    auto second_result = second_task.get_future();
+    auto first_consumer_thread = std::thread(std::move(first_task));
+    auto second_consumer_thread = std::thread(std::move(second_task));
+    auto first_producer_thread = std::thread(producer);
+    auto second_producer_thread = std::thread(producer);
+    auto third_producer_thread = std::thread(producer);
+    auto third_count = consumer();
 
-    prodthread1.join();
-    prodthread2.join();
-    prodthread3.join();
+    first_producer_thread.join();
+    second_producer_thread.join();
+    third_producer_thread.join();
 
-    auto V1 = res1.get();
-    auto V2 = res2.get();
+    auto first_count = first_result.get();
+    auto second_count = second_result.get();
 
-    EXPECT_EQ(V1 + V2 + V3, 3'000'003);
+    EXPECT_EQ(first_count + second_count + third_count, 3'000'003);
 
-    std::cout << "production complete" << std::endl;
-    c1thread.join();
-    c2thread.join();
+    std::cout << "production complete\n";
+    first_consumer_thread.join();
+    second_consumer_thread.join();
 }
 
 /** test with multiple producer/multiple consumer*/
 TEST(blocking_priority_queue, pop_callback_tests)
 {
-    BlockingPriorityQueue<int64_t> sq;
-    int pushcnt = 0;
-    auto prod1 = [&]() {
-        sq.push(7);
-        ++pushcnt;
+    BlockingPriorityQueue<int64_t> queue;
+    int push_count = 0;
+    auto producer = [&]() {
+        queue.push(7);
+        ++push_count;
     };
 
-    auto cons = [&](int cnt) {
-        for (int ii = 0; ii < cnt; ii++) {
-            sq.popOrCall(prod1);
+    auto consumer = [&](int count) {
+        for (int index = 0; index < count; ++index) {
+            queue.popOrCall(producer);
         }
-        return cnt;
+        return count;
     };
 
-    auto res = cons(25);
-    EXPECT_EQ(res, 25);
-    EXPECT_EQ(pushcnt, 25);
-    auto res2 = cons(127);
-    EXPECT_EQ(res2, 127);
-    EXPECT_EQ(pushcnt, 127 + 25);
+    auto first_result = consumer(25);
+    EXPECT_EQ(first_result, 25);
+    EXPECT_EQ(push_count, 25);
+    auto second_result = consumer(127);
+    EXPECT_EQ(second_result, 127);
+    EXPECT_EQ(push_count, 127 + 25);
 }

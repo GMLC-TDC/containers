@@ -138,10 +138,15 @@ class StackBufferRaw {
  * convenience functions */
 class StackBuffer {
   public:
+    static int invalid_size()
+    {
+        throw(std::invalid_argument("size must be positive"));
+    }
+
     StackBuffer() noexcept : stack() {}
     explicit StackBuffer(int size) :
-        data(new unsigned char[size]), statedSize{size}, actualCapacity{size},
-        stack(data, size)
+        data(new unsigned char[size > 0 ? size : invalid_size()]),
+        statedSize{size}, actualCapacity{size}, stack(data, size)
     {
     }
 
@@ -198,23 +203,18 @@ class StackBuffer {
     }
     StackBuffer& operator=(const StackBuffer& sq)
     {
-        stack = sq.stack;
-        resizeMemory(sq.statedSize, false);
-        std::memcpy(data, sq.data, sq.statedSize);
-
-        auto offset = stack.next - stack.origin;
-        stack.origin = data;
-        stack.next = stack.origin + offset;
-        stack.nextIndex = reinterpret_cast<dataIndex*>(
-            stack.origin + stack.dataSize - diSize);
-        stack.nextIndex -= stack.dataCount;
+        if (this == &sq) {
+            return *this;
+        }
+        StackBuffer copy(sq);
+        swap(copy);
         return *this;
     }
 
     bool resize(int newsize)
     {
-        if (newsize < 0) {
-            return false;
+        if (newsize <= 0) {
+            throw(std::invalid_argument("size must be positive"));
         }
         if (newsize == stack.dataSize) {
             return true;

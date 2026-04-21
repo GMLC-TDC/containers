@@ -36,15 +36,18 @@ class AirLock {
   public:
     /** default constructor */
     AirLock() = default;
+    ~AirLock() { close(); }
     /** try to load the airlock
 @return true if successful, false if not*/
     template<class Z>
     bool try_load(Z&& val)
     {  // all modifications to loaded should be inside the mutex otherwise
        // this will contain race conditions
-        if (!loaded.load(std::memory_order_acquire)) {
+        if (!loaded.load(std::memory_order_acquire) &&
+            !closed.load(std::memory_order_acquire)) {
             std::lock_guard<MUTEX> lock(door);
-            if (!loaded.load(std::memory_order_acquire)) {
+            if (!loaded.load(std::memory_order_acquire) &&
+                !closed.load(std::memory_order_acquire)) {
                 data = std::forward<Z>(val);
                 loaded.store(true, std::memory_order_release);
                 return true;
@@ -57,18 +60,27 @@ class AirLock {
     @details the call will block until the airlock is ready to be loaded
     */
     template<class Z>
-    void load(Z&& val)
+    bool load(Z&& val)
     {
         std::unique_lock<MUTEX> lock(door);
+        if (closed.load(std::memory_order_acquire)) {
+            return false;
+        }
         if (!loaded.load(std::memory_order_acquire)) {
             data = std::forward<Z>(val);
             loaded.store(true, std::memory_order_release);
+            return true;
         } else {
-            while (loaded.load(std::memory_order_acquire)) {
+            while (loaded.load(std::memory_order_acquire) &&
+                   !closed.load(std::memory_order_acquire)) {
                 condition.wait(lock);
+            }
+            if (closed.load(std::memory_order_acquire)) {
+                return false;
             }
             data = std::forward<Z>(val);
             loaded.store(true, std::memory_order_release);
+            return true;
         }
     }
 
@@ -90,15 +102,27 @@ contains a value
         }
         return std::nullopt;
     }
+    /** close the airlock to further loads and wake any waiting loader*/
+    void close()
+    {
+        bool expected = false;
+        if (closed.compare_exchange_strong(expected, true)) {
+            condition.notify_all();
+        }
+    }
     /** check if the airlock is loaded
 @details this may or may  not mean anything depending on usage
 it is correct but may be incorrect immediately after the call
 */
     bool isLoaded() const { return loaded.load(std::memory_order_acquire); }
+    /** check if the airlock is closed to further loads */
+    bool isClosed() const { return closed.load(std::memory_order_acquire); }
 
   private:
     std::atomic_bool loaded{
         false};  //!< flag if the airlock is loaded with cargo
+    std::atomic_bool closed{
+        false};  //!< flag indicating the airlock is closed to new cargo
     MUTEX door;  //!< check if one of the doors to the airlock is open
     T data{};  //!< the data to be stored in the airlock
     COND condition;  //!< condition variable for notification of new data

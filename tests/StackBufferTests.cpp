@@ -8,7 +8,7 @@ All rights reserved. SPDX-License-Identifier: BSD-3-Clause
 #include "StackBuffer.hpp"
 
 #include "gtest/gtest.h"
-#include <iostream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -18,15 +18,14 @@ using gmlc::containers::StackBuffer;
 
 TEST(stackBuffer, stack_bufferraw_simple)
 {
-    unsigned char* block = new unsigned char[4096];
+    auto* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
 
     std::vector<unsigned char> testData(1024, 'a');
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, '\0');
     res = stack.pop(testData.data(), 265);
     EXPECT_LT(res, 0);
@@ -42,21 +41,20 @@ TEST(stackBuffer, stack_bufferraw_simple)
 
 TEST(stackBuffer, stack_bufferraw_3_push)
 {
-    unsigned char* block = new unsigned char[4096];
+    auto* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
 
     std::vector<unsigned char> testData(1024, 'a');
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, 'b');
-    pushed = stack.push(testData.data(), 249);
-    EXPECT_TRUE(pushed);
+
+    EXPECT_TRUE(stack.push(testData.data(), 249));
     testData.assign(1024, 'c');
-    pushed = stack.push(testData.data(), 393);
-    EXPECT_TRUE(pushed);
+
+    EXPECT_TRUE(stack.push(testData.data(), 393));
     res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 393);
     EXPECT_EQ(testData[0], 'c');
@@ -82,7 +80,7 @@ TEST(stackBuffer, stack_bufferraw_3_push)
 
 TEST(stackBuffer, stack_bufferraw_push_full)
 {
-    unsigned char* block = new unsigned char[1024];
+    auto* block = new unsigned char[1024];
     StackBufferRaw stack(block, 1024);
 
     std::vector<unsigned char> testData(1024, 'a');
@@ -139,7 +137,7 @@ TEST(stackBuffer, stack_bufferraw_push_full)
 
 TEST(stackBuffer, stack_bufferraw_reverse)
 {
-    unsigned char* block = new unsigned char[4096];
+    auto* block = new unsigned char[4096];
     StackBufferRaw stack(block, 4096);
 
     std::vector<unsigned char> testData(1024, 'a');
@@ -202,11 +200,9 @@ TEST(stackBuffer, stack_buffer_swap)
     StackBuffer stack2(1092);
     std::vector<unsigned char> testData(1024, 'a');
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, '\0');
-    pushed = stack.push(testData.data(), 245);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 245));
 
     stack2.push(testData.data(), 125);
     stack.swap(stack2);
@@ -226,8 +222,7 @@ TEST(stackBuffer, stack_buffer_simple)
     int res = stack.pop(testData.data(), 1024);
     EXPECT_EQ(res, 0);
 
-    bool pushed = stack.push(testData.data(), 571);
-    EXPECT_TRUE(pushed);
+    EXPECT_TRUE(stack.push(testData.data(), 571));
     testData.assign(1024, '\0');
 
     res = stack.pop(testData.data(), 1024);
@@ -563,7 +558,7 @@ TEST(stackBuffer, stack_buffer_resize)
     EXPECT_EQ(stack.capacity(), 2048);
     EXPECT_EQ(stack.rawBlockCapacity(), 4096);
 
-    EXPECT_FALSE(stack.resize(-262354));  // this should do nothing
+    EXPECT_THROW(stack.resize(-262354), std::invalid_argument);
 }
 
 TEST(stackBuffer, odd_conditions)
@@ -593,8 +588,23 @@ TEST(stackBuffer, odd_conditions)
     buf3.resize(1024);
     EXPECT_EQ(buf3.capacity(), 1024);
 
-    StackBuffer buf4;
+    const StackBuffer buf4;
     EXPECT_TRUE(buf4.empty());
-    StackBuffer buf5(buf4);
+    StackBuffer buf5;
+    buf5 = buf4;
     EXPECT_TRUE(buf5.empty());
+}
+
+TEST(stackBuffer, invalid_constructor_sizes)
+{
+    EXPECT_THROW(StackBuffer(0), std::invalid_argument);
+    EXPECT_THROW(StackBuffer(-10), std::invalid_argument);
+}
+
+TEST(stackBuffer, invalid_resize_sizes)
+{
+    StackBuffer buf(1024);
+
+    EXPECT_THROW(buf.resize(0), std::invalid_argument);
+    EXPECT_THROW(buf.resize(-10), std::invalid_argument);
 }
