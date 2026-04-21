@@ -16,7 +16,7 @@ using gmlc::containers::CircularBuffer;
 
 namespace {
 
-void BM_BufferPushPop(benchmark::State& state)
+void bmBufferPushPop(benchmark::State& state)
 {
     CircularBuffer buffer(static_cast<int>(state.range(0)));
     const int read_size = static_cast<int>(state.range(0) / 4);
@@ -28,13 +28,14 @@ void BM_BufferPushPop(benchmark::State& state)
     }
     buffer.push(data_block.data(), read_size);
     buffer.pop(read_block.data(), read_size);
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         buffer.push(data_block.data(), read_size - 2);
         buffer.pop(read_block.data(), read_size);
     }
 }
 
-void BM_BufferPushPopWrap(benchmark::State& state)
+void bmBufferPushPopWrap(benchmark::State& state)
 {
     const int read_size = static_cast<int>(state.range(0) / 4);
     CircularBuffer buffer(static_cast<int>(state.range(0)));
@@ -50,7 +51,8 @@ void BM_BufferPushPopWrap(benchmark::State& state)
     buffer.pop(read_block.data(), read_size);
     buffer.push(data_block.data(), read_size);
     buffer.pop(read_block.data(), read_size);
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         buffer.push(data_block.data(), read_size - 2);
         buffer.pop(read_block.data(), read_size);
     }
@@ -58,8 +60,8 @@ void BM_BufferPushPopWrap(benchmark::State& state)
 
 }  // namespace
 
-BENCHMARK(BM_BufferPushPop)->Range(128, 8U << 20U);
-BENCHMARK(BM_BufferPushPopWrap)->Range(128, 8U << 20U);
+BENCHMARK(bmBufferPushPop)->Range(128, 8U << 20U);
+BENCHMARK(bmBufferPushPopWrap)->Range(128, 8U << 20U);
 
 /*
 TEST (CircBuff_tests, test_circularbuffraw_simple)

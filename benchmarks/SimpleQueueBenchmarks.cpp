@@ -30,7 +30,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)(benchmark::State& st
             sq.push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 sq.push(ii);
@@ -64,7 +65,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)(benchmark::State& st
             sq.push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < state.threads() - 1) {
@@ -122,7 +124,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)(benchmark::Sta
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -156,7 +159,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)(benchmark::Sta
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < 3) {
@@ -217,7 +221,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)(benchmark::Stat
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -251,7 +256,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)(benchmark::Stat
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             int cnt = 0;
             while (cnt < state.threads() - 1) {
@@ -310,7 +316,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(bspscFixture, SProdSCons_bspsc, int64_t)
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -373,7 +380,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)(benchmark::State&
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() == 0) {
             for (int64_t ii = 1000; ii <= 301000; ++ii) {
                 push(ii);
@@ -407,7 +415,8 @@ BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)(benchmark::State&
             push(ii);
         }
     }
-    for (auto _ : state) {
+    for (auto iteration : state) {
+        (void)iteration;
         if (state.thread_index() != 0) {
             for (int64_t ii = 1'000; ii <= 101000; ++ii) {
                 push(ii);
