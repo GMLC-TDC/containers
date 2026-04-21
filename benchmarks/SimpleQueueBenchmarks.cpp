@@ -23,7 +23,8 @@ class sqFixture : public benchmark::Fixture {
     SimpleQueue<X> sq;
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, SProdSCons, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
@@ -58,7 +59,8 @@ BENCHMARK_REGISTER_F(sqFixture, SProdSCons)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(sqFixture, MProdSCons, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
@@ -117,7 +119,8 @@ class stdqFixture : public benchmark::Fixture {
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, SProdSCons_std, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
@@ -152,7 +155,8 @@ BENCHMARK_REGISTER_F(stdqFixture, SProdSCons_std)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(stdqFixture, MProdSCons_std, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
@@ -194,7 +198,7 @@ BENCHMARK_REGISTER_F(stdqFixture, MProdSCons_std)
 template<class X>
 class blfFixture : public benchmark::Fixture {
   public:
-    blfFixture(): q(4096) {}
+    blfFixture() : q(4096) {}
 
     boost::lockfree::queue<X> q;
 
@@ -214,7 +218,8 @@ class blfFixture : public benchmark::Fixture {
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, SProdSCons_blf, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
@@ -249,7 +254,8 @@ BENCHMARK_REGISTER_F(blfFixture, SProdSCons_blf)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(blfFixture, MProdSCons_blf, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
@@ -373,7 +379,8 @@ class mcFixture : public benchmark::Fixture {
     }
 };
 
-BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, SProdSCons_mc, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1000; ++ii) {
@@ -408,7 +415,8 @@ BENCHMARK_REGISTER_F(mcFixture, SProdSCons_mc)
     ->UseRealTime()
     ->Unit(benchmark::kMillisecond);
 
-BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)(benchmark::State& state)
+BENCHMARK_TEMPLATE_DEFINE_F(mcFixture, MProdSCons_mc, int64_t)(
+    benchmark::State& state)
 {
     if (state.thread_index() == 0) {
         for (int64_t ii = 0; ii < 1'000; ++ii) {
